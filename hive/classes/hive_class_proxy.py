@@ -5,6 +5,11 @@ from ..annotations import get_argument_options, get_return_type
 from ..compatability import is_method
 
 
+# Hack to find the type of a getset_descriptor
+from struct import Struct as _Struct
+getset_descriptor = type(_Struct.size)
+
+
 class HiveClassProxy(object):
     """Intercept attribute lookups to return bee equivalents to instance methods and properties belonging to a bind
     class."""
@@ -21,6 +26,9 @@ class HiveClassProxy(object):
         elif isinstance(value, property):
             return self._property_from_descriptor(attr, value)
 
+        elif isinstance(value, getset_descriptor):
+            return self._property_from_getset_descriptor(attr)
+
         else:
             return value
 
@@ -33,7 +41,7 @@ class HiveClassProxy(object):
         return "{}({})".format(self_cls.__name__, wrapped_cls)
 
     def _property_from_descriptor(self, attr, prop):
-        """Create a hive.property object from descriptor"""
+        """Create a hive.property object from property descriptor"""
         data_type = get_return_type(prop.fget)
 
         if prop.fset is not None:
@@ -42,3 +50,7 @@ class HiveClassProxy(object):
                 raise TypeError()
 
         return Property(self._cls, attr, data_type, None)
+
+    def _property_from_getset_descriptor(self, attr):
+        """Create a hive.property object from getset_descriptor"""
+        return Property(self._cls, attr, None, None)

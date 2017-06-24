@@ -123,7 +123,8 @@ class PPOutBee(Output, ConnectSource, TriggerSource):
 
     def __init__(self, target, data_type=None):
         is_stateful = isinstance(target, Stateful)
-        assert is_stateful or target.implements(Callable)# TODO: nice error message
+
+        assert is_stateful or callable(target) or target.implements(Callable)# TODO: nice error message
 
         if is_stateful:
             data_type = target.data_type
