@@ -12,7 +12,9 @@ class PPOutBase(Output, ConnectSource, TriggerSource, Bindable, Nameable):
 
     def __init__(self, target, data_type=None, run_hive=None):
         is_stateful = isinstance(target, Stateful)
-        assert is_stateful or callable(target) or target.implements(Callable), target
+
+        if not (is_stateful or callable(target) or target.implements(Callable)):
+            raise TypeError("Target must implement Callable or Stateful protocol")
 
         if is_stateful:
             data_type = target.data_type
