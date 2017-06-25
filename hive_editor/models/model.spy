@@ -1,7 +1,7 @@
 Type InstanceParameter {
   String identifier
   String data_type
-  String value
+  String value_
 }
 
 
