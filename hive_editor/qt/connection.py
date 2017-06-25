@@ -9,30 +9,33 @@ from PyQt5.QtGui import QPainterPath, QVector2D, QPen, QColor
 from .socket import QtSocket
 
 
+from collections import namedtuple
+
+
+Polar = namedtuple('Polar', 'r theta')
+
+
 def cartesian_to_polar(x, y):
     r = sqrt(x * x + y * y)
     theta = atan2(y, x)
-    return r, theta
+    return Polar(r, theta)
 
 
-def polar_to_cartesian(r, theta):
-    return r * cos(theta), r * sin(theta)
+def polar_to_cartesian(p):
+    return p.r * cos(p.theta), p.r * sin(p.theta)
 
 
 def average_polar(p1, p2):
-    r1, theta1 = p1
-    r2, theta2 = p2
-    thmin, thmax = theta1, theta2
-    if thmin > thmax:
-        thmin, thmax = thmax, thmin
-    thdif1 = thmax - thmin
-    thdif2 = thmin - thmax + 2 * pi
-    if thdif1 < thdif2:
-        theta = thmin + 0.5 * thdif1
-    else:
-        theta = thmax + 0.5 * thdif2
-        if theta > pi: theta -= 2 * pi
-    r = (r1 + r2) / 2.0
+    r_1, theta_1 = p1
+    r_2, theta_2 = p2
+
+    theta = ((theta_1 + theta_2)/2) % (2*pi)
+
+    # Sign between - pi and + pi
+    if theta > pi:
+        theta -= 2 * pi
+
+    r = (r_1 + r_2) / 2.0
     return r, theta
 
 
@@ -40,8 +43,7 @@ def interpolate_tangents(t1, t2):
     p1 = cartesian_to_polar(t1.x(), t1.y())
     p2 = cartesian_to_polar(t2.x(), t2.y())
     r, theta = average_polar(p1, p2)
-    r = 0.5 * r
-    r = min(r, 100)
+    r = min(0.5 * r, 100)
     x, y = polar_to_cartesian(r, theta)
     return QPointF(x, y)
 
