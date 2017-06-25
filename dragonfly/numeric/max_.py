@@ -15,7 +15,7 @@ def build_max(i, ex, args, meta_args):
     i.pull_b = hive.pull_in(i.b_value)
     i.pull_value = hive.pull_out(i.value)
 
-    ex.value = hive.output(i.value)
+    ex.value = hive.output(i.pull_value)
     ex.a = hive.antenna(i.pull_a)
     ex.b = hive.antenna(i.pull_b)
 
