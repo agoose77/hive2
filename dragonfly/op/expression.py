@@ -1,22 +1,18 @@
 import ast
 import hive
+import math
 
 
-class NodeVisitor(ast.NodeVisitor):
+class VariableRecorder(ast.NodeVisitor):
 
     def __init__(self):
         super().__init__()
 
-        self.visited_nodes = []
+        self.undefined_ids = []
 
-    def visit(self, node):
-        if isinstance(node, ast.Call):
-            for arg in node.args:
-                self.visit(arg)
-
-        else:
-            self.generic_visit(node)
-            self.visited_nodes.append(node)
+    def visit_Name(self, node):
+        if not hasattr(math, node.id):
+            self.undefined_ids.append(node.id)
 
 
 def create_func(expression, names):
@@ -42,14 +38,13 @@ def declare_expression(meta_args):
 
 
 def build_expression(i, ex, args, meta_args):
-    """Execute bound expression for provided inputs and output result"""
+    """Evaluate Python expression and store result"""
     ast_node = ast.parse(meta_args.expression, mode='eval')
 
     # Visit AST and find variable names
-    visitor = NodeVisitor()
+    visitor = VariableRecorder()
     visitor.visit(ast_node)
-    visited_nodes = visitor.visited_nodes
-    variable_names = [x.id for x in visited_nodes if isinstance(x, ast.Name)]
+    variable_names = visitor.undefined_ids
 
     i.result = hive.attribute(meta_args.result_type)
     i.pull_result = hive.pull_out(i.result)
@@ -58,7 +53,6 @@ def build_expression(i, ex, args, meta_args):
     for name in variable_names:
         attribute = hive.attribute(meta_args.result_type)
         setattr(i, name, attribute)
-
         pull_in = hive.pull_in(attribute)
         setattr(ex, name, hive.antenna(pull_in))
 

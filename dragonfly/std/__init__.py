@@ -1,4 +1,3 @@
-from .apply import Apply
 from .buffer import Buffer
 from .call import Call
 from .define import Define
