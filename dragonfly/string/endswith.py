@@ -1,7 +1,7 @@
 import hive
 
-# TODO future - it might be that this should be given a declarator for "advanced mode", and by default
-# Just use a normal argument to define the substring
+# TODO future - perhaps this should instead provide an advanced mode,
+# where substring can be pulled, otherwise use a normal argument to define the substring
 
 
 def do_endswith(self):

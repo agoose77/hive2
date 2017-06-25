@@ -10,7 +10,7 @@ def build_abs(i, ex, args, meta_args):
     i.value = hive.attribute(meta_args.data_type)
     i.pull_value = hive.pull_in(i.value)
 
-    i.result = hive.attribute('float')
+    i.result = hive.attribute(meta_args.data_type)
     i.pull_result = hive.pull_out(i.result)
 
     ex.value = hive.antenna(i.pull_value)
