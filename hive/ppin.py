@@ -2,10 +2,11 @@ from functools import partial
 
 from .annotations import get_argument_types
 from .classes import Pusher
-from .identifiers import identifiers_match
+from .typing import match_identifiers
 from .manager import get_mode, get_building_hive, memoize
 from .mixins import (Antenna, Output, Stateful, ConnectTarget, TriggerSource, TriggerTarget, Bee, Bindable, Callable,
                      Nameable)
+from .exception import HiveConnectionError
 
 
 def get_callable_data_type(target):
@@ -72,13 +73,13 @@ class PushIn(PPInBase):
 
     def _hive_is_connectable_target(self, source):
         if not isinstance(source, Output):
-            raise TypeError("Source {} does not implement Output".format(source))
+            raise HiveConnectionError("Source {} does not implement Output".format(source))
 
         if source.mode != "push":
-            raise TypeError("Source {} is not configured for push mode".format(source))
+            raise HiveConnectionError("Source {} is not configured for push mode".format(source))
 
-        if not identifiers_match(source.data_type, self.data_type):
-            raise TypeError("Data types do not match: {}, {}".format(source.data_type, self.data_type))
+        if match_identifiers(source.data_type, self.data_type) == ():
+            raise HiveConnectionError("Data types do not match: {}, {}".format(source.data_type, self.data_type))
 
     def _hive_connect_target(self, source):
         pass        
@@ -99,13 +100,13 @@ class PullIn(PPInBase, TriggerTarget):
 
     def _hive_is_connectable_target(self, source):
         if not isinstance(source, Output):
-            raise TypeError("Source {} does not implement Output".format(source))
+            raise HiveConnectionError("Source {} does not implement Output".format(source))
 
         if source.mode != "pull":
-            raise TypeError("Source {} is not configured for pull mode".format(source))
+            raise HiveConnectionError("Source {} is not configured for pull mode".format(source))
 
-        if not identifiers_match(source.data_type, self.data_type):
-            raise TypeError("Data types do not match")
+        if match_identifiers(source.data_type, self.data_type) == ():
+            raise HiveConnectionError("Data types do not match")
 
     def _hive_connect_target(self, source):
         if self._pull_callback is not None:

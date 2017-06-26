@@ -1,4 +1,4 @@
-from hive.identifiers import identifiers_match
+from hive.typing import match_identifiers
 from enum import IntEnum
 
 
@@ -75,7 +75,7 @@ class Connection:
         if not (source.can_connect_to(target) and target.can_connect_to(source)):
             return ConnectionType.INVALID
 
-        if not identifiers_match(source.data_type, target.data_type):
+        if match_identifiers(source.data_type, target.data_type) == ():
             return ConnectionType.INVALID
 
         # Types valid and both

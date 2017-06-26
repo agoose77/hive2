@@ -1,6 +1,7 @@
 from .manager import get_building_hive, memoize, ContextFactory
 from .mixins import Plugin, Socket, ConnectSource, Exportable, Callable, Bee, Bindable, Nameable
 from .policies import MultipleOptional
+from .exception import HiveConnectionError
 
 
 class HivePlugin(Plugin, ConnectSource, Bindable, Exportable, Nameable):
@@ -20,7 +21,7 @@ class HivePlugin(Plugin, ConnectSource, Bindable, Exportable, Nameable):
         
     def _hive_is_connectable_source(self, target):
         if not isinstance(target, Socket):
-            raise ValueError("Plugin target must be a subclass of Socket")
+            raise HiveConnectionError("Plugin target must be a subclass of Socket")
 
     def _hive_connect_source(self, target):
         pass

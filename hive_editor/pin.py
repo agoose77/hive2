@@ -1,4 +1,4 @@
-from hive.identifiers import identifiers_match
+from hive.typing import match_identifiers
 from .data_views import ListView
 from .protected_container import ProtectedContainer, RestrictedAttribute
 from .sockets import get_colour, get_shape
@@ -43,7 +43,7 @@ class IOPin(ProtectedContainer):
         self._colour = get_colour(data_type)
         self._data_type = data_type
         self._mode = mode
-        self._is_trigger = identifiers_match(data_type, "trigger", support_untyped=False)
+        self._is_trigger = bool(match_identifiers(data_type, "trigger", support_untyped=False))
         self._io_type = io_type
         self._node = node
         self._restricted_data_types = restricted_types
@@ -142,7 +142,7 @@ class IOPin(ProtectedContainer):
     def can_connect_to(self, other_pin):
         # If a restricted data type
         for data_type in self._restricted_data_types:
-            if identifiers_match(other_pin.data_type, data_type, support_untyped=False):
+            if match_identifiers(other_pin.data_type, data_type, support_untyped=False):
                 return False
 
         # Limit connections if provided

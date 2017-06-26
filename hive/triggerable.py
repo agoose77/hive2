@@ -1,6 +1,7 @@
 from .classes import HiveBee
 from .manager import ContextFactory, memoize
 from .mixins import TriggerTarget, ConnectTarget, TriggerSource, Callable, Bee, Bindable, Nameable
+from .exception import HiveConnectionError
 
 
 class Triggerable(TriggerTarget, ConnectTarget, Bindable, Callable, Nameable):
@@ -35,7 +36,7 @@ class Triggerable(TriggerTarget, ConnectTarget, Bindable, Callable, Nameable):
     
     def _hive_is_connectable_target(self, source):
         if not isinstance(source, TriggerSource):
-            raise TypeError("Source does not implement TriggerSource: {}".format(source))
+            raise HiveConnectionError("Source does not implement TriggerSource: {}".format(source))
 
     def _hive_connect_target(self, source):
         pass

@@ -1,6 +1,7 @@
 from .classes import HiveBee
 from .manager import ContextFactory, memoize
 from .mixins import TriggerTarget, ConnectTarget, TriggerSource, Callable, Bee, Bindable, Nameable
+from .exception import HiveConnectionError
 
 
 class Modifier(TriggerTarget, ConnectTarget, Bindable, Callable, Nameable):
@@ -21,7 +22,7 @@ class Modifier(TriggerTarget, ConnectTarget, Bindable, Callable, Nameable):
     def trigger(self):
         # TODO: exception handling hooks
         self._func(self._run_hive)
-        
+
     @memoize
     def bind(self, run_hive):
         if self._run_hive:
@@ -31,10 +32,10 @@ class Modifier(TriggerTarget, ConnectTarget, Bindable, Callable, Nameable):
 
     def _hive_trigger_target(self):
         return self.trigger
-    
+
     def _hive_is_connectable_target(self, source):
         if not isinstance(source, TriggerSource):
-            raise TypeError("Connect target {} is not a TriggerSource".format(source))
+            raise HiveConnectionError("Connect target {} is not a TriggerSource".format(source))
 
     def _hive_connect_target(self, source):
         pass
@@ -54,7 +55,7 @@ class ModifierBee(TriggerTarget, ConnectTarget, Callable, HiveBee):
     @memoize
     def getinstance(self, hive_object):
         func = self._func
-        if isinstance(func, Bee): 
+        if isinstance(func, Bee):
             func = func.getinstance(hive_object)
 
         return Modifier(func)

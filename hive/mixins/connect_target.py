@@ -15,6 +15,10 @@ class ConnectTargetBase(Connectable):
     pass
 
 
+
+# TODO score connection in is_connectable_target
+# TODO remove match_idents
+
 class ConnectTarget(ConnectTargetBase):
     data_type = None
 
