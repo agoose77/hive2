@@ -130,7 +130,7 @@ class PPOutBee(Output, ConnectSource, TriggerSource):
             data_type = target.data_type
 
         else:
-            if not data_type:
+            if data_type_is_untyped(data_type):
                 data_type = get_return_type(target)
 
         self._hive_object_cls = get_building_hive()
