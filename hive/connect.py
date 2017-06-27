@@ -56,12 +56,12 @@ def find_connection_candidates(source_hive, target_hive):
 
         # First match without permitting untyped targets
         try:
-            match = find_matching_ast(left_ast, right_ast, MatchFlags.full_match)
+            match = find_matching_ast(left_ast, right_ast, MatchFlags.match_shortest)
 
         except MatchFailedError:
             # Then fall back on matching untyped targets
             try:
-                match = find_matching_ast(left_ast, right_ast, MatchFlags.full_match|MatchFlags.permit_any_target)
+                match = find_matching_ast(left_ast, right_ast, MatchFlags.match_shortest | MatchFlags.permit_any_target)
             except MatchFailedError:
                 continue
 

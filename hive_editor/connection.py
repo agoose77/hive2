@@ -75,7 +75,7 @@ class Connection:
         if not (source.can_connect_to(target) and target.can_connect_to(source)):
             return ConnectionType.INVALID
 
-        if not data_types_match(source.data_type, target.data_type, MatchFlags.permit_any | MatchFlags.full_match):
+        if not data_types_match(source.data_type, target.data_type, MatchFlags.permit_any | MatchFlags.match_shortest):
             return ConnectionType.INVALID
 
         # Types valid and both

@@ -76,7 +76,7 @@ class PushIn(PPInBase):
         if source.mode != "push":
             raise HiveConnectionError("Source {} is not configured for push mode".format(source))
 
-        if not data_types_match(source.data_type, self.data_type, MatchFlags.permit_any | MatchFlags.full_match):
+        if not data_types_match(source.data_type, self.data_type, MatchFlags.permit_any | MatchFlags.match_shortest):
             raise HiveConnectionError("Data types do not match: {}, {}".format(source.data_type, self.data_type))
 
     def _hive_connect_target(self, source):
@@ -103,7 +103,7 @@ class PullIn(PPInBase, TriggerTarget):
         if source.mode != "pull":
             raise HiveConnectionError("Source {} is not configured for pull mode".format(source))
 
-        if not data_types_match(source.data_type, self.data_type, MatchFlags.permit_any | MatchFlags.full_match):
+        if not data_types_match(source.data_type, self.data_type, MatchFlags.permit_any | MatchFlags.match_shortest):
             raise HiveConnectionError("Data types do not match")
 
     def _hive_connect_target(self, source):

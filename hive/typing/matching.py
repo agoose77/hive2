@@ -9,7 +9,11 @@ class MatchFlags(Flag):
     none = 0
     permit_any_source = auto()
     permit_any_target = auto()
-    full_match = auto()
+    match_source = auto() # Ensure match is same as source (match x.y.z and x.y is x.y, which is shorter than source)
+    match_target = auto() # Ensure match is same as target (match x.y and x.y.z is x.y, which is shorter than target)
+    match_equal = match_source | match_target # Ensure that target and source are equal (i.e the intersection of source
+    # and target types is equal to source and target)
+    match_shortest = auto() # Ensure match length is equal to shortest of target or source (default)
     permit_any = permit_any_source | permit_any_target
 
 
@@ -25,12 +29,20 @@ def find_common_sequence(source, target):
 def find_type_name_type_name_match(source, target, flags):
     common_type_name = find_common_sequence(source.type_name, target.type_name)
     if common_type_name:
-        if (flags & MatchFlags.full_match) and len(common_type_name) != min(len(source.type_name),
-                                                                            len(target.type_name)):
-            raise ValueError
+        if flags & MatchFlags.match_source:
+            if len(common_type_name) != len(source.type_name):
+                raise MatchFailedError
+
+        if flags & MatchFlags.match_target:
+            if len(common_type_name) != len(target.type_name):
+                raise MatchFailedError
+
+        if (flags & MatchFlags.match_shortest) and len(common_type_name) != min(len(source.type_name),
+                                                                                len(target.type_name)):
+            raise MatchFailedError
 
         return TypeName(common_type_name)
-    raise ValueError
+    raise MatchFailedError
 
 
 def find_sequence_sequence_match(source, target, flags):
@@ -41,7 +53,7 @@ def find_sequence_sequence_match(source, target, flags):
 def find_composite_composite_match(source, target, flags):
     """Compare two composites"""
     if source.type != target.type:
-        raise ValueError
+        raise MatchFailedError
 
     # Compare set/list/tuple
     if isinstance(source, SequenceType):
@@ -60,7 +72,7 @@ def find_mapping_mapping_match(source, target, flags):
 
 def find_type_name_composite_match(type_name, composite, flags):
     if len(type_name.type_name) > 1:  # TODO allow 0 (== no typing)
-        raise ValueError
+        raise MatchFailedError
 
     source_type = type_name.type_name[0]
     if source_type != composite.type:
@@ -167,6 +179,16 @@ def type_asts_match(source, target, flags=MatchFlags.none):
 
 def data_type_is_untyped(type_string):
     return isinstance(parse_type_string(type_string), AnyType)
+
+
+def get_base_data_type(type_string):
+    type_ast = parse_type_string(type_string)
+
+    if isinstance(type_ast, CompositeType):
+        return type_ast.type
+    elif isinstance(type_ast, TypeName):
+        return type_ast.type_name[0]
+    raise ValueError
 
 
 def data_types_match(source_string, target_string, flags=MatchFlags.none):

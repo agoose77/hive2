@@ -34,14 +34,13 @@ _base_type_colours = {
 
 def get_colour(data_type):
     """Return the appropriate socket colour for data type"""
-    as_tuple = hive.identifier_to_tuple(data_type)
+    base_type = hive.get_base_data_type(data_type)
 
-    if as_tuple:
-        base_type = as_tuple[0]
-        try:
-            return _base_type_colours[base_type]
-        except KeyError:
-            pass
+    try:
+        return _base_type_colours[base_type]
+    except KeyError:
+        pass
+
 
     return _colours[10]
 

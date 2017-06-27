@@ -233,7 +233,7 @@ class HiveObject(Exportable, ConnectSourceDerived, ConnectTargetDerived, Trigger
     @staticmethod
     def _hive_can_connect_hive(other):
         return isinstance(other, HiveObject)
-    
+
     @classmethod
     def _hive_find_trigger_target(cls):
         """Find name of single external bee that supported TriggerTarget interface.
@@ -256,7 +256,7 @@ class HiveObject(Exportable, ConnectSourceDerived, ConnectTargetDerived, Trigger
             raise TypeError("Multiple trigger targets in {}: {}".format(cls, trigger_targets))
 
         return trigger_targets[0]
-        
+
     @classmethod
     def _hive_find_trigger_source(cls):
         """Find and return name of single external bee that supported TriggerSource interface.
@@ -323,11 +323,11 @@ class HiveObject(Exportable, ConnectSourceDerived, ConnectTargetDerived, Trigger
         assert target.implements(ConnectTarget)
 
         connect_sources = [c for c in cls._hive_find_connect_sources()
-                           if data_types_match(c.data_type, target.data_type, MatchFlags.full_match)]
+                           if data_types_match(c.data_type, target.data_type, MatchFlags.match_shortest)]
         if not connect_sources:
             connect_sources = [c for c in cls._hive_find_connect_sources()
                                if data_types_match(c.data_type, target.data_type,
-                                                   MatchFlags.full_match|MatchFlags.permit_any_target)]
+                                                   MatchFlags.match_shortest | MatchFlags.permit_any_target)]
 
         if not connect_sources:
             raise TypeError("No matching connection sources found for {}".format(target))
@@ -336,7 +336,7 @@ class HiveObject(Exportable, ConnectSourceDerived, ConnectTargetDerived, Trigger
             raise TypeError("Multiple connection sources found for {}: {}".format(target, connect_sources))
 
         return connect_sources[0].bee_name
-            
+
     @classmethod
     def _hive_find_connect_target(cls, source):
         """Find and return the name of a suitable connect target within this hive
@@ -346,16 +346,16 @@ F
         assert source.implements(ConnectSource)
 
         connect_targets = [c for c in cls._hive_find_connect_targets()
-                           if data_types_match(source.data_type, c.data_type, MatchFlags.full_match)]
+                           if data_types_match(source.data_type, c.data_type, MatchFlags.match_shortest)]
         if not connect_targets:
             connect_targets = [c for c in cls._hive_find_connect_targets()
                                if data_types_match(source.data_type, c.data_type,
-                                                   MatchFlags.full_match|MatchFlags.permit_any_target)]
+                                                   MatchFlags.match_shortest | MatchFlags.permit_any_target)]
 
         if not connect_targets:
             raise TypeError("No matching connections found for {}".format(source))
 
-        elif len(connect_targets) > 1:            
+        elif len(connect_targets) > 1:
             raise TypeError("Multiple connection targets found for {}: {}".format(source, connect_targets))
 
         return connect_targets[0].bee_name
@@ -846,8 +846,7 @@ def dyna_hive(name, builder, declarator, builder_cls=None, bases=()):
 def meta_hive(name, builder, declarator, builder_cls=None, bases=()):
     return HiveBuilder.extend(name, builder, builder_cls, declarator=declarator, is_dyna_hive=False, bases=bases)
 
-
-#==========Hive construction path=========
+# ==========Hive construction path=========
 # 1. Take args and kwargs for construction call.
 # 2. Extract the meta-args (defined by declarators, which are called once when the Hive is called first time).
 #           If None, return empty tuple
@@ -857,7 +856,7 @@ def meta_hive(name, builder, declarator, builder_cls=None, bases=()):
 #           If in build mode, return HiveObject instance.
 # 4.1 The MetaHive primitive exposes a __new__ constructor that performs step 4.
 
-#==========Hive build path================
+# ==========Hive build path================
 # Hive building is bottom-up after builder functions, top down before
 # 1. Call all builder functions with i, ex and args wrappers (and frozen meta args)
 # 2. Find all defined HiveObject bees.

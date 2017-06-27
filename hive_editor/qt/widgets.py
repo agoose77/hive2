@@ -4,7 +4,7 @@ from sys import float_info
 from PyQt5.QtWidgets import QSpinBox, QLineEdit, QDoubleSpinBox, QWidget, QHBoxLayout, QCheckBox, QComboBox, QToolButton
 from PyQt5.QtGui import QColor, QIcon, QPixmap
 
-from hive import is_subtype
+from hive import data_types_match, MatchFlags
 from .colour_button import ColorButton
 from .code_editor import CodeEditor
 from .key_selector import QKeySelector
@@ -282,7 +282,9 @@ def create_widget(data_type="", options=None):
         return _create_options(options)
 
     for factory_type, factory in _factories.items():
-        if is_subtype(data_type, factory_type):
+        print(factory_type, data_type)
+        if data_types_match(factory_type, data_type, MatchFlags.match_source):
+            print("MATCH")
             return factory()
 
     return _create_repr()

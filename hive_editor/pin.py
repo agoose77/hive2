@@ -43,7 +43,7 @@ class IOPin(ProtectedContainer):
         self._colour = get_colour(data_type)
         self._data_type = data_type
         self._mode = mode
-        self._is_trigger = bool(data_types_match(data_type, "trigger", MatchFlags.full_match))
+        self._is_trigger = bool(data_types_match(data_type, "trigger", MatchFlags.match_shortest))
         self._io_type = io_type
         self._node = node
         self._restricted_data_types = restricted_types
@@ -142,7 +142,7 @@ class IOPin(ProtectedContainer):
     def can_connect_to(self, other_pin):
         # If a restricted data type
         for data_type in self._restricted_data_types:
-            if data_types_match(other_pin.data_type, data_type, MatchFlags.full_match):
+            if data_types_match(other_pin.data_type, data_type, MatchFlags.match_shortest):
                 return False
 
         # Limit connections if provided
