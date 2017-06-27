@@ -119,7 +119,14 @@ def target_is_any(source, target, flags):
     raise MatchFailedError
 
 
+def check_are_equal(source, target, flags):
+    if source == target:
+        return source
+
+    raise MatchCaseUnhandled
+
 _dispatch_table = [
+    check_are_equal, # If equal then definitely compatible (shortcut, and handles AnyType-AnyType cases)
     if_source_is(AnyType, then=source_is_any),
     if_target_is(AnyType, then=target_is_any),
     if_order_is(SequenceType, SequenceType, then=find_sequence_sequence_match),
