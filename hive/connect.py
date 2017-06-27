@@ -7,7 +7,8 @@ from .debug import get_debug_context
 from .manager import get_mode, memoize, register_bee
 from .mixins import ConnectSourceBase, ConnectSourceDerived, ConnectTargetBase, ConnectTargetDerived, Bee, Bindable, \
     Exportable
-from .typing import match_identifiers, MatchFlags
+from .typing import get_match_score, find_matching_ast, MatchFlags, parse_type_string
+from .exception import MatchFailedError
 
 ConnectionCandidate = namedtuple("ConnectionCandidate", ("bee_name", "data_type"))
 
@@ -20,26 +21,6 @@ def sorted_candidates_from_scored(scored_candidates):
     :param scored_candidates: sequence of (score, source, target) items
     """
     return tuple(x[1:] for x in sorted(scored_candidates,key=_first_item, reverse=True))
-
-
-def get_connection_score(source_candidate, target_candidate, match_flags):
-    """Score the quality of the connection match
-    
-    Return None if no valid match according to match glags
-    """
-    # Score connection by length of type match
-    source_data_type = source_candidate.data_type
-    target_data_type = target_candidate.data_type
-    common_sequence = match_identifiers(source_data_type, target_data_type, match_flags)
-
-    if common_sequence:
-        return len(common_sequence)
-
-    elif common_sequence is None:
-        # Worst case match - untyped source/target
-        return -1
-
-    return None
 
 
 def find_connection_candidates(source_hive, target_hive):
@@ -66,18 +47,30 @@ def find_connection_candidates(source_hive, target_hive):
         except ConnectionError:
             continue
 
-        # First preferentially try typed target match
-        typed_score = get_connection_score(source_candidate, target_candidate, MatchFlags.none)
-        if typed_score:
-            scored_typed_candidates.append((typed_score, source_candidate, target_candidate))
+        # Use new match API & score API
+        source_data_type = source_candidate.data_type
+        target_data_type = target_candidate.data_type
+
+        left_ast = parse_type_string(source_data_type)
+        right_ast = parse_type_string(target_data_type)
+
+        # First match without permitting untyped targets
+        try:
+            match = find_matching_ast(left_ast, right_ast, MatchFlags.full_match)
+
+        except MatchFailedError:
+            # Then fall back on matching untyped targets
+            try:
+                match = find_matching_ast(left_ast, right_ast, MatchFlags.full_match|MatchFlags.permit_any_target)
+            except MatchFailedError:
+                continue
+
+            untyped_score = get_match_score(match)
+            scored_untyped_candidates.append((untyped_score, source_candidate, target_candidate))
 
         else:
-            # If we cannot find a typed match, allow target to have no target type specified
-            # At this point, we may still not find a match, because the generic _hive_is_connectable methods
-            # Support target or source being untyped
-            untyped_score = get_connection_score(source_candidate, target_candidate, MatchFlags.target_untyped)
-            if untyped_score:
-                scored_untyped_candidates.append((untyped_score, source_candidate, target_candidate))
+            typed_score = get_match_score(match)
+            scored_typed_candidates.append((typed_score, source_candidate, target_candidate))
 
     # Sort candidates according to length of match (largest first)
     typed_candidates = sorted_candidates_from_scored(scored_typed_candidates)
@@ -91,30 +84,28 @@ def find_connection_candidates(source_hive, target_hive):
 
 
 # TODO allow multiple connections when they're all unique!
-
-
 def find_connection_between_hives(source_hive, target_hive):
-    """Find best connection between two hives.
+    """Find best connection between two runtime hives.
     
     For each legal connection, first attempt to find typed target connection between source and target.
-    If a typed target connection cannot be made, attempt a typed source untyped targte connection
+    If a typed target connection cannot be made, attempt a typed source untyped target connection
     """
     if not source_hive._hive_can_connect_hive(target_hive):
         raise ValueError("Both hives must be either Hive runtimes or Hive objects")
 
     # First try: match candidates with named data_type
     candidates = find_connection_candidates(source_hive, target_hive)
-
     if not candidates:
         raise ValueError("No matching connections found")
 
-    elif len(candidates) > 1:
+    if len(candidates) > 1:
         candidate_names = [(a.bee_name, b.bee_name) for a, b in candidates]
         raise TypeError("Multiple matches found between {} and {}: {}"
                         .format(source_hive, target_hive, candidate_names))
 
     source_candidate, target_candidate = candidates[0]
 
+    # Get runtime bees
     source = getattr(source_hive, source_candidate.bee_name)
     target = getattr(target_hive, target_candidate.bee_name)
 

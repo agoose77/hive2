@@ -1,6 +1,7 @@
 from .hive import (hive, dyna_hive, meta_hive, HiveBuilder, RuntimeHive, MetaHivePrimitive, HiveObject,
                    validate_external_name, validate_internal_name)
-from .typing import match_identifiers, identifier_to_tuple, is_subtype
+from .typing import data_types_match, MatchFlags, parse_type_string, data_type_is_untyped, is_valid_data_type, \
+    find_matching_ast, type_asts_match
 from .manager import (get_building_hive, get_mode, get_run_hive, get_validation_enabled, set_validation_enabled,
                       validation_enabled_as)
 #i primitives

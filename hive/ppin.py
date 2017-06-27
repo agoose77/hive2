@@ -2,11 +2,12 @@ from functools import partial
 
 from .annotations import get_argument_types
 from .classes import Pusher
-from .typing import match_identifiers
+from .exception import HiveConnectionError
 from .manager import get_mode, get_building_hive, memoize
 from .mixins import (Antenna, Output, Stateful, ConnectTarget, TriggerSource, TriggerTarget, Bee, Bindable, Callable,
                      Nameable)
-from .exception import HiveConnectionError
+from .typing import data_type_is_untyped
+from .typing import data_types_match, MatchFlags
 
 
 def get_callable_data_type(target):
@@ -18,22 +19,19 @@ def get_callable_data_type(target):
 
 
 class PPInBase(Antenna, ConnectTarget, TriggerSource, Bindable, Nameable):
-
-    def __init__(self, target, data_type=None, run_hive=None):
+    def __init__(self, target, data_type='', run_hive=None):
         # Once bound, hive Method object is resolved to a function, not bee
         assert isinstance(target, Stateful) or isinstance(target, Callable) or callable(target), target
 
-        if isinstance(target, Stateful):
+        if isinstance(target, Stateful):  # TODO why are we assuming this
             data_type = target.data_type
-
             # If not yet bound, set_value will have None for run hive!
             self._set_value = partial(target._hive_stateful_setter, run_hive)
 
         else:
-            self._set_value = target
-
-            if not data_type:
+            if data_type_is_untyped(data_type):
                 data_type = get_callable_data_type(target)
+            self._set_value = target
 
         self.target = target
         self.data_type = data_type
@@ -41,13 +39,13 @@ class PPInBase(Antenna, ConnectTarget, TriggerSource, Bindable, Nameable):
         self._run_hive = run_hive
         self._trigger = Pusher(self)
         self._pretrigger = Pusher(self)
-                
+
     def _hive_trigger_source(self, func):
         self._trigger.add_target(func)
 
     def _hive_pretrigger_source(self, func):
         self._pretrigger.add_target(func)
-                
+
     @memoize
     def bind(self, run_hive):
         if self._run_hive:
@@ -78,12 +76,12 @@ class PushIn(PPInBase):
         if source.mode != "push":
             raise HiveConnectionError("Source {} is not configured for push mode".format(source))
 
-        if match_identifiers(source.data_type, self.data_type) == ():
+        if not data_types_match(source.data_type, self.data_type, MatchFlags.permit_any | MatchFlags.full_match):
             raise HiveConnectionError("Data types do not match: {}, {}".format(source.data_type, self.data_type))
 
     def _hive_connect_target(self, source):
-        pass        
-            
+        pass
+
 
 class PullIn(PPInBase, TriggerTarget):
     mode = "pull"
@@ -105,7 +103,7 @@ class PullIn(PPInBase, TriggerTarget):
         if source.mode != "pull":
             raise HiveConnectionError("Source {} is not configured for pull mode".format(source))
 
-        if match_identifiers(source.data_type, self.data_type) == ():
+        if not data_types_match(source.data_type, self.data_type, MatchFlags.permit_any | MatchFlags.full_match):
             raise HiveConnectionError("Data types do not match")
 
     def _hive_connect_target(self, source):
@@ -113,7 +111,7 @@ class PullIn(PPInBase, TriggerTarget):
             raise TypeError("pull_in cannot accept more than one connection: {}".format(source))
 
         self._pull_callback = source.pull
-    
+
     def _hive_trigger_target(self):
         return self.pull
 
@@ -123,7 +121,7 @@ class PullIn(PPInBase, TriggerTarget):
 class PPInBee(Antenna, ConnectTarget, TriggerSource):
     mode = None
 
-    def __init__(self, target, data_type=None):
+    def __init__(self, target, data_type=''):
         is_stateful = isinstance(target, Stateful)
 
         if not (is_stateful or target.implements(Callable)):
@@ -133,7 +131,7 @@ class PPInBee(Antenna, ConnectTarget, TriggerSource):
             data_type = target.data_type
 
         else:
-            if data_type is None:
+            if data_type_is_untyped(data_type):
                 data_type = get_callable_data_type(target)
 
         self._hive_object_cls = get_building_hive()
@@ -144,10 +142,10 @@ class PPInBee(Antenna, ConnectTarget, TriggerSource):
     def getinstance(self, hive_object):
         target = self.target
 
-        if isinstance(target, Bee): 
+        if isinstance(target, Bee):
             target = target.getinstance(hive_object)
 
-        if self.mode == "push":    
+        if self.mode == "push":
             return PushIn(target, data_type=self.data_type)
 
         return PullIn(target, data_type=self.data_type)
@@ -161,8 +159,8 @@ class PPInBee(Antenna, ConnectTarget, TriggerSource):
             return target.implements(cls)
 
         return False
-    
-    
+
+
 class PushInBee(PPInBee):
     mode = "push"
 
@@ -171,7 +169,7 @@ class PullInBee(PPInBee, TriggerTarget):
     mode = "pull"
 
 
-def push_in(target, data_type=None):
+def push_in(target, data_type=''):
     if get_mode() == "immediate":
         return PushIn(target, data_type=data_type)
 
@@ -179,7 +177,7 @@ def push_in(target, data_type=None):
         return PushInBee(target, data_type=data_type)
 
 
-def pull_in(target, data_type=None):
+def pull_in(target, data_type=''):
     if get_mode() == "immediate":
         return PullIn(target, data_type=data_type)
 

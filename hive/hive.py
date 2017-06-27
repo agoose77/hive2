@@ -5,11 +5,11 @@ from .classes import (HiveInternalWrapper, HiveExportableWrapper, HiveArgsWrappe
                       HiveClassProxy)
 from .compatability import next, validate_signature
 from .connect import connect, ConnectionCandidate
-from .typing import match_identifiers, MatchFlags
 from .manager import (bee_register_context, get_mode, hive_mode_as, get_building_hive, building_hive_as, \
                       run_hive_as, memoize, get_validation_enabled)
 from .mixins import *
 from .policies import MatchmakingPolicyError
+from .typing import MatchFlags, data_types_match
 
 
 def gen_sequence_bee_names():
@@ -322,9 +322,12 @@ class HiveObject(Exportable, ConnectSourceDerived, ConnectTargetDerived, Trigger
         """
         assert target.implements(ConnectTarget)
 
-        connect_sources = [c for c in cls._hive_find_connect_sources() if match_identifiers(c.data_type, target.data_type, MatchFlags.none)]
+        connect_sources = [c for c in cls._hive_find_connect_sources()
+                           if data_types_match(c.data_type, target.data_type, MatchFlags.full_match)]
         if not connect_sources:
-            connect_sources = [c for c in cls._hive_find_connect_sources() if match_identifiers(c.data_type, target.data_type, MatchFlags.target_untyped) != ()]
+            connect_sources = [c for c in cls._hive_find_connect_sources()
+                               if data_types_match(c.data_type, target.data_type,
+                                                   MatchFlags.full_match|MatchFlags.permit_any_target)]
 
         if not connect_sources:
             raise TypeError("No matching connection sources found for {}".format(target))
@@ -342,10 +345,12 @@ F
         """
         assert source.implements(ConnectSource)
 
-        connect_targets = [c for c in cls._hive_find_connect_targets() if match_identifiers(source.data_type, c.data_type, MatchFlags.none)]
+        connect_targets = [c for c in cls._hive_find_connect_targets()
+                           if data_types_match(source.data_type, c.data_type, MatchFlags.full_match)]
         if not connect_targets:
-            print("DEBUG")
-            connect_targets = [c for c in cls._hive_find_connect_targets() if match_identifiers(source.data_type, c.data_type, MatchFlags.target_untyped) != ()]
+            connect_targets = [c for c in cls._hive_find_connect_targets()
+                               if data_types_match(source.data_type, c.data_type,
+                                                   MatchFlags.full_match|MatchFlags.permit_any_target)]
 
         if not connect_targets:
             raise TypeError("No matching connections found for {}".format(source))

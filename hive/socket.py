@@ -6,7 +6,7 @@ from .exception import HiveConnectionError
 
 class HiveSocket(Socket, ConnectTarget, Bindable, Exportable, Nameable):
 
-    def __init__(self, func, data_type=None, run_hive=None):
+    def __init__(self, func, data_type="", run_hive=None):
         assert callable(func) or isinstance(func, Callable), func
         self._run_hive = run_hive
         self._func = func
@@ -52,7 +52,7 @@ class HiveSocket(Socket, ConnectTarget, Bindable, Exportable, Nameable):
 
 class HiveSocketBee(Socket, ConnectTarget, Exportable):
 
-    def __init__(self, target, identifier=None, data_type=None, policy=None, export_to_parent=False):
+    def __init__(self, target, identifier=None, data_type="", policy=None, export_to_parent=False):
         self._hive_object_cls = get_building_hive()
         self._target = target
 

@@ -43,7 +43,7 @@ class Node(ProtectedContainer):
         self._inputs = OrderedDict()
         self._outputs = OrderedDict()
 
-    def add_input(self, name, data_type=None, mode="pull", max_connections=-1, restricted_types=None,
+    def add_input(self, name, data_type="", mode="pull", max_connections=-1, restricted_types=None,
                   mimic_flags=MimicFlags.NONE, is_virtual=False, count_proxies=False):
         pin = IOPin(self, name, "input", data_type, mode, max_connections, restricted_types, mimic_flags,
                     is_virtual, count_proxies)
@@ -51,7 +51,7 @@ class Node(ProtectedContainer):
         self._pin_order.append(name)
         return pin
 
-    def add_output(self, name, data_type=None, mode="pull", max_connections=-1, restricted_types=None,
+    def add_output(self, name, data_type="", mode="pull", max_connections=-1, restricted_types=None,
                    mimic_flags=MimicFlags.NONE, is_virtual=False, count_proxies=False):
         pin = IOPin(self, name, "output", data_type, mode, max_connections, restricted_types, mimic_flags,
                     is_virtual, count_proxies)

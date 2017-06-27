@@ -11,6 +11,8 @@ A Stateful object's getter/setter always accept a run_hive object, which will be
 
 class Stateful(object):
 
+    data_type = None
+
     def _hive_stateful_getter(self, run_hive):
         raise NotImplementedError
 

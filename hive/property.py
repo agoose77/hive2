@@ -59,7 +59,7 @@ class Property(Stateful, Bindable, Exportable, Nameable):
         return "<{} '{}'>".format(self.__class__.__name__, self._attr)
 
 
-def property(cls, attr, data_type=None, start_value=None):
+def property(cls, attr, data_type="", start_value=None):
     if get_mode() == "immediate":
         raise ValueError("hive.property cannot be used in immediate mode")
 

@@ -272,7 +272,7 @@ _factories = OrderedDict((
     ))
 
 
-def create_widget(data_type=None, options=None):
+def create_widget(data_type="", options=None):
     """Create a UI widget to edit a specific value
 
     :param data_type: data type of value

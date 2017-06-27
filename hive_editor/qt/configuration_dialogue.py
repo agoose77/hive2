@@ -33,7 +33,7 @@ class ConfigurationDialogue(QDialog):
         self.value_getters = {}
         self.values = {}
 
-    def addWidget(self, name, data_type=None, default=NoValue, options=None):
+    def addWidget(self, name, data_type="", default=NoValue, options=None):
         widget, controller = create_widget(data_type, options)
 
         # If has no default, try and guess one

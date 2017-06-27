@@ -11,7 +11,7 @@ class InspectorOption:
         """Unique object used to indicate no value"""
         pass
 
-    def __init__(self, data_type=None, default=NoValue, options=None):
+    def __init__(self, data_type="", default=NoValue, options=None):
         self.data_type = data_type
         self.default = default
         self.options = options

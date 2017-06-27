@@ -1,10 +1,10 @@
 from .manager import ContextFactory
 from .mixins import Parameter
+from .typing import is_valid_data_type
 
 
 class HiveParameter(Parameter):
-
-    def __init__(self, data_type=None, start_value=Parameter.NoValue, options=None):
+    def __init__(self, data_type='', start_value=Parameter.NoValue, options=None):
         self.data_type = data_type
         self.start_value = start_value
         self.options = options

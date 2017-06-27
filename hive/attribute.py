@@ -2,6 +2,7 @@ from weakref import WeakKeyDictionary
 
 from .manager import ContextFactory, get_building_hive, memoize
 from .mixins import Stateful, Exportable, Bindable, Parameter, Nameable
+from .typing import is_valid_data_type
 
 
 class Attribute(Stateful, Bindable, Exportable, Nameable):
@@ -9,7 +10,7 @@ class Attribute(Stateful, Bindable, Exportable, Nameable):
 
     export_only = False
 
-    def __init__(self, data_type=None, start_value=None):
+    def __init__(self, data_type='', start_value=None):
         self._hive_object_cls = get_building_hive()
 
         self.data_type = data_type
@@ -24,9 +25,6 @@ class Attribute(Stateful, Bindable, Exportable, Nameable):
         assert run_hive in self._values, run_hive
         self._values[run_hive] = value
 
-    def export(self):
-        return self
-
     @memoize
     def bind(self, run_hive):
         start_value = self.start_value
@@ -35,6 +33,9 @@ class Attribute(Stateful, Bindable, Exportable, Nameable):
             start_value = run_hive._hive_object._hive_args_frozen.get_parameter_value(start_value)
 
         self._values[run_hive] = start_value
+        return self
+
+    def export(self):
         return self
 
 
