@@ -100,4 +100,4 @@ my_hive.a.push(1)
 my_hive.b.push(1)
 my_hive.trigger()
 
-print(my_hive.a.target)
+print(my_hive.a)

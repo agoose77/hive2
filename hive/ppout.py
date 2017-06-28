@@ -55,6 +55,9 @@ class PPOutBase(Bindable, Output, ConnectSource, TriggerSource, Nameable):
     def _hive_pretrigger_source(self, func):
         self._pretrigger.add_target(func)
 
+    def __repr__(self):
+        return "{}({!r}, {!r}, {!r})".format(self.__class__.__name__, self.target, self.data_type, self._run_hive)
+
 
 class PullOut(PPOutBase):
     mode = "pull"
@@ -175,6 +178,9 @@ class PPOutBuilder(Bee, Output, ConnectSource, TriggerSource):
             return target.implements(cls)
 
         return False
+
+    def __repr__(self):
+        return "{}({!r}, {!r})".format(self.__class__.__name__, self.target, self.data_type)
 
 
 class PushOutBuilder(PPOutBuilder, TriggerTarget):

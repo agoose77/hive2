@@ -61,6 +61,9 @@ class PPInBase(Bindable, Antenna, ConnectTarget, TriggerSource, Nameable):
 
         return self.__class__(target, data_type=self.data_type, run_hive=run_hive)
 
+    def __repr__(self):
+        return "{}({!r}, {!r}, {!r})".format(self.__class__.__name__, self.target, self.data_type, self._run_hive)
+
 
 class PushIn(PPInBase):
     mode = "push"
@@ -167,6 +170,9 @@ class PPInBuilder(Bee, Antenna, ConnectTarget, TriggerSource):
             return target.implements(cls)
 
         return False
+
+    def __repr__(self):
+        return "{}({!r}, {!r})".format(self.__class__.__name__, self.target, self.data_type)
 
 
 class PushInBuilder(PPInBuilder):
