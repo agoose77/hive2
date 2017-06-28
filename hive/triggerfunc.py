@@ -76,14 +76,10 @@ class TriggerFuncBuilder(Bee, TriggerSource, ConnectSource, Callable):
         return TriggerFunc(func)
 
     def implements(self, cls):
-        if Bee.implements(self, cls):
+        if cls is Callable:
             return True
 
-        # func = self._func
-        # if isinstance(func, Bee):
-        #     return func.implements(cls)
-
-        return False
+        return super().implements(cls)
 
     def __repr__(self):
         return "TriggerFuncBuilder({!r})".format(self._func)

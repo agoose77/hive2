@@ -40,11 +40,11 @@ class Modifier(TriggerTarget, ConnectTarget, Bindable, Callable, Nameable):
         pass
 
 
-class ModifierBee(Bee, TriggerTarget, ConnectTarget, Callable):
+class ModifierBuilder(Bee, TriggerTarget, ConnectTarget):
     """Callable Python snippet which is passed the current run hive"""
 
     def __init__(self, target):
-        assert callable(target), target # TODO what if is a bee...
+        #assert callable(target), target # TODO what if is a bee...
         self._target = target
 
         super().__init__()
@@ -58,17 +58,13 @@ class ModifierBee(Bee, TriggerTarget, ConnectTarget, Callable):
         return Modifier(func)
 
     def implements(self, cls):
-        if super().implements(cls):
+        if cls is Callable:
             return True
 
-            # func = self._func
-            # if isinstance(func, Bee):
-            #     return func.implements(cls)
-            #
-            # return False
+        return super().implements(cls)
 
     def __repr__(self):
         return "Modifier({!r})".format(self._target)
 
 
-modifier = ModeFactory("hive.modifier", immediate=Modifier, build=ModifierBee)
+modifier = ModeFactory("hive.modifier", immediate=Modifier, build=ModifierBuilder)

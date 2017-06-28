@@ -46,7 +46,7 @@ class Triggerable(Bindable, TriggerTarget, ConnectTarget, Callable, Nameable):
         return "Triggerable({!r}, {!r})".format(self._func, self._run_hive)
 
 
-class TriggerableBuilder(Bee, TriggerTarget, ConnectTarget, Callable):
+class TriggerableBuilder(Bee, TriggerTarget, ConnectTarget):
     """Callable Python snippet"""
 
     def __init__(self, func):
@@ -61,6 +61,12 @@ class TriggerableBuilder(Bee, TriggerTarget, ConnectTarget, Callable):
             func = func.getinstance(hive_object)
 
         return Triggerable(func)
+
+    def implements(self, cls):
+        if cls is Callable:
+            return True
+
+        return super().implements(cls)
 
     def __repr__(self):
         return "TriggerableBuilder({!r})".format(self._func)
