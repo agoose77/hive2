@@ -245,23 +245,14 @@ class NetworkDebugContext(ReportedDebugContextBase):
             raise TypeError("Bee is not Nameable")
 
         paths = defaultdict(set)
-
-        bee_runtime_infos = bee._hive_runtime_info
-        if bee_runtime_infos is None:
-            return {}
-
         # Iterate over parent infos, find path relative to parent's container (to find parent_node_name.bee_name)
-        for info in bee._hive_runtime_info:
+        for info in bee._hive_runtime_aliases:
             parent_ref, bee_name = info
             parent = parent_ref()
 
-            parent_runtime_infos = parent._hive_runtime_info
-            if parent_runtime_infos is None:
-                continue
-
             # For each parent runtime info, store path relative to top-level container
-            for parent_info in parent._hive_runtime_info:
-                container_ref, node_name = parent_info
+            for runtime_alias in parent._hive_runtime_aliases:
+                container_ref, node_name = runtime_alias
 
                 paths[container_ref].add((node_name, bee_name))
 

@@ -18,7 +18,7 @@ class Connectable:
     pass
 
 
-BoundRuntimeInfo = namedtuple("BoundRuntimeInfo", "parent_ref name")
+RuntimeAlias = namedtuple("RuntimeAlias", "parent_ref name")
 
 
 class Nameable:
@@ -32,8 +32,8 @@ class Nameable:
         :param parent: runtime hive instance
         :param name: attribute name under which this bee is referred
         """
-        info = BoundRuntimeInfo(ref(parent), name)
-        self._hive_runtime_aliases.add(info)
+        alias = RuntimeAlias(ref(parent), name)
+        self._hive_runtime_aliases.add(alias)
 
 
 class Callable:

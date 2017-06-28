@@ -17,7 +17,7 @@ class BindableResolveBee(Bindable, Nameable):
             self._hive_object = None
 
     @property
-    def _hive_runtime_info(self):
+    def _hive_runtime_aliases(self):
         # TODO why raise runtime error?
         raise RuntimeError
 
@@ -28,7 +28,9 @@ class BindableResolveBee(Bindable, Nameable):
 
 
 class ResolveBee(Exportable):
-    """Wraps Bee instance to resolve appropriate reference at runtime"""
+    """Implements support for connecting between bees of different HiveObjects 
+    (resolving the getinstance & bind methods)
+    """
 
     def __init__(self, bee, own_hive_object):
         self._bee = bee
@@ -54,10 +56,13 @@ class ResolveBee(Exportable):
 
     @memoize
     def getinstance(self, redirected_hive_object):
+        # Hive instance to which the ResolveBee belongs
         hive_instantiator = self._own_hive_object.getinstance(redirected_hive_object)
+        # TODO explain this
         redirected_hive_object = hive_instantiator._hive_object
         result = self._bee.getinstance(redirected_hive_object)
 
+        # If the resulting bee is bindable, we must resolve this later too!
         if isinstance(result, Bindable):
             return BindableResolveBee(hive_instantiator, result)
 

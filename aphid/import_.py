@@ -16,12 +16,12 @@ class ImportClass:
 
     def do_import_from_path(self):
         # Find first runtime info object and assume is the only one required
-        runtime_infos = self._hive._hive_runtime_info
-        if not runtime_infos:
-            raise RuntimeError("This hive does not have any runtime info objects (not a child of a hive)")
+        runtime_aliases = self._hive._hive_runtime_aliases
+        if not runtime_aliases:
+            raise RuntimeError("This hive does not have any runtime aliases (it is not nested within another HiveObject)")
 
         # Find first hive to embed this hive (TODO maybe iterate here)
-        first_runtime_info = set(runtime_infos).pop()
+        first_runtime_info = next(iter(runtime_aliases))
         parent = first_runtime_info.parent_ref()
         container_parent_class = parent._hive_object._hive_parent_class
 
