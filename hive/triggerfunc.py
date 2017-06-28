@@ -13,8 +13,10 @@ class TriggerFunc(Bindable, TriggerSource, ConnectSource, Callable, Nameable):
         assert callable(func) or func is None or isinstance(func, Callable), func
         self._run_hive = run_hive
         self._func = func
+
         self._trigger = Pusher(self)
         self._pretrigger = Pusher(self)
+
         # TODO
         self._name_counter = 0
 
@@ -23,6 +25,7 @@ class TriggerFunc(Bindable, TriggerSource, ConnectSource, Callable, Nameable):
     def __call__(self, *args, **kwargs):
         # TODO: exception handling hooks
         self._pretrigger.push()
+
         if self._func is not None:
             self._func(*args, **kwargs)
 

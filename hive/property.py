@@ -1,5 +1,7 @@
 from weakref import WeakSet
 
+from builtins import property as py_property
+
 from .contexts import get_mode
 from .manager import memoize
 from .protocols import Stateful, Exportable, Bindable, Parameter, Nameable
@@ -15,28 +17,26 @@ class Property(Exportable, Bindable, Stateful, Nameable):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
 
+        self._bound = WeakSet()
         self._cls = cls
         self._attr = attr
-        self._bound = WeakSet()
+        self._data_type = data_type
 
-        self.data_type = data_type
         self.start_value = start_value
 
         super().__init__()
 
-    def _hive_stateful_getter(self, run_hive):
-        cls = self._cls
+    @py_property
+    def data_type(self):
+        return self._data_type
 
-        assert cls in run_hive._hive_build_class_to_instance, cls
-        instance = run_hive._hive_build_class_to_instance[cls]
+    def _hive_stateful_getter(self, run_hive):
+        instance = run_hive._hive_build_class_to_instance[self._cls]
 
         return getattr(instance, self._attr)
 
     def _hive_stateful_setter(self, run_hive, value):
-        cls = self._cls
-
-        assert cls in run_hive._hive_build_class_to_instance, cls
-        instance = run_hive._hive_build_class_to_instance[cls]
+        instance = run_hive._hive_build_class_to_instance[self._cls]
 
         setattr(instance, self._attr, value)
 
@@ -47,9 +47,7 @@ class Property(Exportable, Bindable, Stateful, Nameable):
     def bind(self, run_hive):
         self._bound.add(run_hive)
 
-        cls = self._cls
-        assert cls in run_hive._hive_build_class_to_instance, cls  # TODO, DEBUG can remove?
-        instance = run_hive._hive_build_class_to_instance[cls]
+        instance = run_hive._hive_build_class_to_instance[self._cls]
 
         start_value = self.start_value
         if start_value is not None or not hasattr(instance, self._attr):
@@ -61,7 +59,7 @@ class Property(Exportable, Bindable, Stateful, Nameable):
         return self
 
     def __repr__(self):
-        return "Property({!r}, {!r}, {!r}, {!r})".format(self._cls, self._attr, self.data_type, self.start_value)
+        return "Property({!r}, {!r}, {!r}, {!r})".format(self._cls, self._attr, self._data_type, self.start_value)
 
 
 def property(cls, attr, data_type="", start_value=None):

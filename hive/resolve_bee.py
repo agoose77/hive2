@@ -10,11 +10,7 @@ class BindableResolveBee(Bindable, Nameable):
         self._unbound_run_hive = unbound_run_hive
 
         # Support ResolveBees used for hive_objects
-        if hasattr(bee, "_hive_object"):
-            self._hive_object = bee._hive_object
-
-        else:
-            self._hive_object = None
+        self._hive_object = getattr(bee, '._hive_object', None)
 
     @property
     def _hive_runtime_aliases(self):

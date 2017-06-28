@@ -13,21 +13,22 @@ class HiveSocket(Exportable, Bindable, Socket, ConnectTarget, Nameable):
         assert callable(func) or isinstance(func, Callable), func
         self._run_hive = run_hive
         self._func = func
-
-        self.data_type = data_type
+        self._data_type = data_type
 
         super().__init__()
+
+    @property
+    def data_type(self):
+        return self._data_type
 
     @memoize
     def bind(self, run_hive):
         if self._run_hive:
             return self
 
-        if isinstance(self._func, Bindable):
-            func = self._func.bind(run_hive)
-
-        else:
-            func = self._func
+        func = self._func
+        if isinstance(func, Bindable):
+            func = func.bind(run_hive)
 
         return self.__class__(func, self.data_type, run_hive)
 
@@ -61,10 +62,9 @@ class HiveSocketBuilder(Exportable, Socket, ConnectTarget):
             raise ValueError(data_type)
 
         self._target = target
-
-        self.identifier = identifier
-        self.data_type = data_type
-        self.export_to_parent = export_to_parent
+        self._identifier = identifier
+        self._data_type = data_type
+        self._export_to_parent = export_to_parent
 
         if policy is None:
             policy = SingleRequired
@@ -72,6 +72,18 @@ class HiveSocketBuilder(Exportable, Socket, ConnectTarget):
         self.policy = policy
 
         super().__init__()
+
+    @property
+    def data_type(self):
+        return self._data_type
+
+    @property
+    def export_to_parent(self):
+        return self._export_to_parent
+
+    @property
+    def identifier(self):
+        return self._identifier
 
     def __repr__(self):
         return "<Socket: {}>".format(self._target)

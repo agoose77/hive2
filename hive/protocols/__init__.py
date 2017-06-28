@@ -22,6 +22,7 @@ RuntimeAlias = namedtuple("RuntimeAlias", "parent_ref name")
 
 
 class Nameable:
+    # TOOD move this to bee
     @memo_property
     def _hive_runtime_aliases(self):
         return set()

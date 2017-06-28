@@ -11,14 +11,16 @@ class Variable(Exportable, Bindable, Stateful, Nameable):
     export_only = False
 
     def __init__(self, data_type='', start_value=None):
-        super().__init__()
 
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
 
-        self._data_type = data_type
-        self._start_value = start_value
         self._values = WeakKeyDictionary()
+        self._data_type = data_type
+
+        self.start_value = start_value
+
+        super().__init__()
 
     @property
     def data_type(self):
@@ -28,7 +30,6 @@ class Variable(Exportable, Bindable, Stateful, Nameable):
         return self._values[run_hive]
 
     def _hive_stateful_setter(self, run_hive, value):
-        assert run_hive in self._values, run_hive
         self._values[run_hive] = value
 
     @memoize
@@ -45,7 +46,7 @@ class Variable(Exportable, Bindable, Stateful, Nameable):
         return self
 
     def __repr__(self):
-        return "Variable({!r}, {!r})".format(self.data_type, self._start_value)
+        return "Variable({!r}, {!r})".format(self._data_type, self.start_value)
 
 
 variable = ModeFactory("hive.variable", build=Variable)

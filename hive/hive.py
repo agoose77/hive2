@@ -1,3 +1,4 @@
+from abc import ABC, abstractproperty
 from collections import defaultdict
 from itertools import count
 
@@ -215,7 +216,7 @@ class HiveObject(Exportable, ConnectSourceDerived, ConnectTargetDerived, Trigger
                     raise TypeError("{}.{}".format(builder_cls.__name__, err.args[0]))
 
         # Create ResolveBee wrappers for external interface
-        with building_hive_as(self.__class__), hive_mode_as("build"):
+        with  hive_mode_as("build"):
             external_bees = self.__class__._hive_ex
             for bee_name, bee in external_bees._items:
                 target = bee.export()
@@ -406,10 +407,10 @@ def validate_internal_name(attr_name):
         raise AttributeError('Cannot overwrite special attribute RuntimeHive.{}'.format(attr_name))
 
 
-class MetaHivePrimitive(object):
+class MetaHivePrimitive(ABC):
     """Primitive container to instantiate Hive with particular meta arguments"""
 
-    _hive_object_class = None
+    _hive_object_class = abstractproperty()
 
     def __new__(cls, *args, **kwargs):
         hive_object = cls._hive_object_class(*args, **kwargs)
@@ -434,12 +435,13 @@ class HiveBuilder(object):
     _hive_meta_args = None
 
     def __new__(cls, *args, **kwargs):
+        print("INIT BUILDER", cls)
         # If MetaHive and not DynaHive
         if cls._declarators and not cls._is_dyna_hive:
             return cls._hive_get_meta_primitive(*args, **kwargs)
 
-        args, kwargs, hive_object_cls = cls._hive_get_hive_object_cls(args, kwargs)
-        hive_object = hive_object_cls(*args, **kwargs)
+        args, kwargs, hive_object_class = cls._hive_get_hive_object_class(args, kwargs)
+        hive_object = hive_object_class(*args, **kwargs)
 
         if get_mode() == "immediate":
             return hive_object.instantiate()
@@ -450,16 +452,17 @@ class HiveBuilder(object):
     @classmethod
     def _hive_get_meta_primitive(cls, *args, **kwargs):
         """Return the MetaHivePrimitive subclass associated with the HiveObject class produced for these meta args"""
-        args, kwargs, hive_object_cls = cls._hive_get_hive_object_cls(args, kwargs)
+        args, kwargs, hive_object_class = cls._hive_get_hive_object_class(args, kwargs)
         assert not args or kwargs, "Meta primitive cannot be passed any runtime-arguments"
-        return cls._hive_create_meta_primitive(hive_object_cls)
+
+        return cls._hive_create_meta_primitive(hive_object_class)
 
     @classmethod
     @memoize
-    def _hive_create_meta_primitive(cls, hive_object_cls):
+    def _hive_create_meta_primitive(cls, hive_object_class):
         """Return the MetaHivePrimitive subclass associated with this HiveObject class """
         return type("MetaHivePrimitive::{}".format(cls.__name__), (MetaHivePrimitive,),
-                    {'_hive_object_cls': hive_object_cls})
+                    {'_hive_object_class': hive_object_class})
 
     @classmethod
     @memoize
@@ -469,23 +472,23 @@ class HiveBuilder(object):
         :param kwargs: Parameter keyword arguments
         """
         hive_object_dict = {'__doc__': cls.__doc__, "_hive_parent_class": cls}
-        hive_object_cls_name = "HiveObject<{}>".format(cls.__name__)
-        hive_object_cls = type(hive_object_cls_name, (HiveObject,), hive_object_dict)
+        hive_object_class_name = "HiveObject<{}>".format(cls.__name__)
+        hive_object_class = type(hive_object_class_name, (HiveObject,), hive_object_dict)
 
-        hive_object_cls._hive_i = internals = HiveInternalWrapper(hive_object_cls,
-                                                                  validator=lambda n, v: validate_internal_name(n))
-        hive_object_cls._hive_ex = externals = HiveExportableWrapper(hive_object_cls,
-                                                                     validator=lambda n, v: validate_external_name(n))
-        hive_object_cls._hive_args = args = HiveArgsWrapper(hive_object_cls)
+        hive_object_class._hive_i = internals = HiveInternalWrapper(hive_object_class,
+                                                                    validator=lambda n, v: validate_internal_name(n))
+        hive_object_class._hive_ex = externals = HiveExportableWrapper(hive_object_class,
+                                                                       validator=lambda n, v: validate_external_name(n))
+        hive_object_class._hive_args = args = HiveArgsWrapper(hive_object_class)
 
         # Get frozen meta args
         frozen_meta_args = cls._hive_meta_args.freeze(meta_arg_values)
-        hive_object_cls._hive_meta_args_frozen = frozen_meta_args
+        hive_object_class._hive_meta_args_frozen = frozen_meta_args
 
         is_root = get_building_hive() is None
         is_meta_hive = bool(cls._declarators)
 
-        with hive_mode_as("build"), building_hive_as(hive_object_cls), bee_register_context() as registered_bees:
+        with hive_mode_as("build"), building_hive_as(hive_object_class), bee_register_context() as registered_bees:
             # Invoke builder functions to build wrappers
             for builder, builder_cls in cls._builders:
                 # Call builder with appropriate arguments depending upon Hive type
@@ -506,11 +509,11 @@ class HiveBuilder(object):
                     print("Unable to invoke builder '{}'".format(builder))
                     raise
 
-            cls._hive_build_namespace(hive_object_cls)
+            cls._hive_build_namespace(hive_object_class)
 
             # Root hives build
             if is_root:
-                cls._hive_build_connectivity(hive_object_cls)
+                cls._hive_build_connectivity(hive_object_class)
 
         # Find anonymous bees
         anonymous_bees = set(registered_bees)
@@ -554,9 +557,9 @@ class HiveBuilder(object):
             if isinstance(bee, Stateful):
                 run_hive_class_dict[bee_name] = property(bee._hive_stateful_getter, bee._hive_stateful_setter)
 
-        run_hive_cls_name = "{}::run_hive".format(hive_object_cls.__name__)
-        hive_object_cls._hive_runtime_class = type(run_hive_cls_name, (RuntimeHive,), run_hive_class_dict)
-        return hive_object_cls
+        run_hive_cls_name = "{}::run_hive".format(hive_object_class.__name__)
+        hive_object_class._hive_runtime_class = type(run_hive_cls_name, (RuntimeHive,), run_hive_class_dict)
+        return hive_object_class
 
     @classmethod
     def _hive_build_connectivity(cls, resolved_hive_object, tracked_policies=None, plugin_map=None, socket_map=None):
@@ -756,7 +759,7 @@ class HiveBuilder(object):
                 declarator(args_wrapper)
 
     @classmethod
-    def _hive_get_hive_object_cls(cls, args, kwargs):
+    def _hive_get_hive_object_class(cls, args, kwargs):
         """Find appropriate HiveObject for argument values
 
         Extract meta args from arguments and return remainder
