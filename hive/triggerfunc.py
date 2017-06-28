@@ -32,12 +32,10 @@ class TriggerFunc(Bindable, TriggerSource, ConnectSource, Callable, Nameable):
         self._trigger.push()
 
     def _hive_trigger_source(self, target_func):
-        self._name_counter += 1
-        self._trigger.add_target(target_func, self._name_counter)
+        self._trigger.add_target(target_func)
 
     def _hive_pretrigger_source(self, target_func):
-        self._name_counter += 1
-        self._pretrigger.add_target(target_func, self._name_counter)
+        self._pretrigger.add_target(target_func)
 
     def _hive_is_connectable_source(self, target):
         if not isinstance(target, TriggerTarget):

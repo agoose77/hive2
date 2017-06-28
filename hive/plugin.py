@@ -36,7 +36,7 @@ class HivePlugin(Exportable, Bindable, Plugin, ConnectSource, Nameable):
         else:
             func = self._func
 
-        return self.__class__(func, self.data_type, run_hive)
+        return self.__class__(func, self._data_type, run_hive)
 
     @memoize
     def export(self):
@@ -82,6 +82,10 @@ class HivePluginBuilder(Exportable, Plugin, ConnectSource):
         return self._data_type
 
     @property
+    def policy(self):
+        return self._policy
+
+    @property
     def export_to_parent(self):
         return self._export_to_parent
 
@@ -95,7 +99,7 @@ class HivePluginBuilder(Exportable, Plugin, ConnectSource):
         if isinstance(target, Bee):
             target = target.getinstance(hive_object)
 
-        return HivePlugin(target, self.data_type)
+        return HivePlugin(target, self._data_type)
 
     @memoize
     def export(self):
@@ -104,7 +108,7 @@ class HivePluginBuilder(Exportable, Plugin, ConnectSource):
 
         if isinstance(target, Exportable):
             exported = target.export()
-            return self.__class__(exported, self.identifier, self.data_type, self._policy, self.export_to_parent)
+            return self.__class__(exported, self._identifier, self._data_type, self._policy, self._export_to_parent)
 
         return self
 

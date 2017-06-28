@@ -16,7 +16,7 @@ class TriggerSource(TriggerSourceBase):
     def _hive_trigger_source(self, target):
         raise NotImplementedError
 
-    def _hive_pretrigger_source(self):
+    def _hive_pretrigger_source(self, target):
         raise NotImplementedError
 
 

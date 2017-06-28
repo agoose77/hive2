@@ -34,7 +34,7 @@ class Variable(Exportable, Bindable, Stateful, Nameable):
 
     @memoize
     def bind(self, run_hive):
-        start_value = self._start_value
+        start_value = self.start_value
 
         if isinstance(start_value, Parameter):
             start_value = run_hive._hive_object._hive_args_frozen.get_parameter_value(start_value)
