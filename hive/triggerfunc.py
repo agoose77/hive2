@@ -75,9 +75,9 @@ class TriggerFuncBee(HiveBee, TriggerSource, ConnectSource, Callable):
         if Bee.implements(self, cls):
             return True
 
-        func = self._func
-        if isinstance(func, Bee):
-            return func.implements(cls)
+        # func = self._func
+        # if isinstance(func, Bee):
+        #     return func.implements(cls)
 
         return False
 

@@ -1,44 +1,55 @@
+from abc import ABC, abstractmethod
 from collections import namedtuple
 from weakref import ref
 
+from ..contexts import get_building_hive
 from ..manager import memo_property
 
 BoundRuntimeInfo = namedtuple("BoundRuntimeInfo", "parent_ref name")
 
 
-class Bee(object):
+class Bee:
     _hive_object_cls = None
     _hive_wrapper_name = None
 
+    def __init__(self):
+        self._hive_object_cls = get_building_hive()
+        assert get_building_hive() is not None
+
     def implements(self, cls):
+        return isinstance(self, cls)
+
+    def instance_implements(self, cls):
         return isinstance(self, cls)
 
     def getinstance(self, hive_object):
         return self
 
 
-class Parameter(object):
+class Parameter:
     _hive_parameter_name = None
 
     start_value = None
     data_type = None
     options = None
 
-    class NoValue(object):
-        pass
+    no_value = object()
 
 
-class Connectable(object):
-    # Connectables don't need to be Bees!
+# Connectables don't need to be Bees!
+class Connectable:
     pass
 
 
-class Bindable(object):
-    # Connectables don't need to be Bees!
-    pass
+class Bindable(ABC):
+    # Bindables don't need to be Bees!
+
+    @abstractmethod
+    def bind(self, run_hive):
+        raise NotImplementedError
 
 
-class Nameable(object):
+class Nameable:
 
     @memo_property
     def _hive_runtime_aliases(self):
@@ -54,13 +65,14 @@ class Nameable(object):
         self._hive_runtime_aliases.add(info)
 
 
-class Callable(Bee):
+class Callable:
     pass
 
 
-class Exportable(Bee):
+class Exportable(ABC):
     export_only = True
 
+    @abstractmethod
     def export(self):
         raise NotImplementedError
 
@@ -73,26 +85,9 @@ class Socket(Bee):
     pass
 
 
-class IO(Bee):
-    pass
-
-
-class Antenna(IO):
-    mode = None #must be push or pull
-
-    def push(self): #only needs to be defined if mode is "push"
-        raise NotImplementedError 
-
-
-class Output(IO):
-    mode = None #must be push or pull
-
-    def pull(self): #only needs to be defined if mode is "pull"
-        raise NotImplementedError
-
-
 from .connect_source import ConnectSourceBase, ConnectSource, ConnectSourceDerived
 from .connect_target import ConnectTargetBase, ConnectTarget, ConnectTargetDerived
+from .io import IO, Antenna, Output
 from .stateful import Stateful
 from .trigger_source import TriggerSourceBase, TriggerSource, TriggerSourceDerived
 from .trigger_target import TriggerTargetBase, TriggerTarget, TriggerTargetDerived

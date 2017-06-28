@@ -1,14 +1,14 @@
 from collections import defaultdict
 
-from .classes import (HiveInternalWrapper, HiveExportableWrapper, HiveArgsWrapper, HiveMetaArgsWrapper, ResolveBee,
-                      HiveClassProxy)
+from .classes import HiveInternalWrapper, HiveExportableWrapper, HiveArgsWrapper, HiveMetaArgsWrapper, HiveClassProxy
 from .compatability import next, validate_signature
 from .connect import connect, ConnectionCandidate
-from .contexts import (bee_register_context, get_mode, hive_mode_as, get_building_hive, building_hive_as, \
+from .contexts import (bee_register_context, get_mode, hive_mode_as, building_hive_as, \
                        run_hive_as, get_validation_enabled)
 from .manager import memoize
 from .mixins import *
 from .policies import MatchmakingPolicyError
+from .resolve_bee import ResolveBee
 from .typing import MatchFlags, data_types_match
 
 
@@ -90,6 +90,10 @@ class RuntimeHive(ConnectSourceDerived, ConnectTargetDerived, TriggerSource, Tri
                         if instance is None:
                             continue
 
+                    for scls in Bee.__subclasses__():
+                        if bee.implements(scls):
+                            assert isinstance(bee, scls)
+
                     # Store runtime information on exported bee
                     if isinstance(instance, Nameable):
                         instance.register_alias(self, bee_name)
@@ -101,7 +105,10 @@ class RuntimeHive(ConnectSourceDerived, ConnectTargetDerived, TriggerSource, Tri
                 for bee_name, bee in internal_bees._items:
                     private_name = "_" + bee_name
 
-                    # Some runtime hive attributes are protected
+                    # Some runtime hive attributes are protected, but in the case of Stateful bees,
+                    # The RuntimeHive already has corresponding property descriptors
+                    # TODO: IMP here we want to know that the resolved bee will be stateful
+                    # This might not mean that it's exported to a unique object though (e.g attribute exports to self)
                     if not bee.implements(Stateful):
                         assert not hasattr(self, private_name), private_name
 
@@ -112,11 +119,15 @@ class RuntimeHive(ConnectSourceDerived, ConnectTargetDerived, TriggerSource, Tri
                         if instance is None:
                             continue
 
+                    # for scls in Bee.__subclasses__():
+                    #     if bee.implements(scls):
+                    #         assert isinstance(instance, scls), (instance, scls)
+
                     # Store runtime information on bee
                     if isinstance(instance, Nameable):
                         instance.register_alias(self, bee_name)
 
-                    if isinstance(bee, HiveObject) or bee.implements(Callable):
+                    if bee.implements(HiveObject) or bee.implements(Callable):
                         exposed_bees.append((private_name, instance))
 
                 for bee_name, instance in exposed_bees:

@@ -29,7 +29,7 @@ class BindClassDefinition:
         plugin_entry = PluginEntry(identifier, plugin_policy, socket_policy, declare_for_environment, condition_stack)
         self._plugin_entries.append(plugin_entry)
 
-    def parameter(self, name, data_type=None, start_value=HiveParameter.NoValue, options=None):
+    def parameter(self, name, data_type=None, start_value=HiveParameter.no_value, options=None):
         self._parameters[name] = HiveParameter(data_type, start_value, options)
         return Variable(name)
 

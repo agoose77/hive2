@@ -3,11 +3,12 @@ from .manager import ModeFactory
 from .mixins import Bee, Antenna, Exportable
 
 
-class HiveAntenna(Antenna, Exportable):
+class HiveAntenna(Bee, Antenna, Exportable):
     """Exportable proxy for Antenna bees"""
 
     def __init__(self, target):
         assert isinstance(target, Bee), target
+        # TODO: IMP want something that resolves to an antenna
         assert target.implements(Antenna), target
 
         self._hive_object_cls = get_building_hive()

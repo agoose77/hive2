@@ -3,11 +3,12 @@ from .manager import ModeFactory, memoize
 from .mixins import Output, Exportable, Bee
 
 
-class HiveOutput(Output, Exportable):
+class HiveOutput(Bee, Output, Exportable):
     """Exportable proxy for Output bees"""
 
     def __init__(self, target):
         assert isinstance(target, Bee), target
+        # TODO: IMP Here we want something that will, when resolved to an instance, expose the output protocl
         assert target.implements(Output), target
 
         self._hive_object_cls = get_building_hive()

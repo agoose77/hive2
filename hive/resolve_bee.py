@@ -1,6 +1,6 @@
-from ..manager import memoize
-from ..contexts import get_building_hive
-from ..mixins import Bee, Bindable, Exportable, Nameable
+from .manager import memoize
+from .contexts import get_building_hive
+from .mixins import Bee, Bindable, Exportable, Nameable
 
 
 class BindableResolveBee(Bee, Bindable, Nameable):

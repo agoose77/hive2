@@ -234,7 +234,7 @@ class HiveArgsWrapperBase(MappingObject):
 
                 except KeyError:
                     # Check if we can omit the value
-                    if parameter.start_value is Parameter.NoValue:
+                    if parameter.start_value is Parameter.no_value:
                         raise ValueError(self._format_message("No value for '{}' can be resolved".format(param_name)))
 
                     else:
@@ -244,7 +244,7 @@ class HiveArgsWrapperBase(MappingObject):
                 # If not in kwargs and we're using kwargs, provide attempt for default
                 if not use_args:
                     # Check if we can omit the value
-                    if parameter.start_value is Parameter.NoValue:
+                    if parameter.start_value is Parameter.no_value:
                         raise ValueError(self._format_message("No value for '{}' can be resolved".format(param_name)))
                     else:
                         arg_value = parameter.start_value
@@ -255,7 +255,7 @@ class HiveArgsWrapperBase(MappingObject):
                         arg_value = next(iter_args)
 
                     except StopIteration:
-                        if parameter.start_value is Parameter.NoValue:
+                        if parameter.start_value is Parameter.no_value:
                             raise ValueError(self._format_message("No value for '{}' can be resolved".format(param_name)))
                         else:
                             arg_value = parameter.start_value

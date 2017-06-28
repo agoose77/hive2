@@ -1,11 +1,12 @@
 from weakref import WeakSet
 
-from .mixins import Stateful, Exportable, Bindable, Parameter, Nameable
+from .mixins import Stateful, Exportable, Bindable, Parameter, Nameable, Bee
 from .contexts import get_mode, get_building_hive
+from .typing import is_valid_data_type
 from .manager import memoize
 
 
-class Property(Stateful, Bindable, Exportable, Nameable):
+class Property(Bee, Stateful, Bindable, Exportable, Nameable):
     """Interface to bind class attributes"""
 
     export_only = False

@@ -2,11 +2,11 @@ from weakref import WeakKeyDictionary
 
 from .contexts import get_building_hive
 from .manager import ModeFactory, memoize
-from .mixins import Stateful, Exportable, Bindable, Parameter, Nameable
+from .mixins import Stateful, Exportable, Bindable, Parameter, Nameable, Bee
 from .typing import is_valid_data_type
 
 
-class Attribute(Stateful, Bindable, Exportable, Nameable):
+class Attribute(Bee, Stateful, Bindable, Exportable, Nameable):
     """Stateful data store object"""
 
     export_only = False

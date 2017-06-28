@@ -4,7 +4,7 @@ from .typing import is_valid_data_type
 
 
 class HiveParameter(Parameter):
-    def __init__(self, data_type='', start_value=Parameter.NoValue, options=None):
+    def __init__(self, data_type='', start_value=Parameter.no_value, options=None):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
 
@@ -13,7 +13,7 @@ class HiveParameter(Parameter):
         self.options = options
 
         # Validate start value
-        if not (start_value is Parameter.NoValue or options is None):
+        if not (start_value is Parameter.no_value or options is None):
             assert start_value in options
 
     def __repr__(self):

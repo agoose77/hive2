@@ -62,14 +62,14 @@ class ModifierBee(TriggerTarget, ConnectTarget, Callable, HiveBee):
         return Modifier(func)
 
     def implements(self, cls):
-        if Bee.implements(self, cls):
+        if super().implements(cls):
             return True
 
-        func = self._func
-        if isinstance(func, Bee):
-            return func.implements(cls)
-
-        return False
+        # func = self._func
+        # if isinstance(func, Bee):
+        #     return func.implements(cls)
+        #
+        # return False
 
 
 modifier = ModeFactory("hive.modifier", immediate=Modifier, build=ModifierBee)
