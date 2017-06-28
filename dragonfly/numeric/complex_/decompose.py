@@ -3,9 +3,9 @@ import hive
 
 def build_decompose(i, ex, args):
     """Decompose complex number into real and imaginary components"""
-    i.value = hive.attribute('complex')
-    i.real = hive.attribute('float')
-    i.imag = hive.attribute('float')
+    i.value = hive.variable('complex')
+    i.real = hive.variable('float')
+    i.imag = hive.variable('float')
 
     i.pull_imag = hive.pull_out(i.imag)
     i.pull_real = hive.pull_out(i.real)

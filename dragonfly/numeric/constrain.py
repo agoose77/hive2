@@ -10,11 +10,11 @@ def build_constrain(i, ex, args, meta_args):
     args.min_value = hive.parameter(meta_args.data_type)
     args.max_value = hive.parameter(meta_args.data_type)
 
-    i.min_value = hive.attribute(meta_args.data_type, args.min_value)
-    i.max_value = hive.attribute(meta_args.data_type, args.max_value)
+    i.min_value = hive.variable(meta_args.data_type, args.min_value)
+    i.max_value = hive.variable(meta_args.data_type, args.max_value)
 
-    i.value = hive.attribute(meta_args.data_type)
-    i.result = hive.attribute(meta_args.data_type)
+    i.value = hive.variable(meta_args.data_type)
+    i.result = hive.variable(meta_args.data_type)
 
     i.pull_result = hive.pull_out(i.result)
     i.pull_value = hive.pull_in(i.value)

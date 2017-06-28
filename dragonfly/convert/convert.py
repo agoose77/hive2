@@ -19,8 +19,8 @@ def move_value(self):
 
 
 def build_convert(i, ex, args, meta_args):
-    i.value_in = hive.attribute(meta_args.from_data_type)
-    i.value_out = hive.attribute(meta_args.to_data_type)
+    i.value_in = hive.variable(meta_args.from_data_type)
+    i.value_out = hive.variable(meta_args.to_data_type)
 
     # For push in, push out
     if meta_args.mode == "push":

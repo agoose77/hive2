@@ -47,10 +47,11 @@ from .trigger import trigger
 
 # i/ex primitives
 from .property import property
-from .attribute import attribute
+from .variable import variable
 
 # ex primitives
 from .entry import entry
+from .view import view
 from .hook import hook
 from .socket import socket
 from .plugin import plugin

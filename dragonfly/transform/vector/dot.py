@@ -9,8 +9,8 @@ def dot_modifier(self):
 
 def build_dot(i, ex, args):
     """Calculate the dot product between two vectors"""
-    i.a = hive.attribute("vector")
-    i.b = hive.attribute("vector")
+    i.a = hive.variable("vector")
+    i.b = hive.variable("vector")
 
     i.pull_a = hive.pull_in(i.a)
     i.pull_b = hive.pull_in(i.b)
@@ -18,7 +18,7 @@ def build_dot(i, ex, args):
     ex.a = hive.antenna(i.pull_a)
     ex.b = hive.antenna(i.pull_b)
 
-    i.result = hive.attribute("float")
+    i.result = hive.variable("float")
     i.pull_result = hive.pull_out(i.result)
     ex.result = hive.output(i.pull_result)
 

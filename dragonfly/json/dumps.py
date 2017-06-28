@@ -8,8 +8,8 @@ def build_dumps(i, ex, args):
     def do_dumps(self):
         self._result = dumps(self._object_)
 
-    i.result = hive.attribute('str')
-    i.object_ = hive.attribute()
+    i.result = hive.variable('str')
+    i.object_ = hive.variable()
 
     i.pull_result = hive.pull_out(i.result)
     ex.result = hive.output(i.pull_result)

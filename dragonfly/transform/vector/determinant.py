@@ -10,11 +10,11 @@ def length_modifier(self):
 
 def build_determinant(i, ex, args):
     """Calculate the determinant (length) of a vector"""
-    i.vector = hive.attribute("vector")
+    i.vector = hive.variable("vector")
     i.pull_vector = hive.pull_in(i.vector)
     ex.vector = hive.antenna(i.pull_vector)
 
-    i.result = hive.attribute("float")
+    i.result = hive.variable("float")
     i.pull_result = hive.pull_out(i.result)
     ex.result = hive.output(i.pull_result)
 

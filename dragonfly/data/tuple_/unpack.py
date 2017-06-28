@@ -7,12 +7,12 @@ def declare_unpack_tuple(meta_args):
 
 def build_unpack_tuple(i, ex, args, meta_args):
     """Unpack a tuple from individual inputs"""
-    i.tuple_ = hive.attribute('tuple')
+    i.tuple_ = hive.variable('tuple')
     i.push_tuple = hive.push_in(i.tuple_)
     ex.tuple_ = hive.antenna(i.push_tuple)
 
     for index, data_type in enumerate(meta_args.types):
-        attr = hive.attribute(data_type)
+        attr = hive.variable(data_type)
         setattr(i, "attr_{}".format(index), attr)
 
         pull_out = hive.pull_out(attr)

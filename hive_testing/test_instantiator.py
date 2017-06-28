@@ -7,7 +7,7 @@ from dragonfly.std import Variable
 
 
 def build_some_instance(i, ex, args):
-    i.some_var = hive.attribute("str")
+    i.some_var = hive.variable("str")
     ex.on_tick = dragonfly.event.OnTick()
     i.mod = hive.modifier(lambda self: print(self, self._some_var))
     hive.connect(ex.on_tick, i.mod)

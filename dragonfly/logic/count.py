@@ -14,7 +14,7 @@ def do_count_down(self):
 def build_count(i, ex, args):
     """Simple integer counter"""
     args.start_value = hive.parameter("int", 0)
-    ex.count = hive.attribute("int", args.start_value)
+    ex.count = hive.variable("int", args.start_value)
 
     i.do_count_up = hive.modifier(do_count_up)
     ex.increment = hive.entry(i.do_count_up)

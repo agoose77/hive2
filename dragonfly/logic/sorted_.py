@@ -8,13 +8,13 @@ def declare_sorted(meta_args):
 def build_sorted(i, ex, args, meta_args):
     """Sort an iterable and output list"""
     args.reverse = hive.parameter('bool', False)
-    i.reverse = hive.attribute('bool', args.reverse)
+    i.reverse = hive.variable('bool', args.reverse)
 
-    i.result = hive.attribute('list')
+    i.result = hive.variable('list')
     i.pull_result = hive.pull_out(i.result)
     ex.result = hive.output(i.pull_result)
 
-    i.value = hive.attribute(meta_args.data_type)
+    i.value = hive.variable(meta_args.data_type)
     i.pull_value = hive.pull_in(i.value)
     ex.value = hive.antenna(i.pull_value)
 

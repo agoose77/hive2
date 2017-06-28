@@ -21,7 +21,7 @@ def build_dog(i, ex, args, meta_args):
     print(args)
     
     args.name = hive.parameter("str")
-    ex.name = hive.attribute("str", args.name)
+    ex.name = hive.variable("str", args.name)
 
     for ix in range(meta_args.puppies):
         mod = hive.modifier(lambda h: print("Puppy {} barked".format(h.name)))

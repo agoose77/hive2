@@ -3,7 +3,7 @@ import hive
 
 def build_print(i, ex, args):
     """Output object to Python stdout"""
-    ex.value = hive.attribute()
+    ex.value = hive.variable()
     i.value_in = hive.push_in(ex.value)
     ex.value_in = hive.antenna(i.value_in)
 

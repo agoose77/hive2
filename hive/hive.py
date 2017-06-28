@@ -91,10 +91,6 @@ class RuntimeHive(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource
                         if instance is None:
                             continue
 
-                    for scls in Bee.__subclasses__():
-                        if bee.implements(scls):
-                            assert isinstance(bee, scls)
-
                     # Store runtime information on exported bee
                     if isinstance(instance, Nameable):
                         instance.register_alias(self, bee_name)
@@ -119,10 +115,6 @@ class RuntimeHive(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource
                         instance = instance.bind(self)
                         if instance is None:
                             continue
-
-                    # for scls in Bee.__subclasses__():
-                    #     if bee.implements(scls):
-                    #         assert isinstance(instance, scls), (instance, scls)
 
                     # Store runtime information on bee
                     if isinstance(instance, Nameable):

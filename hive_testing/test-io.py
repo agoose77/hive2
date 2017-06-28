@@ -77,7 +77,7 @@ def build_myhive(cls, i, ex, args):
     ex.a = hive.antenna(i.a_in)
     ex.b = hive.antenna(i.b_in)
 
-    ex.c_ = hive.attribute()
+    ex.c_ = hive.variable()
     i.c_out = hive.push_out(ex.c_)
     ex.c = hive.output(i.c_out)
 

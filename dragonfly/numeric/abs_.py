@@ -7,10 +7,10 @@ def declare_abs(meta_args):
 
 def build_abs(i, ex, args, meta_args):
     """Calculate the absolute abs() of a value"""
-    i.value = hive.attribute(meta_args.data_type)
+    i.value = hive.variable(meta_args.data_type)
     i.pull_value = hive.pull_in(i.value)
 
-    i.result = hive.attribute(meta_args.data_type)
+    i.result = hive.variable(meta_args.data_type)
     i.pull_result = hive.pull_out(i.result)
 
     ex.value = hive.antenna(i.pull_value)

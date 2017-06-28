@@ -7,9 +7,9 @@ def do_interpolation(self):
 
 def build_interpolate(i, ex, args):
     """Interpolate between two values by a floating point factor"""
-    i.min = hive.attribute("float")
-    i.max = hive.attribute("float")
-    i.factor = hive.attribute("float")
+    i.min = hive.variable("float")
+    i.max = hive.variable("float")
+    i.factor = hive.variable("float")
 
     i.pull_min = hive.pull_in(i.min)
     i.pull_max = hive.pull_in(i.max)
@@ -19,7 +19,7 @@ def build_interpolate(i, ex, args):
     ex.max = hive.antenna(i.pull_max)
     ex.value = hive.antenna(i.pull_factor)
 
-    i.result = hive.attribute("float")
+    i.result = hive.variable("float")
     i.pull_result = hive.pull_out(i.result)
     ex.result = hive.output(i.pull_result)
 

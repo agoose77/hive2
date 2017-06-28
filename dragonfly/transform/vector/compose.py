@@ -9,11 +9,11 @@ def build_compose(i, ex, args):
     """Compose a vector from its x, y and z components"""
     i.compose_vector = hive.modifier(compose_modifier)
 
-    i.result = hive.attribute("vector")
+    i.result = hive.variable("vector")
     i.pull_result = hive.pull_out(i.result)
 
     for name in ('x', 'y', 'z'):
-        attr = hive.attribute("float")
+        attr = hive.variable("float")
         setattr(i, name, attr)
 
         pull_in = hive.pull_in(attr)

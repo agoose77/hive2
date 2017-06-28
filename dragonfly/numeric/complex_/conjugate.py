@@ -3,8 +3,8 @@ import hive
 
 def build_conjugate(i, ex, args):
     """Calculate the complex conjugate of a complex number"""
-    i.value = hive.attribute('complex')
-    i.conjugate = hive.attribute('complex')
+    i.value = hive.variable('complex')
+    i.conjugate = hive.variable('complex')
 
     i.pull_conjugate = hive.pull_out(i.conjugate)
     ex.conjugate = hive.output(i.pull_conjugate)

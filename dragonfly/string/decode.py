@@ -4,13 +4,13 @@ import hive
 def build_decode(i, ex, args):
     """Decode bytes into a string"""
     args.encoding = hive.parameter('str', 'utf-8')
-    ex.encoding = hive.attribute('str', args.encoding)
+    ex.encoding = hive.variable('str', args.encoding)
 
-    i.string = hive.attribute("str")
+    i.string = hive.variable("str")
     i.pull_string = hive.pull_out(i.string)
     ex.string = hive.output(i.pull_string)
 
-    i.bytes_ = hive.attribute('bytes')
+    i.bytes_ = hive.variable('bytes')
     i.pull_bytes_ = hive.pull_in(i.bytes_)
     ex.bytes_ = hive.antenna(i.pull_bytes_)
 

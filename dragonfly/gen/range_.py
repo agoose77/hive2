@@ -3,9 +3,9 @@ import hive
 
 def build_range(i, ex, args):
     """A range iterator hive"""
-    i.min_value = hive.attribute("int")
-    i.max_value = hive.attribute("int")
-    i.step = hive.attribute("int")
+    i.min_value = hive.variable("int")
+    i.max_value = hive.variable("int")
+    i.step = hive.variable("int")
 
     i.pull_min_value = hive.pull_in(i.min_value)
     i.pull_max_value = hive.pull_in(i.max_value)
@@ -15,7 +15,7 @@ def build_range(i, ex, args):
     ex.max_value = hive.antenna(i.pull_max_value)
     ex.step = hive.antenna(i.pull_step)
 
-    i.iterator = hive.attribute("int")
+    i.iterator = hive.variable("int")
 
     def get_range(self):
         self._iterator = range(self._min_value, self._max_value, self._step)

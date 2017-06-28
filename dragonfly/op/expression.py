@@ -46,12 +46,12 @@ def build_expression(i, ex, args, meta_args):
     visitor.visit(ast_node)
     variable_names = visitor.undefined_ids
 
-    i.result = hive.attribute(meta_args.result_type)
+    i.result = hive.variable(meta_args.result_type)
     i.pull_result = hive.pull_out(i.result)
     ex.result = hive.output(i.pull_result)
 
     for name in variable_names:
-        attribute = hive.attribute(meta_args.result_type)
+        attribute = hive.variable(meta_args.result_type)
         setattr(i, name, attribute)
         pull_in = hive.pull_in(attribute)
         setattr(ex, name, hive.antenna(pull_in))

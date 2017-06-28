@@ -4,12 +4,12 @@ import hive
 def build_input(i, ex, args):
     """Get input from Python stdin"""
     args.message = hive.parameter("str", "")
-    ex.message = hive.attribute("str", args.message)
+    ex.message = hive.variable("str", args.message)
 
     i.message_in = hive.push_in(ex.message)
     ex.message_in = hive.antenna(i.message_in)
 
-    ex.value = hive.attribute("str")
+    ex.value = hive.variable("str")
     i.value_out = hive.pull_out(ex.value)
     ex.value_out = hive.output(i.value_out)
 

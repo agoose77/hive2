@@ -5,7 +5,7 @@ from .protocols import Stateful, Exportable, Bindable, Parameter, Nameable
 from .typing import is_valid_data_type
 
 
-class Attribute(Exportable, Bindable, Stateful, Nameable):
+class Variable(Exportable, Bindable, Stateful, Nameable):
     """Stateful data store object"""
 
     export_only = False
@@ -45,7 +45,7 @@ class Attribute(Exportable, Bindable, Stateful, Nameable):
         return self
 
     def __repr__(self):
-        return "Attribute({!r}, {!r})".format(self.data_type, self._start_value)
+        return "Variable({!r}, {!r})".format(self.data_type, self._start_value)
 
 
-attribute = ModeFactory("hive.attribute", build=Attribute)
+variable = ModeFactory("hive.variable", build=Variable)

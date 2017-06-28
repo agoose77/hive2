@@ -69,7 +69,7 @@ def build_dog(cls, i, ex, args):
 
     ex.woofs = h.property(cls, "woofs")
     ex.name = h.property(cls, "name")
-    ex.woofs2 = h.attribute(data_type="int", start_value=0)
+    ex.woofs2 = h.variable(data_type="int", start_value=0)
     ex.woof = h.entry(i.woof)
     ex.woofed = h.hook(i.woofed)
     ex.bark = h.hook(i.bark)
