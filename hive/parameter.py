@@ -1,10 +1,13 @@
-from .manager import ContextFactory
+from .manager import ModeFactory
 from .mixins import Parameter
 from .typing import is_valid_data_type
 
 
 class HiveParameter(Parameter):
     def __init__(self, data_type='', start_value=Parameter.NoValue, options=None):
+        if not is_valid_data_type(data_type):
+            raise ValueError(data_type)
+
         self.data_type = data_type
         self.start_value = start_value
         self.options = options
@@ -17,4 +20,4 @@ class HiveParameter(Parameter):
         return "<{}: {}>".format(self.__class__.__name__, self.start_value)
 
 
-parameter = ContextFactory("hive.parameter", declare_mode_cls=HiveParameter, build_mode_cls=HiveParameter)
+parameter = ModeFactory("hive.parameter", declare=HiveParameter, build=HiveParameter)

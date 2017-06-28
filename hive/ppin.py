@@ -3,11 +3,10 @@ from functools import partial
 from .annotations import get_argument_types
 from .classes import Pusher
 from .exception import HiveConnectionError
-from .manager import get_mode, get_building_hive, memoize
+from .manager import get_building_hive, memoize, ModeFactory
 from .mixins import (Antenna, Output, Stateful, ConnectTarget, TriggerSource, TriggerTarget, Bee, Bindable, Callable,
                      Nameable)
-from .typing import data_type_is_untyped
-from .typing import data_types_match, MatchFlags
+from .typing import data_type_is_untyped, data_types_match, MatchFlags, is_valid_data_type
 
 
 def get_callable_data_type(target):
@@ -20,6 +19,9 @@ def get_callable_data_type(target):
 
 class PPInBase(Antenna, ConnectTarget, TriggerSource, Bindable, Nameable):
     def __init__(self, target, data_type='', run_hive=None):
+        if not is_valid_data_type(data_type):
+            raise ValueError(data_type)
+
         # Once bound, hive Method object is resolved to a function, not bee
         assert isinstance(target, Stateful) or isinstance(target, Callable) or callable(target), target
 
@@ -122,17 +124,18 @@ class PPInBee(Antenna, ConnectTarget, TriggerSource):
     mode = None
 
     def __init__(self, target, data_type=''):
-        is_stateful = isinstance(target, Stateful)
+        if not is_valid_data_type(data_type):
+            raise ValueError(data_type)
 
+        is_stateful = isinstance(target, Stateful)
         if not (is_stateful or target.implements(Callable)):
             raise TypeError("Target must implement Callable or Stateful protocol")
 
         if is_stateful:
             data_type = target.data_type
 
-        else:
-            if data_type_is_untyped(data_type):
-                data_type = get_callable_data_type(target)
+        elif data_type_is_untyped(data_type):
+            data_type = get_callable_data_type(target)
 
         self._hive_object_cls = get_building_hive()
         self.target = target
@@ -169,17 +172,5 @@ class PullInBee(PPInBee, TriggerTarget):
     mode = "pull"
 
 
-def push_in(target, data_type=''):
-    if get_mode() == "immediate":
-        return PushIn(target, data_type=data_type)
-
-    else:
-        return PushInBee(target, data_type=data_type)
-
-
-def pull_in(target, data_type=''):
-    if get_mode() == "immediate":
-        return PullIn(target, data_type=data_type)
-
-    else:
-        return PullInBee(target, data_type=data_type)
+push_in = ModeFactory("hive.push_in", immediate=PushIn, build=PushInBee)
+pull_in = ModeFactory("hive.pull_in", immediate=PullIn, build=PullInBee)

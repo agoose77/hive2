@@ -1,5 +1,5 @@
 from .classes import HiveBee
-from .manager import ContextFactory, memoize
+from .manager import ModeFactory, memoize
 from .mixins import TriggerTarget, ConnectTarget, TriggerSource, Callable, Bee, Bindable, Nameable
 from .exception import HiveConnectionError
 
@@ -71,4 +71,4 @@ class ModifierBee(TriggerTarget, ConnectTarget, Callable, HiveBee):
         return False
 
 
-modifier = ContextFactory("hive.modifier", immediate_mode_cls=Modifier, build_mode_cls=ModifierBee)
+modifier = ModeFactory("hive.modifier", immediate=Modifier, build=ModifierBee)

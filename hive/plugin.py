@@ -1,4 +1,4 @@
-from .manager import get_building_hive, memoize, ContextFactory
+from .manager import get_building_hive, memoize, ModeFactory
 from .mixins import Plugin, Socket, ConnectSource, Exportable, Callable, Bee, Bindable, Nameable
 from .policies import MultipleOptional
 from .exception import HiveConnectionError
@@ -7,10 +7,10 @@ from .typing import is_valid_data_type
 
 class HivePlugin(Plugin, ConnectSource, Bindable, Exportable, Nameable):
     def __init__(self, func, data_type='', run_hive=None):
-        assert callable(func) or isinstance(func, Callable), func
-
         if not is_valid_data_type(data_type):
-            raise ValueError("Invalid type string")
+            raise ValueError(data_type)
+
+        assert callable(func) or isinstance(func, Callable), func
 
         self._run_hive = run_hive
         self._func = func
@@ -57,6 +57,9 @@ class HivePlugin(Plugin, ConnectSource, Bindable, Exportable, Nameable):
 
 class HivePluginBee(Plugin, ConnectSource, Exportable):
     def __init__(self, target, identifier=None, data_type='', policy=None, export_to_parent=False):
+        if not is_valid_data_type(data_type):
+            raise ValueError(data_type)
+
         self._hive_object_cls = get_building_hive()
         self._target = target
 
@@ -93,4 +96,4 @@ class HivePluginBee(Plugin, ConnectSource, Exportable):
             return self
 
 
-plugin = ContextFactory("hive.plugin", immediate_mode_cls=HivePlugin, build_mode_cls=HivePluginBee)
+plugin = ModeFactory("hive.plugin", immediate=HivePlugin, build=HivePluginBee)

@@ -3,14 +3,17 @@ from functools import partial
 from .annotations import get_return_type
 from .classes import Pusher
 from .exception import HiveConnectionError
-from .manager import get_mode, get_building_hive, memoize
+from .manager import ModeFactory, get_building_hive, memoize
 from .mixins import (Antenna, Output, Stateful, Bee, Bindable, Callable, ConnectSource, TriggerSource, TriggerTarget,
                      Socket, Nameable)
-from .typing import data_type_is_untyped, data_types_match, MatchFlags
+from .typing import data_type_is_untyped, data_types_match, MatchFlags, is_valid_data_type
 
 
 class PPOutBase(Output, ConnectSource, TriggerSource, Bindable, Nameable):
     def __init__(self, target, data_type='', run_hive=None):
+        if not is_valid_data_type(data_type):
+            raise ValueError(data_type)
+
         is_stateful = isinstance(target, Stateful)
 
         if not (is_stateful or callable(target) or target.implements(Callable)):
@@ -122,6 +125,9 @@ class PPOutBee(Output, ConnectSource, TriggerSource):
     mode = None
 
     def __init__(self, target, data_type=''):
+        if not is_valid_data_type(data_type):
+            raise ValueError(data_type)
+
         is_stateful = isinstance(target, Stateful)
 
         assert is_stateful or callable(target) or target.implements(Callable)  # TODO: nice error message
@@ -129,9 +135,8 @@ class PPOutBee(Output, ConnectSource, TriggerSource):
         if is_stateful:
             data_type = target.data_type
 
-        else:
-            if data_type_is_untyped(data_type):
-                data_type = get_return_type(target)
+        elif data_type_is_untyped(data_type):
+            data_type = get_return_type(target)
 
         self._hive_object_cls = get_building_hive()
         self.data_type = data_type
@@ -171,17 +176,5 @@ class PullOutBee(PPOutBee):
     mode = "pull"
 
 
-def push_out(target, data_type=''):
-    if get_mode() == "immediate":
-        return PushOut(target, data_type=data_type)
-
-    else:
-        return PushOutBee(target, data_type=data_type)
-
-
-def pull_out(target, data_type=''):
-    if get_mode() == "immediate":
-        return PullOut(target, data_type=data_type)
-
-    else:
-        return PullOutBee(target, data_type=data_type)
+push_out = ModeFactory("hive.push_out", immediate=PushOut, build=PushOutBee)
+pull_out = ModeFactory("hive.pull_out", immediate=PullOut, build=PullOutBee)

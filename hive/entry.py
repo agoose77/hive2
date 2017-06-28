@@ -1,5 +1,5 @@
 from .mixins import Bee, TriggerTarget, Exportable
-from .manager import get_building_hive, ContextFactory
+from .manager import get_building_hive, ModeFactory
 
 
 class Entry(Exportable, Bee):
@@ -24,4 +24,4 @@ class Entry(Exportable, Bee):
         return target
 
 
-entry = ContextFactory("hive.entry", build_mode_cls=Entry)
+entry = ModeFactory("hive.entry", build=Entry)

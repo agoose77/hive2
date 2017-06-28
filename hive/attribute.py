@@ -1,6 +1,6 @@
 from weakref import WeakKeyDictionary
 
-from .manager import ContextFactory, get_building_hive, memoize
+from .manager import ModeFactory, get_building_hive, memoize
 from .mixins import Stateful, Exportable, Bindable, Parameter, Nameable
 from .typing import is_valid_data_type
 
@@ -11,6 +11,9 @@ class Attribute(Stateful, Bindable, Exportable, Nameable):
     export_only = False
 
     def __init__(self, data_type='', start_value=None):
+        if not is_valid_data_type(data_type):
+            raise ValueError(data_type)
+
         self._hive_object_cls = get_building_hive()
 
         self.data_type = data_type
@@ -39,4 +42,4 @@ class Attribute(Stateful, Bindable, Exportable, Nameable):
         return self
 
 
-attribute = ContextFactory("hive.attribute", build_mode_cls=Attribute)
+attribute = ModeFactory("hive.attribute", build=Attribute)

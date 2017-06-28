@@ -1,4 +1,4 @@
-from .manager import ContextFactory, get_building_hive, memoize
+from .manager import ModeFactory, get_building_hive, memoize
 from .mixins import Output, Exportable, Bee
 
 
@@ -24,4 +24,4 @@ class HiveOutput(Output, Exportable):
         return target
 
 
-output = ContextFactory("hive.output", build_mode_cls=HiveOutput)
+output = ModeFactory("hive.output", build=HiveOutput)

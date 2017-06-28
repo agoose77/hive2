@@ -1,3 +1,3 @@
 from .contexts import *
-from .factory import ContextFactory
+from .factory import ModeFactory
 from .memoize import memoize

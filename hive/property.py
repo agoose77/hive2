@@ -10,6 +10,9 @@ class Property(Stateful, Bindable, Exportable, Nameable):
     export_only = False
 
     def __init__(self, cls, attr, data_type, start_value):
+        if not is_valid_data_type(data_type):
+            raise ValueError(data_type)
+
         self._hive_object_cls = get_building_hive()
         self._cls = cls
         self._attr = attr
@@ -47,7 +50,6 @@ class Property(Stateful, Bindable, Exportable, Nameable):
 
         start_value = self.start_value
         if start_value is not None or not hasattr(instance, self._attr):
-
             if isinstance(start_value, Parameter):
                 start_value = run_hive._hive_object._hive_args_frozen.get_parameter_value(start_value)
 

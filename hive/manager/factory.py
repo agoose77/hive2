@@ -1,7 +1,7 @@
 from .contexts import get_mode, hive_modes
 
 
-class ContextFactory(object):
+class ModeFactory(object):
     """Return appropriate class instance depending upon execution mode"""
 
     def __init__(self, name, **kwargs):
@@ -9,8 +9,7 @@ class ContextFactory(object):
 
         self.context_dict = ctx = {}
 
-        for mode_name, cls in kwargs.items():
-            mode = mode_name.replace("_mode_cls", "")
+        for mode, cls in kwargs.items():
             assert mode in hive_modes, "Invalid argument for class context factory: {}".format(mode)
             ctx[mode] = cls
 

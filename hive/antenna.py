@@ -1,4 +1,4 @@
-from .manager import get_building_hive, ContextFactory
+from .manager import get_building_hive, ModeFactory
 from .mixins import Bee, Antenna, Exportable
 
 
@@ -25,4 +25,4 @@ class HiveAntenna(Antenna, Exportable):
         return target
 
 
-antenna = ContextFactory("hive.antenna", build_mode_cls=HiveAntenna)
+antenna = ModeFactory("hive.antenna", build=HiveAntenna)
