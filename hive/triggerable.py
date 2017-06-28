@@ -7,7 +7,7 @@ class Triggerable(Bindable, TriggerTarget, ConnectTarget, Callable, Nameable):
     """Callable Python snippet"""
 
     def __init__(self, func, run_hive=None):
-        assert callable(func) or isinstance(func, Callable), func
+        assert callable(func), func
         self._func = func
         self._run_hive = run_hive
 
