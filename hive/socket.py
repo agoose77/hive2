@@ -6,7 +6,7 @@ from .policies import SingleRequired
 from .typing import is_valid_data_type
 
 
-class HiveSocket(Socket, ConnectTarget, Bindable, Exportable, Nameable):
+class HiveSocket(Bee, Socket, ConnectTarget, Bindable, Exportable, Nameable):
     def __init__(self, func, data_type="", run_hive=None):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
@@ -54,7 +54,7 @@ class HiveSocket(Socket, ConnectTarget, Bindable, Exportable, Nameable):
         self._func(plugin)
 
 
-class HiveSocketBee(Socket, ConnectTarget, Exportable):
+class HiveSocketBuilder(Bee, Socket, ConnectTarget, Exportable):
     def __init__(self, target, identifier=None, data_type="", policy=None, export_to_parent=False):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
@@ -95,4 +95,4 @@ class HiveSocketBee(Socket, ConnectTarget, Exportable):
             return self
 
 
-socket = ModeFactory("hive.socket", immediate=HiveSocket, build=HiveSocketBee)
+socket = ModeFactory("hive.socket", immediate=HiveSocket, build=HiveSocketBuilder)

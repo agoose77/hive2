@@ -6,7 +6,7 @@ from .policies import MultipleOptional
 from .typing import is_valid_data_type
 
 
-class HivePlugin(Plugin, ConnectSource, Bindable, Exportable, Nameable):
+class HivePlugin(Bee, Plugin, ConnectSource, Bindable, Exportable, Nameable):
     def __init__(self, func, data_type='', run_hive=None):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
@@ -56,7 +56,7 @@ class HivePlugin(Plugin, ConnectSource, Bindable, Exportable, Nameable):
             return self
 
 
-class HivePluginBee(Plugin, ConnectSource, Exportable):
+class HivePluginBuilder(Bee, Plugin, ConnectSource, Exportable):
     def __init__(self, target, identifier=None, data_type='', policy=None, export_to_parent=False):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
@@ -97,4 +97,4 @@ class HivePluginBee(Plugin, ConnectSource, Exportable):
             return self
 
 
-plugin = ModeFactory("hive.plugin", immediate=HivePlugin, build=HivePluginBee)
+plugin = ModeFactory("hive.plugin", immediate=HivePlugin, build=HivePluginBuilder)

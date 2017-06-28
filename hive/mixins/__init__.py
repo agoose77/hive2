@@ -77,11 +77,11 @@ class Exportable(ABC):
         raise NotImplementedError
 
 
-class Plugin(Bee):
+class Plugin:
     pass
 
 
-class Socket(Bee):
+class Socket:
     pass
 
 
