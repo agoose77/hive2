@@ -1,12 +1,11 @@
-from .contexts import get_building_hive
 from .exception import HiveConnectionError
 from .manager import memoize, ModeFactory
-from .mixins import Plugin, Socket, ConnectSource, Exportable, Callable, Bee, Bindable, Nameable
 from .policies import MultipleOptional
+from .protocols import Plugin, Socket, ConnectSource, Exportable, Callable, Bee, Bindable, Nameable
 from .typing import is_valid_data_type
 
 
-class HivePlugin(Bee, Plugin, ConnectSource, Bindable, Exportable, Nameable):
+class HivePlugin(Exportable, Bindable, Plugin, ConnectSource, Nameable):
     def __init__(self, func, data_type='', run_hive=None):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
@@ -17,6 +16,8 @@ class HivePlugin(Bee, Plugin, ConnectSource, Bindable, Exportable, Nameable):
         self._func = func
 
         self.data_type = data_type
+        super().__init__()
+
 
     def __repr__(self):
         return "<Plugin: {}>".format(self._func)
@@ -56,12 +57,13 @@ class HivePlugin(Bee, Plugin, ConnectSource, Bindable, Exportable, Nameable):
             return self
 
 
-class HivePluginBuilder(Bee, Plugin, ConnectSource, Exportable):
+class HivePluginBuilder(Exportable, Plugin, ConnectSource):
     def __init__(self, target, identifier=None, data_type='', policy=None, export_to_parent=False):
+        super().__init__()
+
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
 
-        self._hive_object_cls = get_building_hive()
         self._target = target
 
         self.identifier = identifier

@@ -57,7 +57,8 @@ current_directory = os.path.split(os.path.abspath(__file__))[0]
 sys.path.append(current_directory + "/" + "..")
 
 import hive
-
+import logging
+logging.getLogger().setLevel(logging.INFO)
 
 class SomeClass(object):
 

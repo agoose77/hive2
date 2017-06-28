@@ -28,3 +28,6 @@ logging_config = {
 }
 
 logging.config.dictConfig(logging_config)
+
+
+# TODO cleanup logging throughout

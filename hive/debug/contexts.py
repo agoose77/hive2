@@ -4,7 +4,7 @@ from weakref import ref
 from ..compatability import cache
 from ..ppin import PullIn
 from ..ppout import PushOut
-from ..mixins import Nameable
+from ..protocols import Nameable
 
 from .bees import DebugPushOutTarget, DebugPretriggerTarget, DebugPullInSource, DebugTriggerTarget
 

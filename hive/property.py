@@ -1,12 +1,12 @@
 from weakref import WeakSet
 
-from .mixins import Stateful, Exportable, Bindable, Parameter, Nameable, Bee
-from .contexts import get_mode, get_building_hive
-from .typing import is_valid_data_type
+from .contexts import get_mode
 from .manager import memoize
+from .protocols import Stateful, Exportable, Bindable, Parameter, Nameable
+from .typing import is_valid_data_type
 
 
-class Property(Bee, Stateful, Bindable, Exportable, Nameable):
+class Property(Exportable, Bindable, Stateful, Nameable):
     """Interface to bind class attributes"""
 
     export_only = False
@@ -15,13 +15,14 @@ class Property(Bee, Stateful, Bindable, Exportable, Nameable):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
 
-        self._hive_object_cls = get_building_hive()
         self._cls = cls
         self._attr = attr
         self._bound = WeakSet()
 
         self.data_type = data_type
         self.start_value = start_value
+
+        super().__init__()
 
     def _hive_stateful_getter(self, run_hive):
         cls = self._cls
@@ -45,9 +46,9 @@ class Property(Bee, Stateful, Bindable, Exportable, Nameable):
     @memoize
     def bind(self, run_hive):
         self._bound.add(run_hive)
-        
+
         cls = self._cls
-        assert cls in run_hive._hive_build_class_to_instance, cls #TODO, DEBUG can remove?
+        assert cls in run_hive._hive_build_class_to_instance, cls  # TODO, DEBUG can remove?
         instance = run_hive._hive_build_class_to_instance[cls]
 
         start_value = self.start_value

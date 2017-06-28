@@ -1,12 +1,11 @@
-from .contexts import get_building_hive
 from .exception import HiveConnectionError
 from .manager import memoize, ModeFactory
-from .mixins import ConnectTarget, Plugin, Socket, Callable, Exportable, Bee, Bindable, Nameable
 from .policies import SingleRequired
+from .protocols import ConnectTarget, Plugin, Socket, Callable, Exportable, Bee, Bindable, Nameable
 from .typing import is_valid_data_type
 
 
-class HiveSocket(Bee, Socket, ConnectTarget, Bindable, Exportable, Nameable):
+class HiveSocket(Exportable, Bindable, Socket, ConnectTarget, Nameable):
     def __init__(self, func, data_type="", run_hive=None):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
@@ -16,6 +15,8 @@ class HiveSocket(Bee, Socket, ConnectTarget, Bindable, Exportable, Nameable):
         self._func = func
 
         self.data_type = data_type
+
+        super().__init__()
 
     def __repr__(self):
         return "<Socket: {}>".format(self._func)
@@ -54,12 +55,11 @@ class HiveSocket(Bee, Socket, ConnectTarget, Bindable, Exportable, Nameable):
         self._func(plugin)
 
 
-class HiveSocketBuilder(Bee, Socket, ConnectTarget, Exportable):
+class HiveSocketBuilder(Exportable, Socket, ConnectTarget):
     def __init__(self, target, identifier=None, data_type="", policy=None, export_to_parent=False):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
 
-        self._hive_object_cls = get_building_hive()
         self._target = target
 
         self.identifier = identifier
@@ -70,6 +70,8 @@ class HiveSocketBuilder(Bee, Socket, ConnectTarget, Exportable):
             policy = SingleRequired
 
         self.policy = policy
+
+        super().__init__()
 
     def __repr__(self):
         return "<Socket: {}>".format(self._target)

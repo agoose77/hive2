@@ -3,11 +3,11 @@ from collections import defaultdict
 from .classes import HiveInternalWrapper, HiveExportableWrapper, HiveArgsWrapper, HiveMetaArgsWrapper, HiveClassProxy
 from .compatability import next, validate_signature
 from .connect import connect, ConnectionCandidate
-from .contexts import (bee_register_context, get_mode, hive_mode_as, building_hive_as, \
-                       run_hive_as, get_validation_enabled)
+from .contexts import (bee_register_context, get_mode, hive_mode_as, building_hive_as, run_hive_as,
+                       get_validation_enabled, get_building_hive)
 from .manager import memoize
-from .mixins import *
 from .policies import MatchmakingPolicyError
+from .protocols import *
 from .resolve_bee import ResolveBee
 from .typing import MatchFlags, data_types_match
 
@@ -35,7 +35,7 @@ class RuntimeHiveInstantiator(Bindable):
         return self._hive_object.instantiate()
 
 
-class RuntimeHive(ConnectSourceDerived, ConnectTargetDerived, TriggerSource, TriggerTarget, Nameable):
+class RuntimeHive(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource, TriggerTarget, Nameable):
     """Unique Hive instance that is created at runtime for a Hive object.
 
     Lightweight instantiation is supported through caching performed by the HiveObject instance.
@@ -49,6 +49,8 @@ class RuntimeHive(ConnectSourceDerived, ConnectTargetDerived, TriggerSource, Tri
     _drones = None
 
     def __init__(self, hive_object, builders):
+        super().__init__()
+
         self._hive_bee_name = hive_object._hive_bee_name
         self._hive_object = hive_object
         self._hive_build_class_to_instance = {}
@@ -198,8 +200,7 @@ class HiveObject(Exportable, ConnectSourceDerived, ConnectTargetDerived, Trigger
     export_only = False
 
     def __init__(self, *args, **kwargs):
-        # HiveObject class for hive that contains this hive (not self.__class__)
-        self._hive_object_cls = get_building_hive()
+        super().__init__()
 
         # Automatically import parent sockets and plugins
         self._hive_allow_import_namespace = kwargs.pop("import_namespace", True)
@@ -224,7 +225,7 @@ class HiveObject(Exportable, ConnectSourceDerived, ConnectTargetDerived, Trigger
                     raise TypeError("{}.{}".format(builder_cls.__name__, err.args[0]))
 
         # Create ResolveBee wrappers for external interface
-        with hive_mode_as("build"):
+        with building_hive_as(self.__class__), hive_mode_as("build"):
             external_bees = self.__class__._hive_ex
             for bee_name, bee in external_bees._items:
                 target = bee.export()
@@ -417,10 +418,10 @@ def validate_internal_name(attr_name):
 class MetaHivePrimitive(object):
     """Primitive container to instantiate Hive with particular meta arguments"""
 
-    _hive_object_cls = None
+    _whive_object_cls = None
 
     def __new__(cls, *args, **kwargs):
-        hive_object = cls._hive_object_cls(*args, **kwargs)
+        hive_object = cls._whive_object_cls(*args, **kwargs)
 
         if get_mode() == "immediate":
             return hive_object.instantiate()

@@ -1,16 +1,13 @@
 from .manager import memoize
-from .contexts import get_building_hive
-from .mixins import Bee, Bindable, Exportable, Nameable
+from .protocols import Bindable, Exportable, Nameable
 
 
-class BindableResolveBee(Bee, Bindable, Nameable):
-
+class BindableResolveBee(Bindable, Nameable):
     def __init__(self, unbound_run_hive, bee):
+        super().__init__()
+
         self._bee = bee
         self._unbound_run_hive = unbound_run_hive
-
-        # For inspection purposes
-        self._hive_object_cls = get_building_hive()
 
         # Support ResolveBees used for hive_objects
         if hasattr(bee, "_hive_object"):
@@ -36,7 +33,8 @@ class ResolveBee(Exportable):
     def __init__(self, bee, own_hive_object):
         self._bee = bee
         self._own_hive_object = own_hive_object
-        self._hive_object_cls = get_building_hive()
+
+        super().__init__()
 
     def __getattr__(self, attr):
         result = getattr(self._bee, attr)

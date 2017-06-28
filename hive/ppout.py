@@ -2,15 +2,14 @@ from functools import partial
 
 from .annotations import get_return_type
 from .classes import Pusher
-from .contexts import get_building_hive
 from .exception import HiveConnectionError
 from .manager import ModeFactory, memoize
-from .mixins import (Antenna, Output, Stateful, Bee, Bindable, Callable, ConnectSource, TriggerSource, TriggerTarget,
-                     Socket, Nameable, Bee)
+from .protocols import (Antenna, Output, Stateful, Bindable, Callable, ConnectSource, TriggerSource, TriggerTarget,
+                        Socket, Nameable, Bee)
 from .typing import data_type_is_untyped, data_types_match, MatchFlags, is_valid_data_type
 
 
-class PPOutBase(Bee, Output, ConnectSource, TriggerSource, Bindable, Nameable):
+class PPOutBase(Bindable, Output, ConnectSource, TriggerSource, Nameable):
     def __init__(self, target, data_type='', run_hive=None):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
@@ -36,6 +35,8 @@ class PPOutBase(Bee, Output, ConnectSource, TriggerSource, Bindable, Nameable):
         self._run_hive = run_hive
         self._trigger = Pusher(self)
         self._pretrigger = Pusher(self)
+
+        super().__init__()
 
     @memoize
     def bind(self, run_hive):
@@ -140,9 +141,10 @@ class PPOutBuilder(Bee, Output, ConnectSource, TriggerSource):
         elif data_type_is_untyped(data_type):
             data_type = get_return_type(target)
 
-        self._hive_object_cls = get_building_hive()
         self.data_type = data_type
         self.target = target
+
+        super().__init__()
 
     @memoize
     def getinstance(self, hive_object):

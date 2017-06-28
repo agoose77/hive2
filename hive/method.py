@@ -1,9 +1,8 @@
 from inspect import isclass
 
 from .annotations import update_wrapper
-from .contexts import get_building_hive
 from .manager import memoize
-from .mixins import Bindable, Callable, Exportable, Nameable
+from .protocols import Bindable, Callable, Exportable, Nameable
 
 
 class Method(Bindable, Callable, Exportable, Nameable):
@@ -15,9 +14,10 @@ class Method(Bindable, Callable, Exportable, Nameable):
 
         self._builder_cls = builder_cls
         self._func = func
-        self._hive_object_cls = get_building_hive()
 
         update_wrapper(self, func)
+
+        super().__init__()
 
     def __repr__(self):
         return "<{}: {}>".format(self.__class__.__name__, self._func.__qualname__)

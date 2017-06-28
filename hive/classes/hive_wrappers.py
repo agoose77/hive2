@@ -1,6 +1,6 @@
 from collections import OrderedDict, namedtuple
 
-from .. mixins import Bee, Exportable, Parameter
+from .. protocols import Bee, Exportable, Parameter
 from .. compatability import next
 
 
@@ -111,12 +111,12 @@ class HiveInternalWrapper(HiveObjectWrapper):
             raise TypeError(self._format_message("attribute '{}' must not be Exportable; Exportables must be added to ex"
                                                  .format(name)))
 
-        if value._hive_object_cls is None:
+        if value._parent_hive_object_cls is None:
             print(value, type(value))
             raise AttributeError(self._format_message("attribute '{}' must be a Bee instance defined inside the builder"
                                                     "function".format(name)))
 
-        if value._hive_object_cls is not self._hive_object_cls:
+        if value._parent_hive_object_cls is not self._hive_object_cls:
             raise AttributeError(self._format_message("attribute '{}' cannot contain a Bee built by a different hive"
                                                       .format(name)))
 
@@ -136,11 +136,11 @@ class HiveExportableWrapper(HiveObjectWrapper):
             raise TypeError(self._format_message("attribute '{}' must be Exportable; Exportables must be added to ex"
                                                  .format(name)))
 
-        if value._hive_object_cls is None:
+        if value._parent_hive_object_cls is None:
             raise AttributeError(self._format_message("attribute '{}' must be a Bee instance defined inside the builder"
-                                                    "function".format(name)))
+                                                    " function".format(name)))
 
-        if value._hive_object_cls is not self._hive_object_cls:
+        if value._parent_hive_object_cls is not self._hive_object_cls:
             raise AttributeError(self._format_message("attribute '{}' cannot contain a Bee built by a different hive"
                                                       .format(name)))
 

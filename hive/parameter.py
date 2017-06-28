@@ -1,5 +1,5 @@
 from .manager import ModeFactory
-from .mixins import Parameter
+from .protocols import Parameter
 from .typing import is_valid_data_type
 
 

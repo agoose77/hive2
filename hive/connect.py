@@ -2,14 +2,13 @@ from collections import namedtuple
 from itertools import product
 from operator import itemgetter
 
-from .classes import HiveBee
-from .debug import get_debug_context
 from .contexts import get_mode, register_bee
+from .debug import get_debug_context
+from .exception import MatchFailedError
 from .manager import memoize
-from .mixins import ConnectSourceBase, ConnectSourceDerived, ConnectTargetBase, ConnectTargetDerived, Bee, Bindable, \
+from .protocols import ConnectSourceBase, ConnectSourceDerived, ConnectTargetBase, ConnectTargetDerived, Bee, Bindable, \
     Exportable
 from .typing import get_match_score, find_matching_ast, MatchFlags, parse_type_string
-from .exception import MatchFailedError
 
 ConnectionCandidate = namedtuple("ConnectionCandidate", ("bee_name", "data_type"))
 
@@ -21,7 +20,7 @@ def sorted_candidates_from_scored(scored_candidates):
     
     :param scored_candidates: sequence of (score, source, target) items
     """
-    return tuple(x[1:] for x in sorted(scored_candidates,key=_first_item, reverse=True))
+    return tuple(x[1:] for x in sorted(scored_candidates, key=_first_item, reverse=True))
 
 
 def find_connection_candidates(source_hive, target_hive):
@@ -155,8 +154,11 @@ class Connection(Bindable):
         self.source = source
         self.target = target
 
+        super().__init__()
+
+
     def __repr__(self):
-        return "<Connection {} ~> {}>".format(self.source.repr(), self.target)
+        return "<Connection {} ~> {}>".format(self.source, self.target)
 
     @memoize
     def bind(self, run_hive):
@@ -172,12 +174,12 @@ class Connection(Bindable):
         return build_connection(source, target)
 
 
-class ConnectionBee(HiveBee):
+class ConnectionBee(Bee):
     def __init__(self, source, target):
-        super(ConnectionBee, self).__init__()
-
         self.source = source
         self.target = target
+
+        super().__init__()
 
     def __repr__(self):
         return "<{}: ({}, {})>".format(self.__class__.__name__, *self.args)

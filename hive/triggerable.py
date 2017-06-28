@@ -1,10 +1,9 @@
-from .classes import HiveBee
-from .manager import ModeFactory, memoize
-from .mixins import TriggerTarget, ConnectTarget, TriggerSource, Callable, Bee, Bindable, Nameable
 from .exception import HiveConnectionError
+from .manager import ModeFactory, memoize
+from .protocols import TriggerTarget, ConnectTarget, TriggerSource, Callable, Bee, Bindable, Nameable
 
 
-class Triggerable(TriggerTarget, ConnectTarget, Bindable, Callable, Nameable):
+class Triggerable(Bindable, TriggerTarget, ConnectTarget, Callable, Nameable):
     """Callable Python snippet"""
 
     def __init__(self, func, run_hive=None):
@@ -12,13 +11,15 @@ class Triggerable(TriggerTarget, ConnectTarget, Bindable, Callable, Nameable):
         self._func = func
         self._run_hive = run_hive
 
+        super().__init__()
+
     def __call__(self):
         self.trigger()
 
     def trigger(self):
         # TODO: exception handling hooks
         self._func()
-        
+
     @memoize
     def bind(self, run_hive):
         if self._run_hive:
@@ -33,7 +34,7 @@ class Triggerable(TriggerTarget, ConnectTarget, Bindable, Callable, Nameable):
 
     def _hive_trigger_target(self):
         return self.trigger
-    
+
     def _hive_is_connectable_target(self, source):
         if not isinstance(source, TriggerSource):
             raise HiveConnectionError("Source does not implement TriggerSource: {}".format(source))
@@ -42,18 +43,18 @@ class Triggerable(TriggerTarget, ConnectTarget, Bindable, Callable, Nameable):
         pass
 
 
-class TriggerableBee(TriggerTarget, ConnectTarget, Callable, HiveBee):
+class TriggerableBee(Bee, TriggerTarget, ConnectTarget, Callable):
     """Callable Python snippet"""
 
     def __init__(self, func):
-        super(TriggerTarget, self).__init__()
-
         self._func = func
+
+        super().__init__()
 
     @memoize
     def getinstance(self, hive_object):
         func = self._func
-        if isinstance(func, Bee): 
+        if isinstance(func, Bee):
             func = func.getinstance(hive_object)
 
         return Triggerable(func)

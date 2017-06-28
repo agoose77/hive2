@@ -1,9 +1,8 @@
-from .contexts import get_building_hive
 from .manager import ModeFactory
-from .mixins import Bee, Antenna, Exportable
+from .protocols import Bee, Antenna, Exportable
 
 
-class HiveAntenna(Bee, Antenna, Exportable):
+class HiveAntenna(Exportable, Antenna):
     """Exportable proxy for Antenna bees"""
 
     def __init__(self, target):
@@ -11,8 +10,8 @@ class HiveAntenna(Bee, Antenna, Exportable):
         # TODO: IMP want something that resolves to an antenna
         assert target.implements(Antenna), target
 
-        self._hive_object_cls = get_building_hive()
         self._target = target
+        super().__init__()
 
     def __repr__(self):
         return "<{}: {}>".format(self.__class__.__name__, self._target)

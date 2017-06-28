@@ -1,21 +1,20 @@
 from weakref import WeakKeyDictionary
 
-from .contexts import get_building_hive
 from .manager import ModeFactory, memoize
-from .mixins import Stateful, Exportable, Bindable, Parameter, Nameable, Bee
+from .protocols import Stateful, Exportable, Bindable, Parameter, Nameable
 from .typing import is_valid_data_type
 
 
-class Attribute(Bee, Stateful, Bindable, Exportable, Nameable):
+class Attribute(Exportable, Bindable, Stateful, Nameable):
     """Stateful data store object"""
 
     export_only = False
 
     def __init__(self, data_type='', start_value=None):
+        super().__init__()
+
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
-
-        self._hive_object_cls = get_building_hive()
 
         self.data_type = data_type
         self.start_value = start_value

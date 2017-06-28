@@ -13,7 +13,7 @@ class TriggerSourceBase(Connectable):
 
 class TriggerSource(TriggerSourceBase):
 
-    def _hive_trigger_source(self):
+    def _hive_trigger_source(self, target):
         raise NotImplementedError
 
     def _hive_pretrigger_source(self):
@@ -22,5 +22,5 @@ class TriggerSource(TriggerSourceBase):
 
 class TriggerSourceDerived(TriggerSourceBase):
 
-    def _hive_get_trigger_sarget(self):
+    def _hive_get_trigger_source(self):
         raise NotImplementedError

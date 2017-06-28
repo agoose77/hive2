@@ -1,7 +1,6 @@
-from .classes import HiveBee
-from .manager import ModeFactory, memoize
-from .mixins import TriggerTarget, ConnectTarget, TriggerSource, Callable, Bee, Bindable, Nameable
 from .exception import HiveConnectionError
+from .manager import ModeFactory, memoize
+from .protocols import TriggerTarget, ConnectTarget, TriggerSource, Callable, Bee, Bindable, Nameable
 
 
 class Modifier(TriggerTarget, ConnectTarget, Bindable, Callable, Nameable):
@@ -41,14 +40,13 @@ class Modifier(TriggerTarget, ConnectTarget, Bindable, Callable, Nameable):
         pass
 
 
-class ModifierBee(TriggerTarget, ConnectTarget, Callable, HiveBee):
+class ModifierBee(Bee, TriggerTarget, ConnectTarget, Callable):
     """Callable Python snippet which is passed the current run hive"""
 
     def __init__(self, func):
-        super(ModifierBee, self).__init__()
         assert callable(func), func
-
         self._func = func
+        super().__init__()
 
     def __repr__(self):
         return "<{}: {}>".format(self.__class__.__name__, self._func)
@@ -65,11 +63,11 @@ class ModifierBee(TriggerTarget, ConnectTarget, Callable, HiveBee):
         if super().implements(cls):
             return True
 
-        # func = self._func
-        # if isinstance(func, Bee):
-        #     return func.implements(cls)
-        #
-        # return False
+            # func = self._func
+            # if isinstance(func, Bee):
+            #     return func.implements(cls)
+            #
+            # return False
 
 
 modifier = ModeFactory("hive.modifier", immediate=Modifier, build=ModifierBee)
