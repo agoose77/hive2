@@ -2,15 +2,12 @@ from weakref import WeakKeyDictionary
 from functools import wraps
 
 
-_memoize_cache = WeakKeyDictionary()
-
-
 def memoize(func):
     """Memoizing decorator
 
     Cache function call results for similar arguments
     """
-    func_instance_cache = _memoize_cache[func] = WeakKeyDictionary()
+    func_instance_cache = WeakKeyDictionary()
 
     @wraps(func)
     def wrapper(self, *args):
@@ -28,3 +25,25 @@ def memoize(func):
             return result
 
     return wrapper
+
+
+class MemoProperty:
+
+    def __init__(self, fget):
+        self.fget = fget
+        self.memo_dict = WeakKeyDictionary()
+
+    def __get__(self, instance, cls=None):
+        if instance is None:
+            return self
+
+        try:
+            return self.memo_dict[instance]
+
+        except KeyError:
+            self.memo_dict[instance] = result = self.fget.__get__(instance, cls)()
+            return result
+
+
+def memo_property(fget):
+    return MemoProperty(fget)

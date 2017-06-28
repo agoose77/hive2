@@ -20,6 +20,7 @@ class BindableResolveBee(Bee, Bindable, Nameable):
 
     @property
     def _hive_runtime_info(self):
+        # TODO why raise runtime error?
         raise RuntimeError
 
     @memoize

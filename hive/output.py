@@ -7,7 +7,8 @@ class HiveOutput(Output, Exportable):
 
     def __init__(self, target):
         assert isinstance(target, Bee), target
-        assert target.implements(Output)
+        assert target.implements(Output), target
+
         self._hive_object_cls = get_building_hive()
         self._target = target
 

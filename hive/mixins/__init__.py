@@ -1,6 +1,9 @@
 from collections import namedtuple
+from weakref import ref
 
-BoundRuntimeInfo = namedtuple("BoundRuntimeInfo", "parent name")
+from ..manager import memo_property
+
+BoundRuntimeInfo = namedtuple("BoundRuntimeInfo", "parent_ref name")
 
 
 class Bee(object):
@@ -36,15 +39,19 @@ class Bindable(object):
 
 
 class Nameable(object):
-    _hive_runtime_info = None
 
-    def add_runtime_info(self, parent, name):
-        info = BoundRuntimeInfo(parent, name)
+    @memo_property
+    def _hive_runtime_aliases(self):
+        return set()
 
-        if self._hive_runtime_info is None:
-            self._hive_runtime_info = set()
-
-        self._hive_runtime_info.add(info)
+    def register_alias(self, parent, name):
+        """Register alias to this bee as a child of a given parent hive, under attribute name
+        
+        :param parent: runtime hive instance
+        :param name: attribute name under which this bee is referred
+        """
+        info = BoundRuntimeInfo(ref(parent), name)
+        self._hive_runtime_aliases.add(info)
 
 
 class Callable(Bee):

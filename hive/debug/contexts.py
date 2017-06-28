@@ -117,7 +117,7 @@ class FileDebugContext(ReportedDebugContextBase):
         path = []
         while True:
             try:
-                parent_ref, bee_name = next(iter(bee._hive_runtime_info))
+                parent_ref, bee_name = next(iter(bee._hive_runtime_aliases))
 
             except TypeError:
                 break

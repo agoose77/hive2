@@ -1,3 +1,5 @@
+from inspect import isclass
+
 from .annotations import update_wrapper
 from .manager import get_building_hive, memoize
 from .mixins import Bindable, Callable, Exportable, Nameable
@@ -7,6 +9,9 @@ class Method(Bindable, Callable, Exportable, Nameable):
     """Exportable interface to instance methods of bind classes"""
 
     def __init__(self, builder_cls, func):
+        assert callable(func), func
+        assert isclass(builder_cls), builder_cls
+
         self._builder_cls = builder_cls
         self._func = func
         self._hive_object_cls = get_building_hive()

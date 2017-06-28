@@ -8,8 +8,8 @@ class Modifier(TriggerTarget, ConnectTarget, Bindable, Callable, Nameable):
     """Callable Python snippet which is passed the current run hive"""
 
     def __init__(self, func, run_hive=None):
-        assert callable(func) and not isinstance(func, Bee), \
-            "Modifier function should be a Python callable, got {}".format(func)
+        assert callable(func), func
+
         self._func = func
         self._run_hive = run_hive
 
@@ -46,6 +46,7 @@ class ModifierBee(TriggerTarget, ConnectTarget, Callable, HiveBee):
 
     def __init__(self, func):
         super(ModifierBee, self).__init__()
+        assert callable(func), func
 
         self._func = func
 

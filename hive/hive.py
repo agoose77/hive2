@@ -90,9 +90,9 @@ class RuntimeHive(ConnectSourceDerived, ConnectTargetDerived, TriggerSource, Tri
                         if instance is None:
                             continue
 
-                    # Store runtime information on bee
+                    # Store runtime information on exported bee
                     if isinstance(instance, Nameable):
-                        instance.add_runtime_info(ref(self), bee_name)
+                        instance.register_alias(self, bee_name)
 
                     exposed_bees.append((bee_name, instance))
 
@@ -114,7 +114,7 @@ class RuntimeHive(ConnectSourceDerived, ConnectTargetDerived, TriggerSource, Tri
 
                     # Store runtime information on bee
                     if isinstance(instance, Nameable):
-                        instance.add_runtime_info(ref(self), bee_name)
+                        instance.register_alias(self, bee_name)
 
                     if isinstance(bee, HiveObject) or bee.implements(Callable):
                         exposed_bees.append((private_name, instance))
