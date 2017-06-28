@@ -25,7 +25,7 @@ class View(Exportable):
         return target
 
     def implements(self, cls):
-        if cls is Stateful:
+        if isinstance(self._target, Bee) and self._target.implements(cls):
             return True
 
         return super().implements(cls)

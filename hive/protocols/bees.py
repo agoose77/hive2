@@ -31,9 +31,10 @@ class Bee:
             logger.warning("Building hive is none for {}, is this the root hive?".format(self))
 
     def implements(self, cls):
-        return isinstance(self, cls)
-
-    def instance_implements(self, cls):
+        """Return True if the Bee returned by getinstance will implement a given class
+        
+        :param cls: class
+        """
         return isinstance(self, cls)
 
     def getinstance(self, hive_object):

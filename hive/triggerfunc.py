@@ -76,7 +76,7 @@ class TriggerFuncBuilder(Bee, TriggerSource, ConnectSource, Callable):
         return TriggerFunc(func)
 
     def implements(self, cls):
-        if cls is Callable:
+        if isinstance(self._func, Bee) and self._func.implements(cls):
             return True
 
         return super().implements(cls)

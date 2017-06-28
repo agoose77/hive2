@@ -104,8 +104,7 @@ class RuntimeHive(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource
 
                     # Some runtime hive attributes are protected, but in the case of Stateful bees,
                     # The RuntimeHive already has corresponding property descriptors
-                    # TODO: IMP here we want to know that the resolved bee will be stateful
-                    # This might not mean that it's exported to a unique object though (e.g attribute exports to self)
+                    # Bee.implements indicates that the final bee (following bee.getinstance(...)) will be Stateful
                     if not bee.implements(Stateful):
                         assert not hasattr(self, private_name), private_name
 
@@ -250,6 +249,7 @@ class HiveObject(Exportable, ConnectSourceDerived, ConnectTargetDerived, Trigger
             exported_bee = bee.export()
 
             if isinstance(exported_bee, TriggerTarget):
+                assert bee.implements(TriggerTarget)
                 trigger_targets.append(bee_name)
 
         if not trigger_targets:
