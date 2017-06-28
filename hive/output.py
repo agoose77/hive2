@@ -1,4 +1,5 @@
-from .manager import ModeFactory, get_building_hive, memoize
+from .contexts import get_building_hive
+from .manager import ModeFactory, memoize
 from .mixins import Output, Exportable, Bee
 
 

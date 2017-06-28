@@ -1,6 +1,7 @@
 from .classes import HiveBee
+from .contexts import get_mode, register_bee
 from .debug import get_debug_context
-from .manager import get_mode, memoize, register_bee
+from .manager import memoize
 from .mixins import TriggerSourceBase, TriggerTargetBase, Bee, Bindable, TriggerTargetDerived
 
 
@@ -21,7 +22,6 @@ def build_trigger(source, target, pre):
 
 
 class Trigger(Bindable):
-
     def __init__(self, source, target, pretrigger):
         self.source = source
         self.target = target
@@ -41,7 +41,6 @@ class Trigger(Bindable):
 
 
 class TriggerBee(HiveBee):
-
     def __init__(self, source, target, pretrigger):
         super(TriggerBee, self).__init__()
 
@@ -64,10 +63,10 @@ class TriggerBee(HiveBee):
         if isinstance(target, TriggerTargetDerived):
             target = target._hive_get_trigger_target()
 
-        if isinstance(target, Bee):    
+        if isinstance(target, Bee):
             target = target.getinstance(hive_object)
 
-        if get_mode() == "immediate":            
+        if get_mode() == "immediate":
             return build_trigger(source, target, pretrigger)
 
         else:

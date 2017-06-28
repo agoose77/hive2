@@ -1,4 +1,5 @@
-from ..manager import memoize, get_building_hive
+from ..manager import memoize
+from ..contexts import get_building_hive
 from ..mixins import Bee, Bindable, Exportable, Nameable
 
 

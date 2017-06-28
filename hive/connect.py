@@ -4,7 +4,8 @@ from operator import itemgetter
 
 from .classes import HiveBee
 from .debug import get_debug_context
-from .manager import get_mode, memoize, register_bee
+from .contexts import get_mode, register_bee
+from .manager import memoize
 from .mixins import ConnectSourceBase, ConnectSourceDerived, ConnectTargetBase, ConnectTargetDerived, Bee, Bindable, \
     Exportable
 from .typing import get_match_score, find_matching_ast, MatchFlags, parse_type_string

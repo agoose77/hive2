@@ -1,7 +1,8 @@
 from inspect import isclass
 
 from .annotations import update_wrapper
-from .manager import get_building_hive, memoize
+from .contexts import get_building_hive
+from .manager import memoize
 from .mixins import Bindable, Callable, Exportable, Nameable
 
 

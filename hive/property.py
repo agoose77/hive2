@@ -1,7 +1,8 @@
 from weakref import WeakSet
 
 from .mixins import Stateful, Exportable, Bindable, Parameter, Nameable
-from .manager import get_mode, get_building_hive, memoize
+from .contexts import get_mode, get_building_hive
+from .manager import memoize
 
 
 class Property(Stateful, Bindable, Exportable, Nameable):

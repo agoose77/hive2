@@ -1,4 +1,4 @@
-from ..manager import get_building_hive
+from ..contexts import get_building_hive
 from ..mixins import Bee
 
 

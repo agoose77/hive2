@@ -1,4 +1,4 @@
-from .contexts import get_mode, hive_modes
+from ..contexts import get_mode, hive_modes
 
 
 class ModeFactory(object):

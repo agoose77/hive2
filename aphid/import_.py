@@ -22,7 +22,7 @@ class ImportClass:
 
         # Find first hive to embed this hive (TODO maybe iterate here)
         first_runtime_info = set(runtime_infos).pop()
-        parent = first_runtime_info.parent()
+        parent = first_runtime_info.parent_ref()
         container_parent_class = parent._hive_object._hive_parent_class
 
         hook = hive_editor.get_hook()

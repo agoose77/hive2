@@ -1,5 +1,6 @@
+from .contexts import get_building_hive
 from .exception import HiveConnectionError
-from .manager import memoize, get_building_hive, ModeFactory
+from .manager import memoize, ModeFactory
 from .mixins import ConnectTarget, Plugin, Socket, Callable, Exportable, Bee, Bindable, Nameable
 from .policies import SingleRequired
 from .typing import is_valid_data_type

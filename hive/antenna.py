@@ -1,4 +1,5 @@
-from .manager import get_building_hive, ModeFactory
+from .contexts import get_building_hive
+from .manager import ModeFactory
 from .mixins import Bee, Antenna, Exportable
 
 

@@ -1,12 +1,12 @@
 from collections import defaultdict
-from weakref import ref
 
 from .classes import (HiveInternalWrapper, HiveExportableWrapper, HiveArgsWrapper, HiveMetaArgsWrapper, ResolveBee,
                       HiveClassProxy)
 from .compatability import next, validate_signature
 from .connect import connect, ConnectionCandidate
-from .manager import (bee_register_context, get_mode, hive_mode_as, get_building_hive, building_hive_as, \
-                      run_hive_as, memoize, get_validation_enabled)
+from .contexts import (bee_register_context, get_mode, hive_mode_as, get_building_hive, building_hive_as, \
+                       run_hive_as, get_validation_enabled)
+from .manager import memoize
 from .mixins import *
 from .policies import MatchmakingPolicyError
 from .typing import MatchFlags, data_types_match

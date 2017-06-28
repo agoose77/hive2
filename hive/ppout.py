@@ -2,8 +2,9 @@ from functools import partial
 
 from .annotations import get_return_type
 from .classes import Pusher
+from .contexts import get_building_hive
 from .exception import HiveConnectionError
-from .manager import ModeFactory, get_building_hive, memoize
+from .manager import ModeFactory, memoize
 from .mixins import (Antenna, Output, Stateful, Bee, Bindable, Callable, ConnectSource, TriggerSource, TriggerTarget,
                      Socket, Nameable)
 from .typing import data_type_is_untyped, data_types_match, MatchFlags, is_valid_data_type
