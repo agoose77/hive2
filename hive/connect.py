@@ -6,8 +6,8 @@ from .contexts import get_mode, register_bee
 from .debug import get_debug_context
 from .exception import MatchFailedError
 from .manager import memoize
-from .protocols import ConnectSourceBase, ConnectSourceDerived, ConnectTargetBase, ConnectTargetDerived, Bee, Bindable, \
-    Exportable
+from .protocols import (ConnectSourceBase, ConnectSourceDerived, ConnectTargetBase, ConnectTargetDerived, Bee, Bindable,
+                        Exportable)
 from .typing import get_match_score, find_matching_ast, MatchFlags, parse_type_string
 
 ConnectionCandidate = namedtuple("ConnectionCandidate", ("bee_name", "data_type"))

@@ -27,11 +27,11 @@ logging.config.dictConfig(logging_config)
 
 from .hive import (hive, dyna_hive, meta_hive, HiveBuilder, RuntimeHive, MetaHivePrimitive, HiveObject,
                    validate_external_name, validate_internal_name)
-from .typing import data_types_match, MatchFlags, parse_type_string, data_type_is_untyped, is_valid_data_type, \
-    find_matching_ast, type_asts_match, CompositeType, SimpleType, SequenceType, MappingType, Type, TypeName, AnyType, \
-    get_base_data_type
+from .typing import (data_types_match, MatchFlags, parse_type_string, data_type_is_untyped, is_valid_data_type,
+                     find_matching_ast, type_asts_match, CompositeType, SimpleType, SequenceType, MappingType, Type,
+                     TypeName, AnyType, get_base_data_type)
 from .contexts import (get_building_hive, get_mode, get_run_hive, get_validation_enabled, set_validation_enabled,
-                      validation_enabled_as)
+                       validation_enabled_as)
 from .manager import memo_property, memoize, MemoProperty, ModeFactory
 
 # i primitives
