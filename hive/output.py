@@ -13,9 +13,6 @@ class HiveOutput(Exportable, Output):
 
         super().__init__()
 
-    def __repr__(self):
-        return "<{}: {}>".format(self.__class__.__name__, self._target)
-
     @memoize
     def export(self):
         # TODO: somehow log the redirection path
@@ -23,6 +20,9 @@ class HiveOutput(Exportable, Output):
         if isinstance(target, Exportable):
             target = target.export()
         return target
+
+    def __repr__(self):
+        return "HiveOutput({!r})".format(self._target)
 
 
 output = ModeFactory("hive.output", build=HiveOutput)

@@ -55,8 +55,11 @@ class TriggerFunc(Bindable, TriggerSource, ConnectSource, Callable, Nameable):
 
         return self.__class__(func, run_hive=run_hive)
 
+    def __repr__(self):
+        return "TriggerFunc({!r}, {!r})".format(self._func, self._run_hive)
 
-class TriggerFuncBee(Bee, TriggerSource, ConnectSource, Callable):
+
+class TriggerFuncBuilder(Bee, TriggerSource, ConnectSource, Callable):
     data_type = 'trigger'
 
     def __init__(self, func=None):
@@ -82,5 +85,8 @@ class TriggerFuncBee(Bee, TriggerSource, ConnectSource, Callable):
 
         return False
 
+    def __repr__(self):
+        return "TriggerFuncBuilder({!r})".format(self._func)
 
-triggerfunc = ModeFactory("hive.triggerfunc", immediate=TriggerFunc, build=TriggerFuncBee)
+
+triggerfunc = ModeFactory("hive.triggerfunc", immediate=TriggerFunc, build=TriggerFuncBuilder)

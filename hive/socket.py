@@ -18,9 +18,6 @@ class HiveSocket(Exportable, Bindable, Socket, ConnectTarget, Nameable):
 
         super().__init__()
 
-    def __repr__(self):
-        return "<Socket: {}>".format(self._func)
-
     @memoize
     def bind(self, run_hive):
         if self._run_hive:
@@ -53,6 +50,9 @@ class HiveSocket(Exportable, Bindable, Socket, ConnectTarget, Nameable):
     def _hive_connect_target(self, source):
         plugin = source.plugin()
         self._func(plugin)
+
+    def __repr__(self):
+        return "HiveSocket({!r}, {!r}, {!r})".format(self._func, self.data_type, self._run_hive)
 
 
 class HiveSocketBuilder(Exportable, Socket, ConnectTarget):
@@ -95,6 +95,10 @@ class HiveSocketBuilder(Exportable, Socket, ConnectTarget):
 
         else:
             return self
+
+    def __repr__(self):
+        return "HiveSocketBuilder({!r}, {!r}, {!r}, {!r}, {!r})".format(self._target, self.identifier, self.data_type,
+                                                                        self.policy, self.export_to_parent)
 
 
 socket = ModeFactory("hive.socket", immediate=HiveSocket, build=HiveSocketBuilder)

@@ -40,8 +40,11 @@ class Trigger(Bindable):
 
         return build_trigger(source, target, self.pretrigger)
 
+    def __repr__(self):
+        return "Trigger({!r}, {!r}, {!r})".format(self.source, self.target, self.pretrigger)
 
-class TriggerBee(Bee):
+
+class TriggerBuilder(Bee):
     def __init__(self, source, target, pretrigger):
         self.source = source
         self.target = target
@@ -73,6 +76,9 @@ class TriggerBee(Bee):
         else:
             return Trigger(source, target, pretrigger)
 
+    def __repr__(self):
+        return "TriggerBuilder({!r}, {!r}, {!r})".format(self.source, self.target, self.pretrigger)
+
 
 def trigger(source, target, pretrigger=False):
     if isinstance(source, Bee):
@@ -87,6 +93,6 @@ def trigger(source, target, pretrigger=False):
         build_trigger(source, target, pretrigger)
 
     else:
-        trigger_bee = TriggerBee(source, target, pretrigger)
+        trigger_bee = TriggerBuilder(source, target, pretrigger)
         register_bee(trigger_bee)
         return trigger_bee

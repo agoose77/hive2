@@ -12,9 +12,6 @@ class Hook(Exportable):
         self._target = target
         super().__init__()
 
-    def __repr__(self):
-        return "<{}: {}>".format(self.__class__.__name__, self._target)
-
     def export(self):
         # TODO: somehow log the redirection path
         target = self._target
@@ -23,6 +20,9 @@ class Hook(Exportable):
             target = target.export()
 
         return target
+
+    def __repr__(self):
+        return "Hook({!r})".format(self._target)
 
 
 hook = ModeFactory("hive.hook", build=Hook)

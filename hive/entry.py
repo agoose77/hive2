@@ -13,9 +13,6 @@ class Entry(Exportable):
 
         super().__init__()
 
-    def __repr__(self):
-        return "<{}: {}>".format(self.__class__.__name__, self._target)
-
     def export(self):
         # TODO: somehow log the redirection path
         target = self._target
@@ -23,6 +20,9 @@ class Entry(Exportable):
             target = target.export()
 
         return target
+
+    def __repr__(self):
+        return "Entry({!r})".format(self._target)
 
 
 entry = ModeFactory("hive.entry", build=Entry)

@@ -61,7 +61,7 @@ class Property(Exportable, Bindable, Stateful, Nameable):
         return self
 
     def __repr__(self):
-        return "<{} '{}'>".format(self.__class__.__name__, self._attr)
+        return "Property({!r}, {!r}, {!r}, {!r})".format(self._cls, self._attr, self.data_type, self.start_value)
 
 
 def property(cls, attr, data_type="", start_value=None):

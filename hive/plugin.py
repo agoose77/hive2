@@ -18,10 +18,6 @@ class HivePlugin(Exportable, Bindable, Plugin, ConnectSource, Nameable):
         self.data_type = data_type
         super().__init__()
 
-
-    def __repr__(self):
-        return "<Plugin: {}>".format(self._func)
-
     def plugin(self):
         return self._func
 
@@ -56,6 +52,9 @@ class HivePlugin(Exportable, Bindable, Plugin, ConnectSource, Nameable):
         else:
             return self
 
+    def __repr__(self):
+        return "HivePlugin({!r}, {!r}, {!r})".format(self._func, self.data_type, self._run_hive)
+
 
 class HivePluginBuilder(Exportable, Plugin, ConnectSource):
     def __init__(self, target, identifier=None, data_type='', policy=None, export_to_parent=False):
@@ -74,9 +73,6 @@ class HivePluginBuilder(Exportable, Plugin, ConnectSource):
             policy = MultipleOptional
 
         self.policy = policy
-
-    def __repr__(self):
-        return "<Plugin: {}>".format(self._target)
 
     @memoize
     def getinstance(self, hive_object):
@@ -97,6 +93,10 @@ class HivePluginBuilder(Exportable, Plugin, ConnectSource):
 
         else:
             return self
+
+    def __repr__(self):
+        return "HivePluginBuilder({!r}, {!r}, {!r}, {!r}, {!r})".format(self._target, self.identifier, self.data_type,
+                                                                        self.policy, self.export_to_parent)
 
 
 plugin = ModeFactory("hive.plugin", immediate=HivePlugin, build=HivePluginBuilder)

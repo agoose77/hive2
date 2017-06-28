@@ -41,5 +41,8 @@ class Attribute(Exportable, Bindable, Stateful, Nameable):
     def export(self):
         return self
 
+    def __repr__(self):
+        return "Attribute({!r}, {!r})".format(self.data_type, self.start_value)
+
 
 attribute = ModeFactory("hive.attribute", build=Attribute)

@@ -156,10 +156,6 @@ class Connection(Bindable):
 
         super().__init__()
 
-
-    def __repr__(self):
-        return "<Connection {} ~> {}>".format(self.source, self.target)
-
     @memoize
     def bind(self, run_hive):
         source = self.source
@@ -173,16 +169,16 @@ class Connection(Bindable):
 
         return build_connection(source, target)
 
+    def __repr__(self):
+        return "Connection({!r}, {!r})".format(self.source, self.target)
 
-class ConnectionBee(Bee):
+
+class ConnectionBuilder(Bee):
     def __init__(self, source, target):
         self.source = source
         self.target = target
 
         super().__init__()
-
-    def __repr__(self):
-        return "<{}: ({}, {})>".format(self.__class__.__name__, *self.args)
 
     @memoize
     def getinstance(self, hive_object):
@@ -207,6 +203,9 @@ class ConnectionBee(Bee):
         else:
             return Connection(source, target)
 
+    def __repr__(self):
+        return "ConnectionBuilder({!r}, {!r})".format(self.source, self.target)
+
 
 def connect(source, target):
     if isinstance(source, Bee):
@@ -221,6 +220,6 @@ def connect(source, target):
         build_connection(source, target)
 
     else:
-        connection_bee = ConnectionBee(source, target)
+        connection_bee = ConnectionBuilder(source, target)
         register_bee(connection_bee)
         return connection_bee

@@ -19,9 +19,6 @@ class Method(Bindable, Callable, Exportable, Nameable):
 
         super().__init__()
 
-    def __repr__(self):
-        return "<{}: {}>".format(self.__class__.__name__, self._func.__qualname__)
-
     @memoize
     def bind(self, run_hive):
         cls = self._builder_cls
@@ -31,3 +28,6 @@ class Method(Bindable, Callable, Exportable, Nameable):
 
     def export(self):
         return self
+
+    def __repr__(self):
+        return "Method({!r})".format(self._builder_cls, self._func)

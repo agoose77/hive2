@@ -11,10 +11,8 @@ class HiveAntenna(Exportable, Antenna):
         assert target.implements(Antenna), target
 
         self._target = target
-        super().__init__()
 
-    def __repr__(self):
-        return "<{}: {}>".format(self.__class__.__name__, self._target)
+        super().__init__()
 
     def export(self):
         # TODO: somehow log the redirection path
@@ -24,6 +22,9 @@ class HiveAntenna(Exportable, Antenna):
             target = target.export()
 
         return target
+
+    def __repr__(self):
+        return "HiveAntenna({!r})".format(self._target)
 
 
 antenna = ModeFactory("hive.antenna", build=HiveAntenna)

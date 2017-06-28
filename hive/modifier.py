@@ -46,10 +46,8 @@ class ModifierBee(Bee, TriggerTarget, ConnectTarget, Callable):
     def __init__(self, func):
         assert callable(func), func
         self._func = func
-        super().__init__()
 
-    def __repr__(self):
-        return "<{}: {}>".format(self.__class__.__name__, self._func)
+        super().__init__()
 
     @memoize
     def getinstance(self, hive_object):
@@ -68,6 +66,9 @@ class ModifierBee(Bee, TriggerTarget, ConnectTarget, Callable):
             #     return func.implements(cls)
             #
             # return False
+
+    def __repr__(self):
+        return "Modifier({!r})".format(self._func)
 
 
 modifier = ModeFactory("hive.modifier", immediate=Modifier, build=ModifierBee)
