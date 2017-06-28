@@ -11,7 +11,10 @@ They exist in two flavors:
 from . import Connectable
 
 
-class ConnectSourceBase(Connectable):
+from abc import ABC, abstractmethod
+
+
+class ConnectSourceBase(Connectable, ABC):
     pass
 
 

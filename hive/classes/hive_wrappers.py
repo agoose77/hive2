@@ -1,14 +1,13 @@
+from abc import ABC, abstractproperty
 from collections import OrderedDict, namedtuple
 
-from .. protocols import Bee, Exportable, Parameter
-from .. compatability import next
-
+from ..compatability import next
+from ..protocols import Bee, Exportable, Parameter
 
 HiveArgsExtraction = namedtuple("HiveArgsExtraction", "args kwargs parameter_values")
 
 
 class MappingObject(object):
-
     def __init__(self, validator=None):
         """MappingObject initialiser
 
@@ -44,7 +43,7 @@ class MappingObject(object):
         return self._members.copy()
 
     def __setattr__(self, name, value):
-        if name.startswith("_"): 
+        if name.startswith("_"):
             return object.__setattr__(self, name, value)
 
         # Mechanism for deletion of attributes
@@ -105,16 +104,17 @@ class HiveInternalWrapper(HiveObjectWrapper):
         super()._validate_attribute(name, value)
 
         if not isinstance(value, Bee):
-            raise TypeError(self._format_message("attribute '{}' must be a Bee, not '{}'".format(name, value.__class__)))
+            raise TypeError(
+                self._format_message("attribute '{}' must be a Bee, not '{}'".format(name, value.__class__)))
 
         if isinstance(value, Exportable) and value.export_only:
-            raise TypeError(self._format_message("attribute '{}' must not be Exportable; Exportables must be added to ex"
-                                                 .format(name)))
+            raise TypeError(
+                self._format_message("attribute '{}' must not be Exportable; Exportables must be added to ex"
+                                     .format(name)))
 
         if value._parent_hive_object_cls is None:
-            print(value, type(value))
             raise AttributeError(self._format_message("attribute '{}' must be a Bee instance defined inside the builder"
-                                                    "function".format(name)))
+                                                      "function".format(name)))
 
         if value._parent_hive_object_cls is not self._hive_object_cls:
             raise AttributeError(self._format_message("attribute '{}' cannot contain a Bee built by a different hive"
@@ -130,7 +130,8 @@ class HiveExportableWrapper(HiveObjectWrapper):
         super()._validate_attribute(name, value)
 
         if not isinstance(value, Bee):
-            raise TypeError(self._format_message("attribute '{}' must be a Bee, not '{}'".format(name, value.__class__)))
+            raise TypeError(
+                self._format_message("attribute '{}' must be a Bee, not '{}'".format(name, value.__class__)))
 
         if not isinstance(value, Exportable):
             raise TypeError(self._format_message("attribute '{}' must be Exportable; Exportables must be added to ex"
@@ -138,7 +139,7 @@ class HiveExportableWrapper(HiveObjectWrapper):
 
         if value._parent_hive_object_cls is None:
             raise AttributeError(self._format_message("attribute '{}' must be a Bee instance defined inside the builder"
-                                                    " function".format(name)))
+                                                      " function".format(name)))
 
         if value._parent_hive_object_cls is not self._hive_object_cls:
             raise AttributeError(self._format_message("attribute '{}' cannot contain a Bee built by a different hive"
@@ -148,7 +149,7 @@ class HiveExportableWrapper(HiveObjectWrapper):
 
 
 class HiveArgsWrapperView(MappingObject):
-    """Read-only view of args wrapper"""
+    """Read-only view of true values of args wrapper"""
 
     def __init__(self, wrapper, frozen_data):
         super(HiveArgsWrapperView, self).__init__()
@@ -256,7 +257,8 @@ class HiveArgsWrapperBase(MappingObject):
 
                     except StopIteration:
                         if parameter.start_value is Parameter.no_value:
-                            raise ValueError(self._format_message("No value for '{}' can be resolved".format(param_name)))
+                            raise ValueError(
+                                self._format_message("No value for '{}' can be resolved".format(param_name)))
                         else:
                             arg_value = parameter.start_value
 
@@ -273,9 +275,9 @@ class HiveArgsWrapper(HiveObjectWrapper, HiveArgsWrapperBase):
     _WRAPPER_NAME = "args"
 
 
-class HiveParentWrapperBase(MappingObject):
+class HiveParentWrapperBase(MappingObject, ABC):
     """Base class for wrapper which refers to its parent hive class"""
-    _WRAPPER_NAME = property()
+    _WRAPPER_NAME = abstractproperty()
 
     def __init__(self, hive_parent_cls):
         self._hive_parent_cls = hive_parent_cls

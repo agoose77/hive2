@@ -16,10 +16,13 @@ class Attribute(Exportable, Bindable, Stateful, Nameable):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
 
-        self.data_type = data_type
-        self.start_value = start_value
-
+        self._data_type = data_type
+        self._start_value = start_value
         self._values = WeakKeyDictionary()
+
+    @property
+    def data_type(self):
+        return self._data_type
 
     def _hive_stateful_getter(self, run_hive):
         return self._values[run_hive]
@@ -30,7 +33,7 @@ class Attribute(Exportable, Bindable, Stateful, Nameable):
 
     @memoize
     def bind(self, run_hive):
-        start_value = self.start_value
+        start_value = self._start_value
 
         if isinstance(start_value, Parameter):
             start_value = run_hive._hive_object._hive_args_frozen.get_parameter_value(start_value)
@@ -42,7 +45,7 @@ class Attribute(Exportable, Bindable, Stateful, Nameable):
         return self
 
     def __repr__(self):
-        return "Attribute({!r}, {!r})".format(self.data_type, self.start_value)
+        return "Attribute({!r}, {!r})".format(self.data_type, self._start_value)
 
 
 attribute = ModeFactory("hive.attribute", build=Attribute)

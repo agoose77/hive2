@@ -6,6 +6,12 @@ class HiveConnectionError(HiveException):
     pass
 
 
+# Matchmaking
+class MatchmakingPolicyError(HiveException):
+    pass
+
+
+# Typing
 class TypingError(HiveException):
     pass
 
@@ -20,4 +26,3 @@ class MatchFailedError(TypingError):
 
 class InvalidMatchCase(TypingError):
     pass
-

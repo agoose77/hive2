@@ -151,18 +151,18 @@ def build_connection(source, target):
 
 class Connection(Bindable):
     def __init__(self, source, target):
-        self.source = source
-        self.target = target
+        self._source = source
+        self._target = target
 
         super().__init__()
 
     @memoize
     def bind(self, run_hive):
-        source = self.source
+        source = self._source
         if isinstance(source, Bindable):
             source = source.bind(run_hive)
 
-        target = self.target
+        target = self._target
 
         if isinstance(target, Bindable):
             target = target.bind(run_hive)
@@ -170,20 +170,20 @@ class Connection(Bindable):
         return build_connection(source, target)
 
     def __repr__(self):
-        return "Connection({!r}, {!r})".format(self.source, self.target)
+        return "Connection({!r}, {!r})".format(self._source, self._target)
 
 
 class ConnectionBuilder(Bee):
     def __init__(self, source, target):
-        self.source = source
-        self.target = target
+        self._source = source
+        self._target = target
 
         super().__init__()
 
     @memoize
     def getinstance(self, hive_object):
-        source = self.source
-        target = self.target
+        source = self._source
+        target = self._target
 
         if isinstance(source, Bee):
             if isinstance(source, Exportable):
@@ -204,7 +204,7 @@ class ConnectionBuilder(Bee):
             return Connection(source, target)
 
     def __repr__(self):
-        return "ConnectionBuilder({!r}, {!r})".format(self.source, self.target)
+        return "ConnectionBuilder({!r}, {!r})".format(self._source, self._target)
 
 
 def connect(source, target):

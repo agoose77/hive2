@@ -14,8 +14,8 @@ class HivePlugin(Exportable, Bindable, Plugin, ConnectSource, Nameable):
 
         self._run_hive = run_hive
         self._func = func
+        self._data_type = data_type
 
-        self.data_type = data_type
         super().__init__()
 
     def plugin(self):

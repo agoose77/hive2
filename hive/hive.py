@@ -1,4 +1,5 @@
 from collections import defaultdict
+from itertools import count
 
 from .classes import HiveInternalWrapper, HiveExportableWrapper, HiveArgsWrapper, HiveMetaArgsWrapper, HiveClassProxy
 from .compatability import next, validate_signature
@@ -12,12 +13,10 @@ from .resolve_bee import ResolveBee
 from .typing import MatchFlags, data_types_match
 
 
-def gen_sequence_bee_names():
+def generate_anonymous_names(fmt_string='anonymous_bee_{}'):
     """Sequential generator of "bee names"""
-    i = 0
-    while True:
-        i += 1
-        yield "anonymous_bee_{}".format(i)
+    for i in count():
+        yield fmt_string.format(i)
 
 
 class RuntimeHiveInstantiator(Bindable):
@@ -418,10 +417,10 @@ def validate_internal_name(attr_name):
 class MetaHivePrimitive(object):
     """Primitive container to instantiate Hive with particular meta arguments"""
 
-    _whive_object_cls = None
+    _hive_object_class = None
 
     def __new__(cls, *args, **kwargs):
-        hive_object = cls._whive_object_cls(*args, **kwargs)
+        hive_object = cls._hive_object_class(*args, **kwargs)
 
         if get_mode() == "immediate":
             return hive_object.instantiate()
@@ -531,7 +530,7 @@ class HiveBuilder(object):
 
         # Save anonymous bees to internal wrapper, with unique names
 
-        sequential_bee_names = gen_sequence_bee_names()
+        sequential_bee_names = generate_anonymous_names()
         for bee in registered_bees:
             if bee not in anonymous_bees:
                 continue
