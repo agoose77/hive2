@@ -8,8 +8,6 @@ from .typing import is_valid_data_type
 class Variable(Bindable, Stateful, Nameable):
     """Stateful data store object"""
 
-    export_only = False
-
     def __init__(self, data_type='', start_value=None):
         super().__init__()
 

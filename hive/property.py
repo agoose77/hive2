@@ -9,8 +9,6 @@ from .typing import is_valid_data_type
 class Property(Bindable, Stateful, Nameable):
     """Interface to bind class attributes"""
 
-    export_only = False
-
     def __init__(self, cls, attr, data_type, start_value):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
