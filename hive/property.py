@@ -6,7 +6,7 @@ from .protocols import Stateful, Exportable, Bindable, Parameter, Nameable
 from .typing import is_valid_data_type
 
 
-class Property(Exportable, Bindable, Stateful, Nameable):
+class Property(Bindable, Stateful, Nameable):
     """Interface to bind class attributes"""
 
     export_only = False

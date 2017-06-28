@@ -5,7 +5,7 @@ from .protocols import Stateful, Exportable, Bindable, Parameter, Nameable
 from .typing import is_valid_data_type
 
 
-class Variable(Exportable, Bindable, Stateful, Nameable):
+class Variable(Bindable, Stateful, Nameable):
     """Stateful data store object"""
 
     export_only = False
@@ -39,9 +39,6 @@ class Variable(Exportable, Bindable, Stateful, Nameable):
             start_value = run_hive._hive_object._hive_args_frozen.get_parameter_value(start_value)
 
         self._values[run_hive] = start_value
-        return self
-
-    def export(self):
         return self
 
     def __repr__(self):
