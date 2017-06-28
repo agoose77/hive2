@@ -71,7 +71,7 @@ def find_mapping_mapping_match(source, target, flags):
 
 
 def find_type_name_composite_match(type_name, composite, flags):
-    if len(type_name.type_name) > 1:  # TODO allow 0 (== no typing)
+    if len(type_name.type_name) > 1:
         raise MatchFailedError
 
     source_type = type_name.type_name[0]

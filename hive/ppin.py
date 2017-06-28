@@ -26,7 +26,7 @@ class PPInBase(Antenna, ConnectTarget, TriggerSource, Bindable, Nameable):
         # Once bound, hive Method object is resolved to a function, not bee
         assert isinstance(target, Stateful) or isinstance(target, Callable) or callable(target), target
 
-        if isinstance(target, Stateful):  # TODO why are we assuming this
+        if isinstance(target, Stateful):
             data_type = target.data_type
             # If not yet bound, set_value will have None for run hive!
             self._set_value = partial(target._hive_stateful_setter, run_hive)
