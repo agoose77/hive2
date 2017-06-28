@@ -27,7 +27,7 @@ def do_break(self):
 def build_foreach(i, ex, args, meta_args):
     """Iterate over iterable object"""
     # Set iterable
-    i.iterable = hive.attribute()
+    i.iterable = hive.attribute("$iterable[int]")
     i.pull_iterable = hive.pull_in(i.iterable)
     ex.iterable = hive.antenna(i.pull_iterable)
 

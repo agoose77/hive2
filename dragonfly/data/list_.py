@@ -7,8 +7,8 @@ def declare_list(meta_args):
 
 def build_list(i, ex, args, meta_args):
     """Interface to list container"""
-
-    i.list_ = hive.attribute('list', list())
+    data_type = "list[{}]".format(meta_args.data_type or '?')
+    i.list_ = hive.attribute(data_type, list())
     i.pull_list_ = hive.pull_out(i.list_)
     ex.list_out = hive.output(i.pull_list_)
 

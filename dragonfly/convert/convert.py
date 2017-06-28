@@ -40,9 +40,7 @@ def build_convert(i, ex, args, meta_args):
 
     # For casting (explicit conversion)
     if meta_args.conversion == "cast":
-        to_type_tuple = hive.identifier_to_tuple(meta_args.to_data_type)
-        to_base_type_name = to_type_tuple[0]
-
+        to_base_type_name = hive.get_base_data_type(meta_args.to_data_type)
         value_cls = _type_map[to_base_type_name]
 
         def converter(self):
