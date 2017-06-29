@@ -209,7 +209,7 @@ class HiveNodeInspector:
                     meta_args = yield ("meta_args", self._scrape_wrapper(meta_args_wrapper))
 
                     # Create HiveObject class
-                    _, _, hive_object_cls = hive_cls._hive_get_hive_object_class((), meta_args)
+                    _, _, hive_object_cls = hive_cls._hive_get_hive_object_class_for((), meta_args)
 
                 else:
                     hive_object_cls = hive_cls._hive_build(())

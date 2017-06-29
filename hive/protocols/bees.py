@@ -50,7 +50,6 @@ class Bindable(Bee, ABC):
 
 
 class Exportable(Bee, ABC):
-    export_only = True
 
     @abstractmethod
     def export(self):

@@ -107,7 +107,7 @@ class HiveInternalWrapper(HiveObjectWrapper):
             raise TypeError(
                 self._format_message("attribute '{}' must be a Bee, not '{}'".format(name, value.__class__)))
 
-        if isinstance(value, Exportable) and value.export_only:
+        if isinstance(value, Exportable):
             raise TypeError(
                 self._format_message("attribute '{}' must not be Exportable; Exportables must be added to ex"
                                      .format(name)))

@@ -38,9 +38,6 @@ class Property(Bindable, Stateful, Nameable):
 
         setattr(instance, self._attr, value)
 
-    def export(self):
-        return self
-
     @memoize
     def bind(self, run_hive):
         self._bound.add(run_hive)

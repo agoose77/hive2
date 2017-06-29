@@ -1,6 +1,8 @@
 from abc import ABC, abstractproperty
 from collections import defaultdict
+from inspect import currentframe, getmodule
 from itertools import count, chain
+
 
 from .classes import HiveInternalWrapper, HiveExportableWrapper, HiveArgsWrapper, HiveMetaArgsWrapper, HiveClassProxy
 from .compatability import next, validate_signature
@@ -187,8 +189,6 @@ class HiveObject(Exportable, ConnectSourceDerived, ConnectTargetDerived, Trigger
 
     _hive_args = None
     _hive_meta_args_frozen = None
-
-    export_only = False
 
     def __init__(self, *args, **kwargs):
         super().__init__()
@@ -405,6 +405,7 @@ def validate_external_name(attr_name):
 def validate_internal_name(attr_name):
     """Raise AttributeError if attribute name prefixed with underscore belongs to HiveObject or RuntimeHive"""
     internal_name = "_{}".format(attr_name)
+
     if hasattr(HiveObject, internal_name):
         raise AttributeError('Cannot overwrite special attribute HiveObject.{}'.format(attr_name))
 
@@ -423,11 +424,10 @@ class MetaHivePrimitive(ABC):
         if get_mode() == "immediate":
             return hive_object.instantiate()
 
-        else:
-            return hive_object
+        return hive_object
 
 
-class HiveBuilder(object):
+class HiveBuilder:
     """Deferred Builder for constructing Hive classes.
 
     Perform building once for multiple instances of the same Hive.
@@ -444,7 +444,7 @@ class HiveBuilder(object):
         if cls._declarators and not cls._is_dyna_hive:
             return cls._hive_get_meta_primitive(*args, **kwargs)
 
-        args, kwargs, hive_object_class = cls._hive_get_hive_object_class(args, kwargs)
+        args, kwargs, hive_object_class = cls._hive_get_hive_object_class_for(args, kwargs)
         hive_object = hive_object_class(*args, **kwargs)
 
         if get_mode() == "immediate":
@@ -456,7 +456,7 @@ class HiveBuilder(object):
     @classmethod
     def _hive_get_meta_primitive(cls, *args, **kwargs):
         """Return the MetaHivePrimitive subclass associated with the HiveObject class produced for these meta args"""
-        args, kwargs, hive_object_class = cls._hive_get_hive_object_class(args, kwargs)
+        args, kwargs, hive_object_class = cls._hive_get_hive_object_class_for(args, kwargs)
         assert not args or kwargs, "Meta primitive cannot be passed any runtime-arguments"
 
         return cls._hive_create_meta_primitive(hive_object_class)
@@ -475,8 +475,8 @@ class HiveBuilder(object):
 
         :param kwargs: Parameter keyword arguments
         """
-        hive_object_dict = {'__doc__': cls.__doc__, "_hive_parent_class": cls}
-        hive_object_class_name = "HiveObject<{}>".format(cls.__name__)
+        hive_object_dict = {'__doc__': cls.__doc__, "_hive_parent_class": cls, "__module__": cls.__module__}
+        hive_object_class_name = "{}(HiveObject)".format(cls.__name__)
         hive_object_class = type(hive_object_class_name, (HiveObject,), hive_object_dict)
 
         hive_object_class._hive_i = internals = HiveInternalWrapper(hive_object_class,
@@ -519,21 +519,14 @@ class HiveBuilder(object):
             if is_root:
                 cls._hive_build_connectivity(hive_object_class)
 
-        # Find anonymous bees
-        anonymous_bees = set(registered_bees)
-
-        # Find any anonymous bees which are held on object
-        for bee_name, bee in internals._items:
-            if bee in anonymous_bees:
-                anonymous_bees.remove(bee)
+        # Find "anonymous (non-stored)" bees (using the anonymous register API) which aren't held by any wrappers,
+        # anonymous_bees must be ordered to ensure execution ordering
+        all_wrapper_bees = frozenset(chain(internals._values, externals._values))
+        anonymous_bees = tuple((b for b in registered_bees if not b in all_wrapper_bees))
 
         # Save anonymous bees to internal wrapper, with unique names
-
         sequential_bee_names = generate_anonymous_names()
-        for bee in registered_bees:
-            if bee not in anonymous_bees:
-                continue
-
+        for bee in anonymous_bees:
             # Find unique name for bee
             while True:
                 bee_name = next(sequential_bee_names)
@@ -543,9 +536,10 @@ class HiveBuilder(object):
             setattr(internals, bee_name, bee)
 
         # TODO: auto-remove connections/triggers for which the source/target has been deleted
+        # TODO: this implies that bees must be registered on wrappers to "work"
 
         # Build runtime hive class
-        run_hive_class_dict = {"__doc__": cls.__doc__}
+        run_hive_class_dict = {"__doc__": cls.__doc__, "__module__": cls.__module__}
 
         # For internal bees
         for bee_name, bee in internals._items:
@@ -561,7 +555,7 @@ class HiveBuilder(object):
             if isinstance(bee, Stateful):
                 run_hive_class_dict[bee_name] = property(bee._hive_stateful_getter, bee._hive_stateful_setter)
 
-        run_hive_cls_name = "{}::run_hive".format(hive_object_class.__name__)
+        run_hive_cls_name = "{}(RuntimeHive)".format(cls.__name__)
         hive_object_class._hive_runtime_class = type(run_hive_cls_name, (RuntimeHive,), run_hive_class_dict)
         return hive_object_class
 
@@ -721,7 +715,7 @@ class HiveBuilder(object):
                 declarator(args_wrapper)
 
     @classmethod
-    def _hive_get_hive_object_class(cls, args, kwargs):
+    def _hive_get_hive_object_class_for(cls, args, kwargs):
         """Find appropriate HiveObject for argument values
 
         Extract meta args from arguments and return remainder
@@ -736,7 +730,7 @@ class HiveBuilder(object):
         return args, kwargs, cls._hive_build(meta_arg_values)
 
     @classmethod
-    def extend(cls, name, builder=None, builder_cls=None, declarator=None, is_dyna_hive=None, bases=()):
+    def extend(cls, name, builder=None, builder_cls=None, declarator=None, is_dyna_hive=None, bases=(), module=None):
         """Extend HiveBuilder with an additional builder (and builder class)
 
         :param name: name of new hive class
@@ -746,6 +740,14 @@ class HiveBuilder(object):
         :param is_dyna_hive: optional flag to use dyna-hive instantiation path. If omitted (None), inherit
         :param bases: optional tuple of base classes to use
         """
+        # Ugly frame hack to find the name of the module in which this give was created
+        if module is None:
+            frame = currentframe()
+            this_mod = getmodule(frame)
+            while getmodule(frame) is this_mod:
+                frame = frame.f_back
+            module = getmodule(frame).__name__
+
         # Add base hive
         bases = bases + (cls,)
 
@@ -797,8 +799,8 @@ class HiveBuilder(object):
             "_declarators": declarators,
             "_hive_meta_args": None,
             "_is_dyna_hive": is_dyna_hive,
+            "__module__": module
         }
-
         return type(name, bases, class_dict)
 
 

@@ -9,7 +9,6 @@ class Variable(Bindable, Stateful, Nameable):
     """Stateful data store object"""
 
     def __init__(self, data_type='', start_value=None):
-
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
 
