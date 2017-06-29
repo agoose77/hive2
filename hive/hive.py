@@ -685,24 +685,11 @@ class HiveBuilder(object):
         internals = hive_object_cls._hive_i
 
         # Set of child hives used for importing sockets/plugins
-        child_hives = set()
-
-        # Find external hives
-        for bee in externals._values:
-            if isinstance(bee, HiveObject):
-                child_hives.add(bee)
-
-        # Find internal hives
-        for bee in internals._values:
-            if isinstance(bee, HiveObject):
-                child_hives.add(bee)
+        child_hives = frozenset((b for b in chain(externals._values, internals._values)
+                                 if b.implements(HiveObject) and b._hive_allow_export_namespace))
 
         # Export bees from drone-like child hives
         for child_hive in child_hives:
-            # If child doesn't allow exporting
-            if not child_hive._hive_allow_export_namespace:
-                continue
-
             # Find exportable from child and save to HiveObject instance
             importable_from_child = child_hive.__class__._hive_exportable_to_parent
 
@@ -713,13 +700,10 @@ class HiveBuilder(object):
                 setattr(externals, bee_name, bee)
 
         # Exportable bees to parent if drone
-        hive_object_cls._hive_exportable_to_parent = export_to_parent = set()
-        for bee_name, bee in externals._items:
-            if not (bee.implements(Plugin) or bee.implements(Socket)):
-                continue
-
-            if bee.identifier is not None and bee.export_to_parent:
-                export_to_parent.add(bee_name)
+        export_to_parent = frozenset((n for n, b in externals._items
+                                      if (b.implements(Plugin) or b.implements(Socket))
+                                      and b.identifier is not None and b.export_to_parent))
+        hive_object_cls._hive_exportable_to_parent = export_to_parent
 
     @classmethod
     def _hive_build_meta_args_wrapper(cls):
