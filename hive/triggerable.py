@@ -7,7 +7,7 @@ class Triggerable(Bindable, TriggerTarget, ConnectTarget, Callable, Nameable):
     """Callable Python snippet"""
 
     def __init__(self, func, run_hive=None):
-        assert callable(func), func
+        assert callable(func) or isinstance(func, Callable), func
         self._func = func
         self._run_hive = run_hive
 
@@ -63,7 +63,7 @@ class TriggerableBuilder(Bee, TriggerTarget, ConnectTarget):
         return Triggerable(func)
 
     def implements(self, cls):
-        if cls is Callable:
+        if issubclass(Triggerable, cls):
             return True
 
         return super().implements(cls)

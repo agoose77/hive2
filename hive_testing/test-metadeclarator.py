@@ -13,7 +13,7 @@ import hive
 
 def declare_dog(meta_args):
     print("Invoked Declarator")
-    meta_args.puppies = hive.parameter(("int",), 1)
+    meta_args.puppies = hive.parameter("int", 1)
     
 
 def build_dog(i, ex, args, meta_args):

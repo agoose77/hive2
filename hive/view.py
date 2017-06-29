@@ -3,7 +3,7 @@ from .protocols import Bee, Stateful, Exportable
 
 
 class View(Exportable):
-    """Exportable proxy for Antenna bees"""
+    """Exportable proxy for Stateful bees"""
 
     def __init__(self, target):
         assert isinstance(target, Bee), target
@@ -25,7 +25,7 @@ class View(Exportable):
         return target
 
     def implements(self, cls):
-        if cls is Stateful:
+        if isinstance(self._target, Bee) and self._target.implements(cls):
             return True
 
         return super().implements(cls)

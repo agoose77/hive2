@@ -13,8 +13,10 @@ class TriggerFunc(Bindable, TriggerSource, ConnectSource, Callable, Nameable):
         assert callable(func) or func is None or isinstance(func, Callable), func
         self._run_hive = run_hive
         self._func = func
+
         self._trigger = Pusher(self)
         self._pretrigger = Pusher(self)
+
         # TODO
         self._name_counter = 0
 
@@ -23,18 +25,17 @@ class TriggerFunc(Bindable, TriggerSource, ConnectSource, Callable, Nameable):
     def __call__(self, *args, **kwargs):
         # TODO: exception handling hooks
         self._pretrigger.push()
+
         if self._func is not None:
             self._func(*args, **kwargs)
 
         self._trigger.push()
 
     def _hive_trigger_source(self, target_func):
-        self._name_counter += 1
-        self._trigger.add_target(target_func, self._name_counter)
+        self._trigger.add_target(target_func)
 
     def _hive_pretrigger_source(self, target_func):
-        self._name_counter += 1
-        self._pretrigger.add_target(target_func, self._name_counter)
+        self._pretrigger.add_target(target_func)
 
     def _hive_is_connectable_source(self, target):
         if not isinstance(target, TriggerTarget):
@@ -76,7 +77,7 @@ class TriggerFuncBuilder(Bee, TriggerSource, ConnectSource, Callable):
         return TriggerFunc(func)
 
     def implements(self, cls):
-        if cls is Callable:
+        if issubclass(TriggerFunc, cls):
             return True
 
         return super().implements(cls)

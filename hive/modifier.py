@@ -58,7 +58,9 @@ class ModifierBuilder(Bee, TriggerTarget, ConnectTarget):
         return Modifier(func)
 
     def implements(self, cls):
-        if cls is Callable:
+        from derp.ast.formatting import Colours
+        print("IMPL MOD",Colours.green(cls.__name__),issubclass(Modifier, cls),self)
+        if issubclass(Modifier, cls):
             return True
 
         return super().implements(cls)

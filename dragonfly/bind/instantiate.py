@@ -144,6 +144,7 @@ class InstantiatorClass:
         context = self._create_context()
 
         bind_meta_args = self._hive._hive_object._hive_meta_args_frozen
+        print("PRE", (self.bind_meta_class))
         bind_class = self.bind_meta_class(bind_meta_args=bind_meta_args, hive_class=self.hive_class)
 
         # Create Hive and track ID
@@ -170,6 +171,7 @@ def build_instantiator(cls, i, ex, args, meta_args):
     # If this is built now, then it won't perform matchmaking, so use meta hive
     bind_meta_class = hive.meta_hive("BindEnvironment", build_bind_environment, declare_build_environment,
                                      builder_cls=BindEnvironmentClass)
+    #assert bind_meta_class._hive_object_class
     i.bind_meta_class = hive.property(cls, "bind_meta_class", "class", bind_meta_class)
 
     i.trig_instantiate = hive.triggerfunc(cls.instantiate)

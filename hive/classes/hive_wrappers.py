@@ -116,6 +116,7 @@ class HiveInternalWrapper(HiveObjectWrapper):
             raise AttributeError(self._format_message("attribute '{}' must be a Bee instance defined inside the builder"
                                                       "function".format(name)))
 
+        # TODO should permit resolvebees here
         if value._parent_hive_object_cls is not self._hive_object_cls:
             raise AttributeError(self._format_message("attribute '{}' cannot contain a Bee built by a different hive"
                                                       .format(name)))
@@ -141,6 +142,7 @@ class HiveExportableWrapper(HiveObjectWrapper):
             raise AttributeError(self._format_message("attribute '{}' must be a Bee instance defined inside the builder"
                                                       " function".format(name)))
 
+        # TODO should permit resolvebees here
         if value._parent_hive_object_cls is not self._hive_object_cls:
             raise AttributeError(self._format_message("attribute '{}' cannot contain a Bee built by a different hive"
                                                       .format(name)))

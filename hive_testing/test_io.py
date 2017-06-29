@@ -50,11 +50,7 @@ from __future__ import print_function
 # my_hive.trigger()
 #
 
-import sys
-import os
-
-current_directory = os.path.split(os.path.abspath(__file__))[0]
-sys.path.append(current_directory + "/" + "..")
+from unittest import TestCase, main
 
 import hive
 import logging
@@ -86,18 +82,24 @@ def build_myhive(cls, i, ex, args):
         this.c_ = this.a_ + this.b_
         this.c.push()
 
-    i.on_triggered = hive.modifier(lambda this: setattr(this, 'c_', (this.a_ + this.b_)))
+    i.on_triggered = hive.modifier(on_triggered)
     ex.trigger = hive.entry(i.on_triggered)
 
 
-MyHive = hive.hive("MyHive", build_myhive, SomeClass)
+class TestIO(TestCase):
+
+    def test(self):
+        MyHive = hive.hive("MyHive", build_myhive, SomeClass)
 
 
-# Create runtime hive instances
-my_hive = MyHive()
+        # Create runtime hive instances
+        my_hive = MyHive()
 
-my_hive.a.push(1)
-my_hive.b.push(1)
-my_hive.trigger()
+        my_hive.a.push(1)
+        my_hive.b.push(1)
+        my_hive.trigger()
+        self.assertEqual(my_hive.c_, 2)
 
-print(my_hive.a)
+
+if __name__ == "__main__":
+    main()

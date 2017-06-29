@@ -211,7 +211,7 @@ class BindClassFactory:
 
             else:
                 method = getattr(cls, attr_name)
-                socket = hive.socket(method, plugin_entry.identifier, plugin_entry.socket_policy)
+                socket = hive.socket(method, plugin_entry.identifier, policy=plugin_entry.socket_policy)
                 setattr(ex, attr_name, socket)
 
         get_plugins_plugin = hive.plugin(cls.get_plugins, identifier="bind.get_plugins")

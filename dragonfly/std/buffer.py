@@ -17,10 +17,6 @@ def build_buffer(i, ex, args, meta_args):
     args.start_value = hive.parameter(meta_args.data_type, None)
     i.cached_value = hive.variable(meta_args.data_type, args.start_value)
 
-    def mod(self):
-        print("PUSHED")
-
-    i.m = hive.modifier(mod)
 
     if meta_args.mode == "push":
         i.push_value = hive.push_in(i.cached_value)
@@ -30,7 +26,6 @@ def build_buffer(i, ex, args, meta_args):
         ex.cached_value = hive.output(i.push_cached_value)
 
         ex.output = hive.entry(i.push_cached_value)
-        hive.trigger(i.push_value, i.m)
 
     elif meta_args.mode == "pull":
         i.pull_value = hive.pull_in(i.cached_value)

@@ -1,39 +1,65 @@
-from __future__ import print_function
-
-import os
-import sys
-
-current_directory = os.path.split(os.path.abspath(__file__))[0]
-sys.path.append(current_directory + "/" + "..")
+from unittest import TestCase, main
 
 import hive
+from .helpers import Triggerable, TriggerableHive
 
 
-def print_ping():
-    print("PING")
+def build_nofunc_hive(i, ex, args):
+    i.triggerable = TriggerableHive()
+
+    i.trig = hive.triggerfunc()
+    hive.trigger(i.trig, i.triggerable.trig)
+
+    i.entry = hive.triggerable(i.trig)
+
+    ex.trig = hive.entry(i.entry)
+    ex.get_triggered = hive.output(i.triggerable.get_triggered)
 
 
-def print_pong():
-    print("PONG")
+NoFuncHive = hive.hive("NoFuncHive", build_nofunc_hive)
 
 
-def test_empty_triggerfunc():
-    """Trigger function will trigger associated triggerable"""
-    hive_pang = hive.triggerfunc()
-    hive_pong = hive.triggerable(print_pong)
-    hive.trigger(hive_pang, hive_pong)
+def build_func_hive(i, ex, args):
+    i.triggerable = TriggerableHive()
 
-    hive_pang()
+    i.trig = hive.triggerfunc(i.triggerable.trig)
 
+    i.entry = hive.triggerable(i.trig)
 
-def test_callable_triggerfunc():
-    """Trigger function will trigger associated triggerable, after first calling triggerfunc wrapped function"""
-    hive_ping = hive.triggerfunc(print_ping)
-    hive_pong = hive.triggerable(print_pong)
-    hive.trigger(hive_ping, hive_pong)
-
-    hive_ping()
+    ex.trig = hive.entry(i.entry)
+    ex.get_triggered = hive.output(i.triggerable.get_triggered)
 
 
-test_empty_triggerfunc()
-test_callable_triggerfunc()
+FuncHive = hive.hive("FuncHive", build_func_hive)
+
+
+class TestTriggerFunc(TestCase):
+
+    # def test_nofunc_immediate(self):
+    #     triggerable = Triggerable()
+    #     trig = hive.triggerfunc()
+    #     hive_pong = hive.triggerable(triggerable)
+    #     hive.trigger(trig, hive_pong)
+    #
+    #     trig()
+    #     self.assertTrue(triggerable)
+
+    # def test_func_immediate(self):
+    #     triggerable = Triggerable()
+    #     trig = hive.triggerfunc(triggerable)
+    #     trig()
+    #     self.assertTrue(triggerable)
+    #
+    # def test_nofunc_build(self):
+    #     h = NoFuncHive()
+    #     h.trig()
+    #     self.assertTrue(h.get_triggered.pull())
+
+    def test_func_build(self):
+        h = FuncHive()
+        h.trig()
+        self.assertTrue(h.get_triggered.pull())
+
+
+if __name__ == "__main__":
+    main()

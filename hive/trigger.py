@@ -22,41 +22,41 @@ def build_trigger(source, target, pre):
 
 class Trigger(Bindable):
     def __init__(self, source, target, pretrigger):
-        self.source = source
-        self.target = target
-        self.pretrigger = pretrigger
+        self._source = source
+        self._target = target
+        self._pretrigger = pretrigger
 
         super().__init__()
 
     @memoize
     def bind(self, run_hive):
-        source = self.source
+        source = self._source
         if isinstance(source, Bindable):
             source = source.bind(run_hive)
 
-        target = self.target
+        target = self._target
         if isinstance(target, Bindable):
             target = target.bind(run_hive)
 
-        return build_trigger(source, target, self.pretrigger)
+        return build_trigger(source, target, self._pretrigger)
 
     def __repr__(self):
-        return "Trigger({!r}, {!r}, {!r})".format(self.source, self.target, self.pretrigger)
+        return "Trigger({!r}, {!r}, {!r})".format(self._source, self._target, self._pretrigger)
 
 
 class TriggerBuilder(Bee):
     def __init__(self, source, target, pretrigger):
-        self.source = source
-        self.target = target
-        self.pretrigger = pretrigger
+        self._source = source
+        self._target = target
+        self._pretrigger = pretrigger
 
         super().__init__()
 
     @memoize
     def getinstance(self, hive_object):
-        source = self.source
-        target = self.target
-        pretrigger = self.pretrigger
+        source = self._source
+        target = self._target
+        pretrigger = self._pretrigger
 
         if isinstance(source, TriggerSourceDerived):
             source = source._hive_get_trigger_source()
@@ -77,7 +77,7 @@ class TriggerBuilder(Bee):
             return Trigger(source, target, pretrigger)
 
     def __repr__(self):
-        return "TriggerBuilder({!r}, {!r}, {!r})".format(self.source, self.target, self.pretrigger)
+        return "TriggerBuilder({!r}, {!r}, {!r})".format(self._source, self._target, self._pretrigger)
 
 
 def trigger(source, target, pretrigger=False):

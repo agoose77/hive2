@@ -161,16 +161,6 @@ class PPInBuilder(Bee, Antenna, ConnectTarget, TriggerSource):
 
         return PullIn(target, data_type=self.data_type)
 
-    def implements(self, cls):
-        if Bee.implements(self, cls):
-            return True
-
-        target = self.target
-        if isinstance(target, Bee):
-            return target.implements(cls)
-
-        return False
-
     def __repr__(self):
         return "{}({!r}, {!r})".format(self.__class__.__name__, self.target, self.data_type)
 

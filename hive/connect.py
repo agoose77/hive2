@@ -150,6 +150,7 @@ def build_connection(source, target):
 
 
 class Connection(Bindable):
+
     def __init__(self, source, target):
         self._source = source
         self._target = target
@@ -174,6 +175,7 @@ class Connection(Bindable):
 
 
 class ConnectionBuilder(Bee):
+
     def __init__(self, source, target):
         self._source = source
         self._target = target

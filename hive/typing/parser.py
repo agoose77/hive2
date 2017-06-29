@@ -21,6 +21,11 @@ def strip_end_formatting_tokens(tokens):
 
 
 def parse_type_string(type_string):
+    if not isinstance(type_string, str):
+        if type_string is None:
+            return AnyType()
+        raise ValueError("Require string or None for type string, not {!r}".format(type_string))
+
     if not type_string:
         return AnyType()
 
