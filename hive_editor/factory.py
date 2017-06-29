@@ -1,4 +1,4 @@
-from hive import validation_enabled_as
+from hive import matchmaker_validation_enabled_as
 
 from .node import Node, NodeTypes, MimicFlags
 from .utils import hive_object_instance_from_import_result, hive_import_from_path, get_io_info
@@ -120,7 +120,7 @@ class HiveNodeFactory:
     @staticmethod
     def _node_from_import_result(import_result, name, reference_path, params, param_info):
         # Allow GUI to instantiate hives without connectivity validation
-        with validation_enabled_as(False):
+        with matchmaker_validation_enabled_as(False):
             hive_object = hive_object_instance_from_import_result(import_result, params)
             io_info = get_io_info(hive_object)
 

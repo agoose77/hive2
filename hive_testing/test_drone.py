@@ -9,13 +9,6 @@ sys.path.append(current_directory + "/" + "..")
 import hive
 
 
-def get_last(n, a):
-    while True:
-        if not hasattr(n, a):
-            return n
-        n = getattr(n, a)
-
-
 class DroneCls:
     def __init__(self, name="<internal>"):
         self.name = name
@@ -33,13 +26,13 @@ Drone = hive.hive("Drone", build_drone, builder_cls=DroneCls)
 
 class HiveCls:
 
-    def get_plugin(self, plugin):
-        plugin()
+    def set_plugin(self, print_name_plugin):
+        print_name_plugin()
 
 
 def build_h(cls, i, ex, args):
-    ex.drone = Drone(import_namespace=True)
-    ex.sock = hive.socket(cls.get_plugin, identifier="some_api.func")
+    ex.drone = Drone()
+    ex.sock = hive.socket(cls.set_plugin, identifier="some_api.func")
 
 
 Hive = hive.hive("Hive", build_h, builder_cls=HiveCls)

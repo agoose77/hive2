@@ -6,7 +6,7 @@ from .classes import HiveInternalWrapper, HiveExportableWrapper, HiveArgsWrapper
 from .compatability import next, validate_signature
 from .connect import connect, ConnectionCandidate
 from .contexts import (bee_register_context, get_mode, hive_mode_as, building_hive_as, run_hive_as,
-                       get_validation_enabled, get_building_hive)
+                       get_matchmaker_validation_enabled, get_building_hive)
 from .manager import memoize
 from .policies import MatchmakingPolicyError
 from .protocols import *
@@ -664,7 +664,7 @@ class HiveBuilder(object):
             cls._hive_build_connectivity(child, tracked_policies, plugin_map, socket_map)
 
         # Validate policies
-        if get_validation_enabled():
+        if get_matchmaker_validation_enabled():
             for bee, policy in tracked_policies:
                 try:
                     policy.validate()

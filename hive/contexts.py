@@ -11,24 +11,24 @@ _bees = []
 _validation_enabled = True
 
 
-def get_validation_enabled():
+def get_matchmaker_validation_enabled():
     return _validation_enabled
 
 
-def set_validation_enabled(validate):
+def set_matchmaker_validation_enabled(validate):
     global _validation_enabled
     _validation_enabled = validate
 
 
 @contextmanager
-def validation_enabled_as(validate):
-    previous_validation_state = get_validation_enabled()
+def matchmaker_validation_enabled_as(validate):
+    previous_validation_state = get_matchmaker_validation_enabled()
     try:
-        set_validation_enabled(validate)
+        set_matchmaker_validation_enabled(validate)
         yield
 
     finally:
-        set_validation_enabled(previous_validation_state)
+        set_matchmaker_validation_enabled(previous_validation_state)
 
 
 def get_mode():

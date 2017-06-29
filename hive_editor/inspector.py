@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from hive import validation_enabled_as
+from hive import matchmaker_validation_enabled_as
 from .utils import hive_import_from_path, get_bind_class_args
 
 
@@ -187,7 +187,7 @@ class HiveNodeInspector:
 
         :param reference_path: reference path of Hive class
         """
-        with validation_enabled_as(False):
+        with matchmaker_validation_enabled_as(False):
             # Import and prepare hive
             import_result = hive_import_from_path(reference_path)
 
