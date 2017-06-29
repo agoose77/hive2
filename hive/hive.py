@@ -435,7 +435,6 @@ class HiveBuilder(object):
     _hive_meta_args = None
 
     def __new__(cls, *args, **kwargs):
-        print("INIT BUILDER", cls)
         # If MetaHive and not DynaHive
         if cls._declarators and not cls._is_dyna_hive:
             return cls._hive_get_meta_primitive(*args, **kwargs)
@@ -656,7 +655,6 @@ class HiveBuilder(object):
 
                         except MatchmakingPolicyError:
                             print("An error occurred during matchmaking for socket {}, {}".format(bee_name, identifier))
-                            print(socket_bee)
                             raise
 
             # Find and connect identified sockets with existing plugins
@@ -686,7 +684,6 @@ class HiveBuilder(object):
 
                         except MatchmakingPolicyError:
                             print("An error occurred during matchmaking for socket {}, {}".format(bee_name, identifier))
-                            print(plugin_bee)
                             raise
 
         # Get resolve bees instead of raw HiveObject instances (ResolveBees relative to parent)
@@ -709,10 +706,14 @@ class HiveBuilder(object):
 
     @classmethod
     def _hive_build_namespace(cls, hive_object_cls):
+        """Build namespace of plugins and sockets
+        
+        Due to invocation order, returns bottom up
+        """
         externals = hive_object_cls._hive_ex
         internals = hive_object_cls._hive_i
 
-        # Importing
+        # Set of child hives used for importing sockets/plugins
         child_hives = set()
 
         # Find external hives

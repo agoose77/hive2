@@ -3,7 +3,7 @@ from .protocols import Bee, Stateful, Exportable
 
 
 class View(Exportable):
-    """Exportable proxy for Antenna bees"""
+    """Exportable proxy for Stateful bees"""
 
     def __init__(self, target):
         assert isinstance(target, Bee), target

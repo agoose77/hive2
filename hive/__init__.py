@@ -17,7 +17,7 @@ logging_config = {
     'loggers': {
         '': {
             'handlers': ['default'],
-            'level': 'INFO',
+            'level': 'ERROR',
             'propagate': True
         }
     }
