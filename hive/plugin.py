@@ -1,4 +1,5 @@
 from .exception import HiveConnectionError
+from .identifier import is_valid_identifier
 from .manager import memoize, ModeFactory
 from .policies import MultipleOptional
 from .protocols import Plugin, Socket, ConnectSource, Exportable, Callable, Bee, Bindable, Nameable
@@ -65,6 +66,9 @@ class HivePluginBuilder(Exportable, Plugin, ConnectSource):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
 
+        if not is_valid_identifier(identifier):
+            raise ValueError(identifier)
+
         self._target = target
         self._identifier = identifier
         self._data_type = data_type
@@ -113,7 +117,7 @@ class HivePluginBuilder(Exportable, Plugin, ConnectSource):
         return self
 
     def __repr__(self):
-        return "HivePluginBuilder({!r}, {!r}, {!r}, {!r}, {!r})".format(self._target, self.identifier, self.data_type,
+        return "HivePluginBuilder({!r}, {!r}, {!r}, {!r}, {!r})".format(self._target, self._identifier, self._data_type,
                                                                         self._policy, self.export_to_parent)
 
 

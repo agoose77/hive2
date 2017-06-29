@@ -1,4 +1,5 @@
 from .exception import HiveConnectionError
+from .identifier import is_valid_identifier
 from .manager import memoize, ModeFactory
 from .policies import SingleRequired
 from .protocols import ConnectTarget, Plugin, Socket, Callable, Exportable, Bee, Bindable, Nameable
@@ -60,6 +61,9 @@ class HiveSocketBuilder(Exportable, Socket, ConnectTarget):
     def __init__(self, target, identifier=None, data_type="", policy=None, export_to_parent=False):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
+
+        if not is_valid_identifier(identifier):
+            raise ValueError(identifier)
 
         self._target = target
         self._identifier = identifier

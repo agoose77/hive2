@@ -1,6 +1,6 @@
 from abc import ABC, abstractproperty
 from collections import defaultdict
-from itertools import count
+from itertools import count, chain
 
 from .classes import HiveInternalWrapper, HiveExportableWrapper, HiveArgsWrapper, HiveMetaArgsWrapper, HiveClassProxy
 from .compatability import next, validate_signature
@@ -572,17 +572,18 @@ class HiveBuilder(object):
         # For children of the root hive, we must connect relative to top-most hive
         # This is for the top level (building) hive
         is_root = tracked_policies is None
-
+#
+        # For root, importing/exporting from/to parent has no meaning
         if is_root:
             exported_to_parent = set()
 
             plugin_map = defaultdict(list)
             socket_map = defaultdict(list)
 
-            bee_source = externals
+            resolved_bee_source = externals
             tracked_policies = []
 
-        # This method call applies to a HiveObject instance (bee_source)
+        # This method call applies to a HiveObject instance (resolved_bee_source)
         else:
             # If this hive exported to parent
             if resolved_hive_object._hive_allow_export_namespace:
@@ -590,35 +591,21 @@ class HiveBuilder(object):
 
             # Nothing was exported
             else:
-                exported_to_parent = set()
+                exported_to_parent = frozenset()
 
             plugin_map = plugin_map.copy()
             socket_map = socket_map.copy()
 
-            # Get the external bees' resolvebee instead of raw bee
-            bee_source = resolved_hive_object
+            # Get the external bees' ResolveBee instead of raw bee, so that connect() correctly resolves bee relative to root
+            # Due to chaining of resolve bees, this works
+            resolved_bee_source = resolved_hive_object
 
-        child_hives = set()
+        child_hives = frozenset((b for b in chain(externals._values, internals._values)
+                                 if b.implements(HiveObject) and b._hive_allow_import_namespace))
 
-        # Find external hives
-        for bee in externals._values:
-            if not bee.implements(HiveObject):
-                continue
-
-            if not bee._hive_allow_import_namespace:
-                continue
-
-            child_hives.add(bee)
-
-        # Find internal hives
-        for bee in internals._values:
-            if not bee.implements(HiveObject):
-                continue
-
-            if not bee._hive_allow_import_namespace:
-                continue
-
-            child_hives.add(bee)
+        # Get resolve bees instead of raw HiveObject instances (ResolveBees relative to parent)
+        if not is_root:
+            child_hives = frozenset((ResolveBee(bee.export(), resolved_hive_object) for bee in child_hives))
 
         # Find sockets and plugins that are exportable
         for bee_name in externals._names:
@@ -626,69 +613,51 @@ class HiveBuilder(object):
             if bee_name in exported_to_parent:
                 continue
 
-            bee = getattr(bee_source, bee_name)
+            bee = getattr(resolved_bee_source, bee_name)
 
-            # Find and connect identified plugins with existing sockets
-            if bee.implements(Plugin) and bee.identifier is not None:
-                identifier = bee.identifier
+            if bee.implements(Plugin):
+                register_map = plugin_map
+                lookup_map = socket_map
+                connect_bees = connect
 
-                plugin_policy = bee.policy()
+            elif bee.implements(Socket):
+                register_map = socket_map
+                lookup_map = plugin_map
+                def connect_bees(target, source):
+                    return connect(source, target)
+            else:
+                continue
 
-                node_info = bee, plugin_policy
-                plugin_map[identifier].append(node_info)
-                # Keep track of instantiated policies
-                tracked_policies.append(node_info)
+            identifier = bee.identifier
+            if identifier is None:
+                continue
 
-                # Can we connect to a socket?
-                if identifier in socket_map:
-                    socket_bees = socket_map[identifier]
+            # Store in map of plugins or sockets
+            policy = bee.policy()
+            match_info = bee, policy
+            register_map[identifier].append(match_info)
+            # Keep track of instantiated policies
+            tracked_policies.append(match_info)
 
-                    for socket_bee, socket_policy in socket_bees:
-                        try:
-                            plugin_policy.pre_connected()
-                            socket_policy.pre_connected()
+            # Can we connect to a socket?
+            if identifier not in lookup_map:
+                continue
 
-                            connect(bee, socket_bee)
+            other_bees = lookup_map[identifier]
 
-                            plugin_policy.on_connected()
-                            socket_policy.on_connected()
+            for other_bee, other_policy in other_bees:
+                try:
+                    policy.pre_connected()
+                    other_policy.pre_connected()
 
-                        except MatchmakingPolicyError:
-                            print("An error occurred during matchmaking for socket {}, {}".format(bee_name, identifier))
-                            raise
+                    connect_bees(bee, other_bee)
 
-            # Find and connect identified sockets with existing plugins
-            if bee.implements(Socket) and bee.identifier is not None:
-                identifier = bee.identifier
+                    policy.on_connected()
+                    other_policy.on_connected()
 
-                socket_policy = bee.policy()
-                node_info = bee, socket_policy
-                socket_map[identifier].append(node_info)
-                # Keep track of instantiated policies
-                tracked_policies.append(node_info)
-
-                # Can we connect to a plugin?
-                if identifier in plugin_map:
-                    plugin_bees = plugin_map[identifier]
-
-                    for plugin_bee, plugin_policy in plugin_bees:
-                        try:
-
-                            plugin_policy.pre_connected()
-                            socket_policy.pre_connected()
-
-                            connect(plugin_bee, bee)
-
-                            plugin_policy.on_connected()
-                            socket_policy.on_connected()
-
-                        except MatchmakingPolicyError:
-                            print("An error occurred during matchmaking for socket {}, {}".format(bee_name, identifier))
-                            raise
-
-        # Get resolve bees instead of raw HiveObject instances (ResolveBees relative to parent)
-        if not is_root:
-            child_hives = {ResolveBee(bee.export(), resolved_hive_object) for bee in child_hives}
+                except MatchmakingPolicyError:
+                    print("An error occurred during matchmaking {}, {}".format(bee_name, identifier))
+                    raise
 
         # Now export to child hives
         for child in child_hives:
@@ -706,9 +675,11 @@ class HiveBuilder(object):
 
     @classmethod
     def _hive_build_namespace(cls, hive_object_cls):
-        """Build namespace of plugins and sockets
+        """Build namespace of plugins and sockets within a given HiveObject class
         
-        Due to invocation order, returns bottom up
+        Requires that child HiveObjects have already performed this step
+        
+        :param hive_object_cls: HiveObject class being built
         """
         externals = hive_object_cls._hive_ex
         internals = hive_object_cls._hive_i
