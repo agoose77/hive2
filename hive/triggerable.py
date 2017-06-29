@@ -63,7 +63,7 @@ class TriggerableBuilder(Bee, TriggerTarget, ConnectTarget):
         return Triggerable(func)
 
     def implements(self, cls):
-        if isinstance(self._func, Bee) and self._func.implements(cls):
+        if issubclass(Triggerable, cls):
             return True
 
         return super().implements(cls)

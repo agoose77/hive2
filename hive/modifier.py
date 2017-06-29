@@ -58,7 +58,7 @@ class ModifierBuilder(Bee, TriggerTarget, ConnectTarget):
         return Modifier(func)
 
     def implements(self, cls):
-        if cls is Callable:
+        if issubclass(Modifier, cls):
             return True
 
         return super().implements(cls)

@@ -1,5 +1,9 @@
 from ..contexts import get_mode, hive_modes
 
+from logging import getLogger
+
+logger = getLogger(__name__)
+
 
 class ModeFactory(object):
     """Return appropriate class instance depending upon execution mode"""
@@ -22,4 +26,8 @@ class ModeFactory(object):
         except KeyError:
             raise TypeError("{} cannot be used in {} mode".format(self.name, mode))
 
-        return cls(*args, **kwargs)
+        try:
+            return cls(*args, **kwargs)
+        except:
+            logger.exception("Unable to instantiate {} in {} mode".format(self.name, mode))
+            raise

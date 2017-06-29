@@ -216,9 +216,13 @@ class HiveObject(Exportable, ConnectSourceDerived, ConnectTargetDerived, Trigger
                     raise TypeError("{}.{}".format(builder_cls.__name__, err.args[0]))
 
         # Create ResolveBee wrappers for external interface
-        with  hive_mode_as("build"):
+        # We do NOT use with building_hive_as, because these attributes are intended for use by the
+        # The parent hive. They will not enter the hive namespace unless the parent accesses them
+        # Because ResolveBee.export() returns itself, multiple levels of indirection are supported
+        with hive_mode_as("build"):
             external_bees = self.__class__._hive_ex
             for bee_name, bee in external_bees._items:
+                # ResolveBee.export returns self, (to support multiple indirectino) so we must export target here
                 target = bee.export()
                 resolve_bee = ResolveBee(target, self)
 
@@ -796,7 +800,6 @@ class HiveBuilder(object):
         return type(name, bases, class_dict)
 
 
-# TODO options for namespaces (old frame/hive distinction)
 def hive(name, builder=None, builder_cls=None, bases=()):
     return HiveBuilder.extend(name, builder, builder_cls, bases=bases)
 
