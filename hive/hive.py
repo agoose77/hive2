@@ -216,8 +216,9 @@ class HiveObject(Exportable, ConnectSourceDerived, ConnectTargetDerived, Trigger
                     raise TypeError("{}.{}".format(builder_cls.__name__, err.args[0]))
 
         # Create ResolveBee wrappers for external interface
-        # We do NOT use with building_hive_as, because these attributes are intended for use by the
-        # The parent hive. They will not enter the hive namespace unless the parent accesses them
+        # We do NOT use 'with building_hive_as(...):' here, because these attributes are intended for use by the
+        # the parent hive. They will not enter the hive namespace unless the parent accesses them with
+        # 'some_hive_object.some_bee'
         # Because ResolveBee.export() returns itself, multiple levels of indirection are supported
         with hive_mode_as("build"):
             external_bees = self.__class__._hive_ex
@@ -576,7 +577,7 @@ class HiveBuilder(object):
         # For children of the root hive, we must connect relative to top-most hive
         # This is for the top level (building) hive
         is_root = tracked_policies is None
-#
+        #
         # For root, importing/exporting from/to parent has no meaning
         if is_root:
             exported_to_parent = set()
@@ -627,6 +628,7 @@ class HiveBuilder(object):
             elif bee.implements(Socket):
                 register_map = socket_map
                 lookup_map = plugin_map
+
                 def connect_bees(target, source):
                     return connect(source, target)
             else:
