@@ -31,9 +31,9 @@
 from types import ModuleType
 
 import os
-import hive_testing
+import testing
 import hive_editor
-mod = ModuleType("hive_testing")
+mod = ModuleType("testing")
 mod.__package__ = mod.__name__
 mod.__file__ = "SomeFile"
 

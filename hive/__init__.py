@@ -36,11 +36,10 @@ from .contexts import (get_building_hive, get_mode, get_run_hive, get_matchmaker
 from .manager import memo_property, memoize, MemoProperty, ModeFactory
 
 # i primitives
-# from .triggerfunc import triggerfunc
-# from .triggerable import triggerable
 from .modifier import modifier
 from .ppin import push_in, pull_in
 from .ppout import push_out, pull_out
+from .relay import relay
 
 # connection primitives
 from .connect import connect

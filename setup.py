@@ -6,7 +6,7 @@ setup(name='HIVE',
       author='Sjoerd De Vries & Angus Hollands',
       author_email='goosey15+hive@gmail.com',
       url='https://github.com/agoose77/hive2',
-      packages=['aphid', 'dragonfly', 'hive', 'hive_editor', 'hive_testing', 'sparta'],
+      packages=['aphid', 'dragonfly', 'hive', 'hive_editor', 'testing', 'sparta'],
       include_package_data=True,
       scripts=['run_qt_gui.py'],
 

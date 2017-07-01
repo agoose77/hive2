@@ -4,10 +4,8 @@ from .manager import ModeFactory, memoize
 from .protocols import TriggerSource, TriggerTarget, ConnectSource, Callable, Bee, Bindable, Nameable
 
 
-class Relay(Bee, TriggerSource, ConnectSource, Callable, Nameable):
+class Relay(Bee, TriggerSource, TriggerTarget, Callable, Nameable):
     """Callable interface to HIVE (pre)trigger"""
-
-    data_type = 'trigger'
 
     def __init__(self):
         self._trigger = Pusher(self)
@@ -26,26 +24,12 @@ class Relay(Bee, TriggerSource, ConnectSource, Callable, Nameable):
     def _hive_trigger_target(self):
         return self.trigger
 
-    def _hive_is_connectable_target(self, source):
-        if not isinstance(source, TriggerSource):
-            raise HiveConnectionError("Source does not implement TriggerSource: {}".format(source))
-
-    def _hive_connect_target(self, source):
-        pass
-
     def _hive_trigger_source(self, target_func):
         self._trigger.add_target(target_func)
 
     def _hive_pretrigger_source(self, target_func):
         self._pretrigger.add_target(target_func)
 
-    def _hive_is_connectable_source(self, target):
-        if not isinstance(target, TriggerTarget):
-            raise HiveConnectionError("Target {} does not implement TriggerTarget".format(target))
-
-    def _hive_connect_source(self, target):
-        target_func = target._hive_trigger_target()
-        self._trigger.add_target(target_func)
 
     def __repr__(self):
         return "Relay()"
