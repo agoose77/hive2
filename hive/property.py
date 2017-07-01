@@ -29,12 +29,12 @@ class Property(Bindable, Stateful, Nameable):
         return self._data_type
 
     def _hive_stateful_getter(self, run_hive):
-        instance = run_hive._hive_build_class_to_instance[self._cls]
+        instance = run_hive._drone_class_to_instance[self._cls]
 
         return getattr(instance, self._attr)
 
     def _hive_stateful_setter(self, run_hive, value):
-        instance = run_hive._hive_build_class_to_instance[self._cls]
+        instance = run_hive._drone_class_to_instance[self._cls]
 
         setattr(instance, self._attr, value)
 
@@ -42,7 +42,7 @@ class Property(Bindable, Stateful, Nameable):
     def bind(self, run_hive):
         self._bound.add(run_hive)
 
-        instance = run_hive._hive_build_class_to_instance[self._cls]
+        instance = run_hive._drone_class_to_instance[self._cls]
 
         start_value = self.start_value
         if start_value is not None or not hasattr(instance, self._attr):

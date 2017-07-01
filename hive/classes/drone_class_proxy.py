@@ -32,12 +32,12 @@ class HiveClassProxy(object):
         else:
             return value
 
-    def __setattr__(self, attr):
+    def __setattr__(self, name, value):
         raise AttributeError("HiveMethodWrapper of class '{}' is read-only".format(self._cls.__name__))
 
     def __repr__(self):
-        self_cls = object.__getattribute__(self, "__class__")
-        wrapped_cls = object.__getattribute__(self, "_cls")
+        self_cls = self.__class__
+        wrapped_cls = self._cls
         return "{}({})".format(self_cls.__name__, wrapped_cls)
 
     def _property_from_descriptor(self, attr, prop):

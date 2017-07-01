@@ -12,7 +12,7 @@ class MappingObject:
         """MappingObject initialiser"""
         if not isinstance(ordered_mapping, OrderedDict):
             raise ValueError("Expected OrderedDict")
-        self._ordered_mapping = OrderedDict()
+        object.__setattr__(self, '_ordered_mapping', OrderedDict())
 
     @property
     def _repr_name(self):
@@ -28,9 +28,7 @@ class MappingObject:
         raise AttributeError("Cannot delete attributes from {}".format(self._repr_name))
 
     def __setattr__(self, name, value):
-        if not name.startswith("_"):
-            raise AttributeError("Cannot modify attributes on {}".format(self._repr_name))
-        super().__setattr__(name, value)
+        raise AttributeError("Cannot modify attributes on {}".format(self._repr_name))
 
     def __bool__(self):
         return bool(self._ordered_mapping)
@@ -57,7 +55,7 @@ class MutableMappingObject(MappingObject):
             ordered_mapping = OrderedDict()
         super().__init__(ordered_mapping)
 
-        self._validator = validator
+        object.__setattr__(self, '_validator', validator)
 
     def _validate_attribute(self, name: str, value):
         if self._validator is not None:
@@ -82,7 +80,7 @@ class HiveObjectWrapperBase(MutableMappingObject, ABC):
     _wrapper_name = abstractproperty()
 
     def __init__(self, hive_object_class, validator=None):
-        self._hive_object_class = hive_object_class
+        object.__setattr__(self, '_hive_object_class', hive_object_class)
 
         super().__init__(validator=validator)
 
@@ -221,14 +219,14 @@ class HiveParentWrapperBase(MutableMappingObject, ABC):
     """Base class for wrapper which refers to its parent hive class"""
     _wrapper_name = abstractproperty()
 
-    def __init__(self, hive_parent_cls, validator=None):
-        self._hive_parent_cls = hive_parent_cls
+    def __init__(self, hive_parent_class, validator=None):
+        object.__setattr__(self, '_hive_parent_class', hive_parent_class)
 
         super().__init__(validator=validator)
 
     @property
     def _repr_name(self):
-        return "{}.{}".format(self._hive_parent_cls.__name__, self._wrapper_name)
+        return "{}.{}".format(self._hive_parent_class.__name__, self._wrapper_name)
 
 
 class MetaArgsWrapper(HiveParentWrapperBase, ArgWrapperBase):
@@ -247,8 +245,8 @@ class ResolvedArgWrapper(MappingObject):
         ordered_name_to_value = OrderedDict(((n, name_to_value[n]) for n, p in wrapper))
         super().__init__(ordered_name_to_value)
 
-        self._wrapper = wrapper
-        self._param_to_name = {p: n for n, p in wrapper}
+        object.__setattr__(self, '_wrapper', wrapper)
+        object.__setattr__(self, '_param_to_name', {p: n for n, p in wrapper})
 
     @property
     def _repr_name(self):
