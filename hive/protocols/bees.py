@@ -22,11 +22,10 @@ logger = getLogger(__name__)
 class Bee:
     # TODO: resolve method for arguments that are bees (returns a new HiveBee class?)
 
-    _parent_hive_object_cls = None
-    _hive_wrapper_name = None
+    _parent_hive_object_class = None
 
     def __init__(self):
-        self._parent_hive_object_cls = get_building_hive()
+        self._parent_hive_object_class = get_building_hive()
         if get_building_hive() is None:
             logger.warning("Building hive is none for {}, is this the root hive?".format(self))
 

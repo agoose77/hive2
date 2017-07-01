@@ -5,8 +5,6 @@ from ..manager import memo_property
 
 
 class Parameter:
-    _hive_parameter_name = None
-
     start_value = None
     data_type = None
     options = None
@@ -22,7 +20,7 @@ RuntimeAlias = namedtuple("RuntimeAlias", "parent_ref name")
 
 
 class Nameable:
-    # TOOD move this to bee
+
     @memo_property
     def _hive_runtime_aliases(self):
         return set()

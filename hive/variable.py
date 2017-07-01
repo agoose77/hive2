@@ -34,7 +34,7 @@ class Variable(Bindable, Stateful, Nameable):
         start_value = self.start_value
 
         if isinstance(start_value, Parameter):
-            start_value = run_hive._hive_object._hive_args_frozen.get_parameter_value(start_value)
+            start_value = run_hive._hive_object._hive_args_frozen.resolve_parameter(start_value)
 
         self._values[run_hive] = start_value
         return self

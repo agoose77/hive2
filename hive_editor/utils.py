@@ -226,7 +226,7 @@ def hive_object_instance_from_import_result(import_result, params):
         else:
             # Get HiveObject class
             meta_args = params.get("meta_args", {})
-            _, _, hive_object_cls = import_result.cls._hive_get_hive_object_class_for((), meta_args)
+            _, _, hive_object_cls = import_result.cls._build_hive_object_from_arguments((), meta_args)
 
         # Get RuntimeHive instance
         args = params.get("args", {}).copy()

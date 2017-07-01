@@ -6,6 +6,7 @@ from collections.abc import Collection
 
 
 class HiveParameter(Parameter):
+
     def __init__(self, data_type='', start_value=Parameter.no_value, options=None):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
