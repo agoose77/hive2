@@ -81,9 +81,8 @@ class RuntimeHive(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource
         super().__init__()
 
         self._hive_object = hive_object
-        self._hive_build_class_to_instance = {}
-        self._hive_bee_instances = {}
-        self._bee_names = ["_drones"]
+        self._drone_class_to_instance = {}
+        self._name_to_runtime_bee = {}
         self._drones = []
 
         with run_hive_as(self):
@@ -94,15 +93,15 @@ class RuntimeHive(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource
             for builder, builder_cls in builders:
 
                 if builder_cls is not None:
-                    assert builder_cls not in self._hive_build_class_to_instance, builder_cls
+                    assert builder_cls not in self._drone_class_to_instance, builder_cls
 
                     # Do not initialise instance yet
-                    build_class_instance = builder_cls.__new__(builder_cls)
+                    drone = builder_cls.__new__(builder_cls)
 
-                    self._hive_build_class_to_instance[builder_cls] = build_class_instance
-                    self._drones.append(build_class_instance)
+                    self._drone_class_to_instance[builder_cls] = drone
+                    self._drones.append(drone)
 
-                    build_class_instance.__init__(*args, **kwargs)
+                    drone.__init__(*args, **kwargs)
 
             with building_hive_as(hive_object.__class__), hive_mode_as("build"):
                 # Add external bees to runtime hive
@@ -156,8 +155,7 @@ class RuntimeHive(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource
                         continue
 
                     # Risk that multiple references to same bee exist
-                    self._hive_bee_instances[bee_name] = instance
-                    self._bee_names.append(bee_name)
+                    self._name_to_runtime_bee[bee_name] = instance
 
                     setattr(self, bee_name, instance)
 
@@ -173,12 +171,12 @@ class RuntimeHive(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource
 
     def _hive_trigger_source(self, target_func):
         source_name = self._hive_object._hive_find_trigger_source()
-        instance = self._hive_bee_instances[source_name]
+        instance = self._name_to_runtime_bee[source_name]
         return instance._hive_trigger_source(target_func)
 
     def _hive_trigger_target(self):
         target_name = self._hive_object._hive_find_trigger_target()
-        instance = self._hive_bee_instances[target_name]
+        instance = self._name_to_runtime_bee[target_name]
         return instance._hive_trigger_target()
 
     def _hive_get_connect_source(self, target):

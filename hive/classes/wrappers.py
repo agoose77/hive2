@@ -36,7 +36,7 @@ class MappingObject:
         return bool(self._ordered_mapping)
 
     def __dir__(self):
-        return tuple(self._ordered_mapping)
+        return super().__dir__() + tuple(self._ordered_mapping)
 
     def __iter__(self):
         return iter(self._ordered_mapping.items())
