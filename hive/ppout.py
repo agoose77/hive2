@@ -124,15 +124,15 @@ class PPOutBuilder(Output, ConnectSource, TriggerSource, Exportable):
             raise ValueError(data_type)
 
         # TODO: IMP sane as ppinbee
-        is_stateful = isinstance(target, Stateful)
+        is_stateful = target.implements(Stateful)
 
-        # assert is_stateful or callable(target) or target.implements(Callable)  # TODO: nice error message
-        #
-        # if is_stateful:
-        #     data_type = target.data_type
-        #
-        # elif data_type_is_untyped(data_type):
-        #     data_type = get_return_type(target)
+        assert is_stateful or callable(target) or target.implements(Callable)  # TODO: nice error message
+
+        if is_stateful:
+            data_type = target.data_type
+
+        elif data_type_is_untyped(data_type):
+            data_type = get_return_type(target)
 
         self.data_type = data_type
         self.target = target
@@ -146,7 +146,7 @@ class PPOutBuilder(Output, ConnectSource, TriggerSource, Exportable):
         else:
             cls = PullOut
 
-        return cls(self.target.bind(run_hive), data_type=self.data_type, run_hive=run_hive)
+        return cls(self.target.bind(run_hive), data_type=self.data_type)
 
     def __repr__(self):
         return "{}({!r}, {!r})".format(self.__class__.__name__, self.target, self.data_type)

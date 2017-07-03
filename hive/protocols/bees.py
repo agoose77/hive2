@@ -42,9 +42,6 @@ class Bee:
     def bind(self, runtime_hive):
         return self
 
-    def getinstance(self, hive_object):
-        return self
-
 
 class Bindable(Bee):
     pass

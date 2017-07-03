@@ -1,5 +1,5 @@
 from ..method import Method
-from ..property import Property
+# from ..property import Property
 
 from ..annotations import get_argument_options, get_return_type
 from ..compatability import is_method

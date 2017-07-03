@@ -1,67 +1,71 @@
-from weakref import WeakSet
-
-from builtins import property as py_property
-
-from .contexts import get_mode
-from .manager import memoize
-from .protocols import Stateful, Exportable, Bindable, Parameter, Nameable
+from .manager import ModeFactory, memoize
+from .protocols import Bee, Stateful, Bindable, Parameter
+from .stateful import StatefulBuilder, StatefulRuntime
 from .typing import is_valid_data_type
 
 
-class Property(Bindable, Stateful, Nameable):
-    """Interface to bind class attributes"""
-
-    def __init__(self, cls, attr, data_type, start_value):
-        if not is_valid_data_type(data_type):
-            raise ValueError(data_type)
-
-        self._bound = WeakSet()
-        self._cls = cls
-        self._attr = attr
+class RuntimeProperty(StatefulRuntime, Bee):
+    def __init__(self, run_hive, data_type, start_value, parent):
         self._data_type = data_type
+        self._start_value = start_value
 
-        self.start_value = start_value
+        if isinstance(start_value, Parameter):
+            start_value = run_hive._hive_object._hive_args_frozen.get_parameter_value(start_value)
 
-        super().__init__()
+        self._value = start_value
 
-    @py_property
+        super().__init__(run_hive, parent)
+
+    @property
     def data_type(self):
         return self._data_type
 
-    def _hive_stateful_getter(self, run_hive):
-        instance = run_hive._drone_class_to_instance[self._cls]
+    @property
+    def start_value(self):
+        return self._start_value
 
-        return getattr(instance, self._attr)
+    def _hive_stateful_getter(self):
+        return self._value
 
-    def _hive_stateful_setter(self, run_hive, value):
-        instance = run_hive._drone_class_to_instance[self._cls]
+    def _hive_stateful_setter(self, value):
+        self._value = value
 
-        setattr(instance, self._attr, value)
+    def __repr__(self):
+        return "RuntimeProperty({!r}, {!r}, {!r})".format(self._run_hive, self._data_type, self._start_value)
+
+
+class BuilderProperty(Bindable, StatefulBuilder):
+    """Stateful data store object"""
+
+    def __init__(self, data_type='', start_value=None):
+        if not is_valid_data_type(data_type):
+            raise ValueError(data_type)
+
+        self._data_type = data_type
+        self._start_value = start_value
+
+        super().__init__()
+
+    @property
+    def data_type(self):
+        return self._data_type
+
+    @property
+    def start_value(self):
+        return self._start_value
 
     @memoize
     def bind(self, run_hive):
-        self._bound.add(run_hive)
+        return RuntimeProperty(run_hive, self._data_type, self._start_value, self)
 
-        instance = run_hive._drone_class_to_instance[self._cls]
+    def implements(self, cls):
+        if cls is Stateful:
+            return True
 
-        start_value = self.start_value
-        if start_value is not None or not hasattr(instance, self._attr):
-            if isinstance(start_value, Parameter):
-                start_value = run_hive._hive_object._hive_args_frozen.resolve_parameter(start_value)
-
-            setattr(instance, self._attr, start_value)
-
-        return self
+        return super().implements(cls)
 
     def __repr__(self):
-        return "Property({!r}, {!r}, {!r}, {!r})".format(self._cls, self._attr, self._data_type, self.start_value)
+        return "BuilderProperty({!r}, {!r})".format(self._data_type, self._start_value)
 
 
-def property(cls, attr, data_type="", start_value=None):
-    if get_mode() == "immediate":
-        raise ValueError("hive.property cannot be used in immediate mode")
-
-    from .classes import DroneClassProxy
-    assert isinstance(cls, DroneClassProxy), "hive.property(cls) must be the cls argument in build(cls, i, ex, args)"
-
-    return Property(cls._cls, attr, data_type, start_value)
+property = ModeFactory("hive.property", build=BuilderProperty, immediate=RuntimeProperty)

@@ -17,8 +17,10 @@ def get_callable_data_type(target):
     return next(iter(arg_types.values()), None)
 
 
+# TODO if we can only wrap a stateful object then we can remove the data type arg
 class PPInBase(Bindable, Antenna, ConnectTarget, TriggerSource, Exportable):
-    def __init__(self, target, data_type='', run_hive=None):
+
+    def __init__(self, target, data_type=''):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
 
@@ -28,7 +30,7 @@ class PPInBase(Bindable, Antenna, ConnectTarget, TriggerSource, Exportable):
         if isinstance(target, Stateful):
             data_type = target.data_type
             # If not yet bound, set_value will have None for run hive!
-            self._set_value = partial(target._hive_stateful_setter, run_hive)
+            self._set_value = target._hive_stateful_setter
 
         else:
             if data_type_is_untyped(data_type):
@@ -38,7 +40,6 @@ class PPInBase(Bindable, Antenna, ConnectTarget, TriggerSource, Exportable):
         self.target = target
         self.data_type = data_type
 
-        self._run_hive = run_hive
         self._trigger = Pusher(self)
         self._pretrigger = Pusher(self)
 
@@ -50,19 +51,8 @@ class PPInBase(Bindable, Antenna, ConnectTarget, TriggerSource, Exportable):
     def _hive_pretrigger_source(self, func):
         self._pretrigger.add_target(func)
 
-    @memoize
-    def bind(self, run_hive):
-        if self._run_hive:
-            return self
-
-        target = self.target
-        if isinstance(target, Bindable):
-            target = target.bind(run_hive)
-
-        return self.__class__(target, data_type=self.data_type, run_hive=run_hive)
-
     def __repr__(self):
-        return "{}({!r}, {!r}, {!r})".format(self.__class__.__name__, self.target, self.data_type, self._run_hive)
+        return "{}({!r}, {!r})".format(self.__class__.__name__, self.target, self.data_type)
 
 
 class PushIn(PPInBase):
@@ -132,9 +122,7 @@ class PPInBuilder(Bee, Antenna, ConnectTarget, TriggerSource):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
 
-        # TODO: IMP - here we want an actually stateful object, or a resolvebee to a stateful object
-        # In other words, something that resolves to something implementing the stateful protocol
-        is_stateful = isinstance(target, Stateful)
+        is_stateful = target.implements(Stateful)
         if not (is_stateful or target.implements(Callable)):
             raise TypeError("Target must implement Callable or Stateful protocol")
 
@@ -150,16 +138,14 @@ class PPInBuilder(Bee, Antenna, ConnectTarget, TriggerSource):
         super().__init__()
 
     @memoize
-    def getinstance(self, hive_object):
-        target = self.target
-
-        if isinstance(target, Bee):
-            target = target.getinstance(hive_object)
-
+    def bind(self, run_hive):
         if self.mode == "push":
-            return PushIn(target, data_type=self.data_type)
+            cls = PushIn
+        else:
+            cls = PullIn
 
-        return PullIn(target, data_type=self.data_type)
+        return cls(self.target.bind(run_hive), data_type=self.data_type)
+
 
     def __repr__(self):
         return "{}({!r}, {!r})".format(self.__class__.__name__, self.target, self.data_type)

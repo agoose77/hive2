@@ -46,7 +46,7 @@ class ResolveBee(Exportable):
         return result
 
     def __repr__(self):
-        return "[{}]{}".format(self._defining_hive_object.__class__.__name__, self._bee)
+        return "RB[{}]{}".format(self._defining_hive_object.__class__.__name__, self._bee)
 
     def export(self):
         return self
@@ -56,7 +56,6 @@ class ResolveBee(Exportable):
         
         :param redirected_hive_object: TODO
         """ # TODO
-
         # Hive instance to which the ResolveBee belongs
         run_hive = self._defining_hive_object.bind(containing_instance)
         return self._bee.bind(run_hive)
@@ -64,5 +63,16 @@ class ResolveBee(Exportable):
     def implements(self, cls):
         return self._bee.implements(cls)
 
+
+class DescriptorResolveBee(ResolveBee):
+
+    def __get__(self, instance, owner):
+        return self._bee.__get__(instance, owner)
+
+    def __set__(self, instance, value):
+        return self._bee.__set__(instance, value)
+
+    def __delete__(self, instance):
+        return self._bee.__delete_(instance)
 
 resolve_bee = ModeFactory("hive.resolve_bee", build=ResolveBee)

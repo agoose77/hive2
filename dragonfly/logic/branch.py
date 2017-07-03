@@ -1,37 +1,27 @@
 import hive
 
 
-def declare_switch(meta_args):
-    meta_args.data_type = hive.parameter("str", "bool")
-
-
-def evaluate_switch(self):
-    if self.switch:
-        self._true()
+def evaluate_switch(self, i):
+    if i.switch.value:
+        i.on_true()
 
     else:
-        self._false()
+        i.on_false()
 
 
 def build_switch(i, ex, args, meta_args):
     """Redirect input trigger to true / false outputs according to boolean evaluation of switch value"""
-    ex.switch = hive.variable(meta_args.data_type)
+    i.switch = hive.variable()
+    ex.input = i.switch.push_in
 
-    i.input = hive.pull_in(ex.switch)
-    ex.input = hive.antenna(i.input)
+    i.on_true = hive.triggerfunc()
+    ex.true = i.true.triggered
 
-    i.true = hive.triggerfunc()
-    ex.true = hive.hook(i.true)
+    i.on_false = hive.triggerfunc()
+    ex.false = i.false.triggered
 
-    i.false = hive.triggerfunc()
-    ex.false = hive.hook(i.false)
-
-    i.do_evaluate = hive.modifier(evaluate_switch)
-    i.do_trigger = hive.triggerfunc(i.do_evaluate)
-    hive.trigger(i.do_trigger, i.input, pretrigger=True)
-
-    i.on_trigger = hive.triggerable(i.do_trigger)
-    ex.trigger = hive.entry(i.on_trigger)
+    i.evaluate_input = hive.modifier(evaluate_switch)
+    ex.input.push_in.trigger(i.evaluate_input)
 
 
-Branch = hive.dyna_hive("Switch", build_switch, declare_switch)
+Switch = hive.hive("Switch", build_switch)

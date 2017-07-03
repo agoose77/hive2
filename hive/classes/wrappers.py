@@ -13,7 +13,7 @@ class ImmutableAttributeMapping:
         if not isinstance(ordered_mapping, OrderedDict):
             raise ValueError("Expected OrderedDict")
         object.__setattr__(self, '_name', name)
-        object.__setattr__(self, '_ordered_mapping', OrderedDict())
+        object.__setattr__(self, '_ordered_mapping', ordered_mapping)
 
     def __getattr__(self, name):
         try:
@@ -51,10 +51,11 @@ class AttributeMapping(ImmutableAttributeMapping):
         :param ordered_mapping: default values for attributes
         :param validator: validate attributes before they're set
         """
+        object.__setattr__(self, '_validator', validator)
+
         if ordered_mapping is None:
             ordered_mapping = OrderedDict()
 
-        object.__setattr__(self, '_validator', validator)
         super().__init__(name, ordered_mapping)
 
     def _validate_attribute(self, name: str, value):
@@ -132,11 +133,10 @@ class ArgWrapper(AttributeMapping):
         parameter_dict = {}
 
         for name, param in self._ordered_mapping.items():
-            value = parameters[name]
-
             parameter = self._ordered_mapping[name]
-
             options = parameter.options
+
+            value = parameters[name]
             if options is not None and value not in options:
                 raise ValueError("Invalid value for {}: {!r} is not in the permitted options {}"
                                  .format(name, value, options))
@@ -164,7 +164,6 @@ class ArgWrapper(AttributeMapping):
             # If param name in kwargs dict, switch to kwargs
             if name in kwargs:
                 break
-
             value = next(iter_args)  # TODO error
             found_param_values[name] = value
 
@@ -174,7 +173,6 @@ class ArgWrapper(AttributeMapping):
         for name in kwargs:
             if name not in self._ordered_mapping:
                 continue
-
             if name in found_param_values:
                 raise ValueError("Multiple values for {}".format(name))
 
@@ -182,7 +180,6 @@ class ArgWrapper(AttributeMapping):
 
         # Build defaults
         all_param_values = {}
-
         for name, parameter in self._ordered_mapping.items():
             try:
                 value = found_param_values[name]
@@ -213,7 +210,6 @@ class ResolvedArgWrapper(ImmutableAttributeMapping):
         :param resolved_mapping: OrderedDict mapping """
         object.__setattr__(self, '_param_to_name', {p: n for n, p in name_to_param.items()})
         ordered_name_to_value = OrderedDict(((n, name_to_value[n]) for n, p in name_to_param.items()))
-
         super().__init__(name, ordered_name_to_value)
 
     def resolve_parameter(self, parameter):
@@ -223,5 +219,3 @@ class ResolvedArgWrapper(ImmutableAttributeMapping):
         """
         name = self._param_to_name[parameter]
         return self._ordered_mapping[name]
-
-

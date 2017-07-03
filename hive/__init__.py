@@ -49,7 +49,7 @@ from .connect import connect
 from .trigger import trigger
 
 # i/ex primitives
-from .property_descriptor import property_descriptor
+from .stateful_descriptor import stateful_descriptor
 
 # ex primitives
 from .socket import socket

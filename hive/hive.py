@@ -3,91 +3,20 @@ from collections import namedtuple
 from functools import wraps
 from inspect import currentframe, getmodule, isclass
 from itertools import count, chain
-from weakref import ref
 
 from .classes import (AttributeMapping, InternalValidator, ExternalValidator, ArgWrapper, validate_args,
-                      DroneClassProxy, HiveDescriptor, HiveProperty)
+                      DroneClassProxy, HiveDescriptorProxy)
 from .compatability import next, validate_signature
 from .connect import ConnectionCandidate
 from .contexts import (bee_register_context, get_mode, hive_mode_as, building_hive_as, run_hive_as,
                        get_building_hive)
 from .manager import memoize
-from .protocols import Callable, Bindable, Bee, ConnectTargetDerived, ConnectSourceDerived, TriggerSource, \
-    TriggerTarget, Nameable, ConnectSource, ConnectTarget
-from .protocols import Descriptor  # TODO cleanup
+from .protocols import Bee, ConnectTargetDerived, ConnectSourceDerived, TriggerSource, \
+    TriggerTarget, Nameable, ConnectSource, ConnectTarget, Descriptor
 from .resolve_bee import ResolveBee
 from .typing import MatchFlags, data_types_match
 
 MatchmakerConnectivityState = namedtuple("MatchmakerConnectivityState", "active_policies plugins sockets")
-
-
-class RedirectedDescriptorProxy:
-    """Proxy"""
-
-    def __init__(self, descriptor):
-        object.__setattr__(self, '_descriptor', descriptor)
-
-    def __getattr__(self, name):
-        return getattr(self._descriptor, name)
-
-    def __setattr__(self, name, value):
-        return setattr(self._descriptor, name, value)
-
-    def __get__(self, wrapper, owner):
-        if wrapper is None:
-            return self
-
-        return self._descriptor.__get__(wrapper._run_hive, owner)
-
-    def __set__(self, wrapper, value):
-        return self._descriptor.__set__(wrapper._run_hive, value)
-
-    def __delete__(self, wrapper, value):
-        return self._descriptor.__set__(wrapper._run_hive)
-
-
-def redirect_hive_descriptor(descriptor):
-    # if isinstance(descriptor, HiveProperty):
-    #     return redirected_hive_property(descriptor)
-
-    if descriptor._hive_redirect_self_descriptor:
-        return RedirectedDescriptorProxy(descriptor)
-    return descriptor
-
-
-def redirected_hive_property(prop):
-    """Modify "self" argument of internal wrapper to point to run hive"""
-    fget = prop.fget
-    fset = prop.fset
-    fdel = prop.fdel
-
-    if prop._hive_redirect_self_descriptor:
-        getter = None
-        setter = None
-        deleter = None
-
-        if fget is not None:
-            @wraps(fget)
-            def getter(wrapper):
-                return fget(wrapper._run_hive)
-
-        if fset is not None:
-            @wraps(fset)
-            def setter(wrapper, value):
-                return fset(wrapper._run_hive, value)
-
-        if fdel is not None:
-            @wraps(fdel)
-            def deleter(wrapper):
-                return fdel(wrapper._run_hive)
-
-    else:
-        getter = fget
-        setter = fset
-        deleter = fdel
-
-
-    return property(getter, setter, deleter, prop.__doc__)
 
 
 def generate_anonymous_names(fmt_string='anonymous_bee_{}'):
@@ -127,7 +56,6 @@ def validate_internal_name(attr_name):
 
     if hasattr(RuntimeHive, internal_name):
         raise AttributeError('Cannot overwrite special attribute RuntimeHive.{}'.format(attr_name))
-
 
 
 class HiveInternalRuntimeWrapper:
@@ -171,26 +99,26 @@ class RuntimeHive(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource
 
             with building_hive_as(hive_object.__class__), hive_mode_as("build"):
                 # Add external bees to runtime hive
-                exposed_bees = []
-
                 external_bees = hive_object._hive_ex
                 for bee_name, bee in external_bees:
+                    if bee.implements(Descriptor):
+                        continue
+
                     # TODO: nice exception reporting
                     instance = bee.bind(self)
-                    print("BIND", bee, instance)
                     if instance is None:
                         continue
 
                     # Store runtime information on exported bee # TODO rethink this
                     # if isinstance(instance, Nameable):
                     #     instance.register_alias(self, bee_name)
-
-                    exposed_bees.append((bee_name, instance))
+                    setattr(self, bee_name, instance)
 
                 # Add internal bees (that are hives, Callable or Stateful) to runtime hive
                 internal_bees = hive_object._hive_i
                 for bee_name, bee in internal_bees:
-
+                    if bee.implements(Descriptor):
+                        continue
                     # Some runtime hive attributes are protected, but in the case of Stateful bees,
                     # The RuntimeHive already has corresponding property descriptors
                     # Bee.implements indicates that the final bee (following bee.getinstance(...)) will be Stateful
@@ -200,22 +128,7 @@ class RuntimeHive(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource
                     if instance is None:
                         continue
 
-                    # Store runtime information on exported bee # TODO rethink this
-                    # if isinstance(instance, Nameable):
-                    #     instance.register_alias(self, bee_name)
-
-                    if bee.implements(HiveObject) or bee.implements(Callable):
-                        # exposed_bees.append((private_name, instance))
-                        setattr(hive_i, bee_name, instance)
-
-                for bee_name, instance in exposed_bees:
-                    if isinstance(instance, Descriptor):
-                        continue
-
-                    # Risk that multiple references to same bee exist
-                    self._name_to_runtime_bee[bee_name] = instance
-
-                    setattr(self, bee_name, instance)
+                    setattr(hive_i, bee_name, instance)
 
     @staticmethod
     def _hive_can_connect_hive(other):
@@ -298,6 +211,7 @@ class HiveObject(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource,
             external_bees = self._hive_ex
             for bee_name, bee in external_bees:
                 # ResolveBee.export returns self, (to support multiple indirectino) so we must export target here
+                # TODO this is crap. Instead return descriptorproxy at of resolvebee chain?
                 resolve_bee = ResolveBee(bee, self)
 
                 setattr(self, bee_name, resolve_bee)
@@ -598,25 +512,21 @@ class HiveBuilder:
 
         # Build runtime hive class
         run_hive_cls_name = "{}(RuntimeHive)".format(cls.__name__)
-        run_hive_class_dict = {"__doc__": cls.__doc__, "__module__": cls.__module__}
 
         # For internal bees
-        internal_proxy_dict = {}
-        for bee_name, bee in internals:
-            # If the bee requires a property interface, build a property
-            if not bee.implements(Descriptor):
-                continue
+        internal_proxy_dict = {name: HiveDescriptorProxy(bee, internal=True)
+                               for name, bee in internals
+                               if bee.implements(Descriptor)}
 
-            internal_proxy_dict[bee_name] = redirect_hive_descriptor(bee)
-
-        run_hive_class_dict['_hive_i_class'] = type("{}._hive_i".format(run_hive_cls_name),
+        hive_i_class = type("{}._hive_i".format(run_hive_cls_name),
                                                     (HiveInternalRuntimeWrapper,), internal_proxy_dict)
+        run_hive_class_dict = {"__doc__": cls.__doc__, "__module__": cls.__module__, '_hive_i_class': hive_i_class}
 
         # For external bees
         for bee_name, bee in externals:
             # If the bee requires a property interface, build a property
             if bee.implements(Descriptor):
-                run_hive_class_dict[bee_name] = bee
+                run_hive_class_dict[bee_name] = HiveDescriptorProxy(bee)  #
 
         hive_object_class._hive_runtime_class = type(run_hive_cls_name, (RuntimeHive,), run_hive_class_dict)
         return hive_object_class
