@@ -5,7 +5,7 @@ from .classes import Pusher
 from .exception import HiveConnectionError
 from .manager import memoize, ModeFactory
 from .protocols import (Antenna, Output, Stateful, ConnectTarget, TriggerSource, TriggerTarget, Bindable, Callable,
-                        Nameable, Bee)
+                        Exportable, Bee)
 from .typing import data_type_is_untyped, data_types_match, MatchFlags, is_valid_data_type
 
 
@@ -17,7 +17,7 @@ def get_callable_data_type(target):
     return next(iter(arg_types.values()), None)
 
 
-class PPInBase(Bindable, Antenna, ConnectTarget, TriggerSource, Nameable):
+class PPInBase(Bindable, Antenna, ConnectTarget, TriggerSource, Exportable):
     def __init__(self, target, data_type='', run_hive=None):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)

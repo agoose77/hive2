@@ -31,7 +31,8 @@ from .typing import (data_types_match, MatchFlags, parse_type_string, data_type_
                      find_matching_ast, type_asts_match, CompositeType, SimpleType, SequenceType, MappingType, Type,
                      TypeName, AnyType, get_base_data_type)
 from .identifier import is_valid_identifier
-from .contexts import (get_building_hive, get_mode, get_run_hive, get_matchmaker_validation_enabled, set_matchmaker_validation_enabled,
+from .contexts import (get_building_hive, get_mode, get_run_hive, get_matchmaker_validation_enabled,
+                       set_matchmaker_validation_enabled,
                        matchmaker_validation_enabled_as)
 from .manager import memo_property, memoize, MemoProperty, ModeFactory
 
@@ -40,24 +41,20 @@ from .modifier import modifier
 from .ppin import push_in, pull_in
 from .ppout import push_out, pull_out
 from .relay import relay
+from .property import property
+from .variable import variable
 
 # connection primitives
 from .connect import connect
 from .trigger import trigger
 
 # i/ex primitives
-from .property import property
-from .variable import variable
+from .property_descriptor import property_descriptor
 
 # ex primitives
-from .entry import entry
-from .view import view
-from .hook import hook
 from .socket import socket
 from .plugin import plugin
 from .policies import SingleOptional, SingleRequired, MultipleOptional, MultipleRequired
-from .antenna import antenna
-from .output import output
 
 # args primitives
 from .parameter import parameter

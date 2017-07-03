@@ -1,4 +1,4 @@
-from abc import ABC, abstractproperty
+from abc import ABC, abstractmethod
 from collections import OrderedDict, namedtuple
 
 from ..compatability import next
@@ -7,28 +7,25 @@ from ..protocols import Bee, Exportable, Parameter
 ExtractedArguments = namedtuple("ExtractedArguments", "args kwargs parameter_values")
 
 
-class MappingObject:
-    def __init__(self, ordered_mapping):
-        """MappingObject initialiser"""
+class ImmutableAttributeMapping:
+    def __init__(self, name: str, ordered_mapping: OrderedDict):
+        """ImmutableAttributeMapping initialiser"""
         if not isinstance(ordered_mapping, OrderedDict):
             raise ValueError("Expected OrderedDict")
+        object.__setattr__(self, '_name', name)
         object.__setattr__(self, '_ordered_mapping', OrderedDict())
-
-    @property
-    def _repr_name(self):
-        return repr(self)
 
     def __getattr__(self, name):
         try:
             return self._ordered_mapping[name]
         except KeyError:
-            raise AttributeError("{} has no attribute {!r}".format(self._repr_name, name))
+            raise AttributeError("{} has no attribute {!r}".format(self._name, name))
 
     def __delattr_(self, name):
-        raise AttributeError("Cannot delete attributes from {}".format(self._repr_name))
+        raise AttributeError("Cannot delete attributes from {}".format(self._name))
 
     def __setattr__(self, name, value):
-        raise AttributeError("Cannot modify attributes on {}".format(self._repr_name))
+        raise AttributeError("Cannot modify attributes on {}".format(self._name))
 
     def __bool__(self):
         return bool(self._ordered_mapping)
@@ -39,13 +36,16 @@ class MappingObject:
     def __iter__(self):
         return iter(self._ordered_mapping.items())
 
-    def __repr__(self):
-        attributes_string = ', '.join("{}={!r}".format(k, v) for k, v in self._ordered_mapping.items())
-        return "{}({})".format(self._repr_name, attributes_string)
+    def __str__(self):
+        if self._ordered_mapping:
+            attributes_string = ', '.join("\n  .{} = {!r}".format(k, v) for k, v in self._ordered_mapping.items())
+            return "{}{}".format(self._name, attributes_string)
+        else:
+            return self._name
 
 
-class MutableMappingObject(MappingObject):
-    def __init__(self, ordered_mapping=None, validator=None):
+class AttributeMapping(ImmutableAttributeMapping):
+    def __init__(self, name: str, ordered_mapping: OrderedDict = None, validator=None):
         """MutableMaping initialiser
 
         :param ordered_mapping: default values for attributes
@@ -53,13 +53,16 @@ class MutableMappingObject(MappingObject):
         """
         if ordered_mapping is None:
             ordered_mapping = OrderedDict()
-        super().__init__(ordered_mapping)
 
         object.__setattr__(self, '_validator', validator)
+        super().__init__(name, ordered_mapping)
 
     def _validate_attribute(self, name: str, value):
         if self._validator is not None:
-            self._validator(name, value)
+            try:
+                self._validator(self, name, value)
+            except ValueError as err:
+                raise AttributeError("Error setting attribute {}.{}".format(self._name, name)) from err
 
     def __setattr__(self, name, value):
         if name.startswith("_"):
@@ -72,71 +75,54 @@ class MutableMappingObject(MappingObject):
         try:
             del self._ordered_mapping[name]
         except KeyError:
-            raise AttributeError("{} has no attribute {!r}".format(self._repr_name, name))
+            raise AttributeError("{} has no attribute {!r}".format(self._name, name))
 
 
-class HiveObjectWrapperBase(MutableMappingObject, ABC):
-    """Base class for wrappers belonging to HiveObject (i, ex)"""
-    _wrapper_name = abstractproperty()
+class ValidatorBase(ABC):
+    @abstractmethod
+    def __call__(self, wrapper: AttributeMapping, name: str, value):
+        pass
 
-    def __init__(self, hive_object_class, validator=None):
-        object.__setattr__(self, '_hive_object_class', hive_object_class)
 
-        super().__init__(validator=validator)
+class BaseBeeValidator(ValidatorBase):
+    """Validator for Bees which are associated with a HiveObject builder hive"""
 
-    @property
-    def _repr_name(self):
-        hive_name = self._hive_object_class._hive_parent_class.__name__
-        return "{}.{}".format(hive_name, self._wrapper_name)
+    def __init__(self, hive_object_class):
+        self._hive_object_class = hive_object_class
 
-    def _validate_attribute(self, name: str, value):
-        super()._validate_attribute(name, value)
+    def __call__(self, wrapper: AttributeMapping, name: str, value):
+        if not isinstance(value, Bee):
+            raise ValueError("Invalid attribute data type {}, expected a Bee instance".format(type(value)))
 
         if value._parent_hive_object_class is None:
-            raise AttributeError("{} bees must be defined inside the builder function"
-                                 .format(self._repr_name, name))
+            raise ValueError("Bees must be defined inside the builder function")
 
         # TODO should permit ResolveBees here
         if value._parent_hive_object_class is not self._hive_object_class:
-            raise AttributeError("{} bees cannot be built by a different hive".format(name))
+            raise ValueError("Bees cannot be built by a different hive")
 
 
-class InternalWrapper(HiveObjectWrapperBase):
-    _wrapper_name = "i"
-
-    def _validate_attribute(self, name: str, value):
-        super()._validate_attribute(name, value)
+class InternalValidator(BaseBeeValidator):
+    def __call__(self, wrapper, name: str, value):
+        super().__call__(wrapper, name, value)
 
         if not isinstance(value, Bee):
-            raise TypeError("{} attributes must be Bees ,not {}".format(self._repr_name, type(value)))
-
-        if isinstance(value, Exportable):
-            raise TypeError("{} attributes must not not be Exportable, Exportables should be added to ex"
-                            .format(self._repr_name))
+            raise ValueError("Attribute must be Bees not {}".format(type(value)))
 
 
-class ExternalWrapper(HiveObjectWrapperBase):
-    _wrapper_name = "ex"
-
-    def _validate_attribute(self, name: str, value):
-        super()._validate_attribute(name, value)
+class ExternalValidator(BaseBeeValidator):
+    def __call__(self, wrapper, name: str, value):
+        super().__call__(wrapper, name, value)
 
         if not isinstance(value, Bee):
-            raise TypeError("{} attributes must be Bees, not {}".format(self._repr_name, type(value)))
+            raise ValueError("Attribute must be Bee, not {}".format(type(value)))
 
         if not isinstance(value, Exportable):
-            raise TypeError("{} attributes must be Exportable".format(self._repr_name))
+            raise ValueError("Attribute must be Exportable")
 
 
-class ArgWrapperBase(MappingObject):
+class ArgWrapper(AttributeMapping):
     """Base class for hive argument wrappers"""
-
-    def _validate_attribute(self, name: str, value):
-        super()._validate_attribute(name, value)
-
-        if not isinstance(value, Parameter):
-            raise TypeError(self._format_message("attribute '{}' must be a Parameter, not '{}'"
-                                                 .format(name, value.__class__)))
 
     def freeze(self, parameters: dict):
         """Resolve all parameter values with their parameter objects and return FrozenHiveArgs view
@@ -157,7 +143,9 @@ class ArgWrapperBase(MappingObject):
 
             parameter_dict[name] = value
 
-        return ResolvedArgWrapper(self, parameter_dict)
+        name_to_param = self._ordered_mapping.copy()
+        name = "{}(resolved)".format(self._name)
+        return ResolvedArgWrapper(name, name_to_param, parameter_dict)
 
     def extract_from_arguments(self, args: tuple, kwargs: dict) -> ExtractedArguments:
         """Extract parameter values from arguments and keyword arguments provided to the building hive.
@@ -210,47 +198,23 @@ class ArgWrapperBase(MappingObject):
         return ExtractedArguments(remaining_args, remaining_kwargs, all_param_values)
 
 
-class ArgsWrapper(HiveObjectWrapperBase, ArgWrapperBase):
-    """Hive 'args' wrapper"""
-    _wrapper_name = "args"
+def validate_args(wrapper: ArgWrapper, name: str, value):
+    if not isinstance(value, Parameter):
+        raise ValueError("AttributeMapping must be a Parameters, not '{}'".format(name, value.__class__))
 
 
-class HiveParentWrapperBase(MutableMappingObject, ABC):
-    """Base class for wrapper which refers to its parent hive class"""
-    _wrapper_name = abstractproperty()
-
-    def __init__(self, hive_parent_class, validator=None):
-        object.__setattr__(self, '_hive_parent_class', hive_parent_class)
-
-        super().__init__(validator=validator)
-
-    @property
-    def _repr_name(self):
-        return "{}.{}".format(self._hive_parent_class.__name__, self._wrapper_name)
-
-
-class MetaArgsWrapper(HiveParentWrapperBase, ArgWrapperBase):
-    _wrapper_name = "meta_args"
-
-
-
-class ResolvedArgWrapper(MappingObject):
+class ResolvedArgWrapper(ImmutableAttributeMapping):
     """Read-only view of true values of an args wrapper"""
 
-    def __init__(self, wrapper, name_to_value):
+    def __init__(self, name: str, name_to_param: dict, name_to_value: dict):
         """Initialiser for a read-only view of the resolved values of an args wrapper
 
         :param wrapper: name of args wrapper 
         :param resolved_mapping: OrderedDict mapping """
-        ordered_name_to_value = OrderedDict(((n, name_to_value[n]) for n, p in wrapper))
-        super().__init__(ordered_name_to_value)
+        object.__setattr__(self, '_param_to_name', {p: n for n, p in name_to_param.items()})
+        ordered_name_to_value = OrderedDict(((n, name_to_value[n]) for n, p in name_to_param.items()))
 
-        object.__setattr__(self, '_wrapper', wrapper)
-        object.__setattr__(self, '_param_to_name', {p: n for n, p in wrapper})
-
-    @property
-    def _repr_name(self):
-        return "{}(resolved)".format(self._wrapper._repr_name)
+        super().__init__(name, ordered_name_to_value)
 
     def resolve_parameter(self, parameter):
         """Retrieve the value associated with the given parameter
@@ -259,3 +223,5 @@ class ResolvedArgWrapper(MappingObject):
         """
         name = self._param_to_name[parameter]
         return self._ordered_mapping[name]
+
+

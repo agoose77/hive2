@@ -188,15 +188,9 @@ class ConnectionBuilder(Bee):
         target = self._target
 
         if isinstance(source, Bee):
-            if isinstance(source, Exportable):
-                source = source.export()
-
             source = source.getinstance(hive_object)
 
         if isinstance(target, Bee):
-            if isinstance(target, Exportable):
-                target = target.export()
-
             target = target.getinstance(hive_object)
 
         if get_mode() == "immediate":

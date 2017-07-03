@@ -24,7 +24,7 @@ def build_variable(i, ex, args, meta_args):
         i.do_pre_output = hive.triggerable(i.pre_output)
         hive.trigger(i.pull_value, i.do_pre_output, pretrigger=True)
 
-Variable = hive.dyna_hive("Variable", build_variable, declarator=declare_variable)
+Variable = hive.dyna_hive("BuilderVariable", build_variable, declarator=declare_variable)
 
 # Helpers
 _MetaVariable = Variable.extend("MetaVariable", is_dyna_hive=False)

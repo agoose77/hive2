@@ -5,7 +5,7 @@ from .protected_container import ProtectedContainer, RestrictedAttribute, Restri
 from .pin import MimicFlags, IOPin
 
 
-FOLD_NODE_REFERENCE_PATH = "dragonfly.std.Variable"
+FOLD_NODE_REFERENCE_PATH = "dragonfly.std.BuilderVariable"
 
 
 class NodeTypes(object):

@@ -31,17 +31,17 @@ class MemoProperty:
 
     def __init__(self, fget):
         self.fget = fget
-        self.memo_dict = WeakKeyDictionary()
+        self._memo_dict = WeakKeyDictionary()
 
     def __get__(self, instance, cls=None):
         if instance is None:
             return self
 
         try:
-            return self.memo_dict[instance]
+            return self._memo_dict[instance]
 
         except KeyError:
-            self.memo_dict[instance] = result = self.fget.__get__(instance, cls)()
+            self._memo_dict[instance] = result = self.fget.__get__(instance, cls)()
             return result
 
 

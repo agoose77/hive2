@@ -30,6 +30,20 @@ class Relay(Bee, TriggerSource, TriggerTarget, Callable, Nameable):
     def _hive_pretrigger_source(self, target_func):
         self._pretrigger.add_target(target_func)
 
+    def _hive_is_connectable_target(self, source):
+        if not isinstance(source, TriggerSource):
+            raise HiveConnectionError("Source does not implement TriggerSource: {}".format(source))
+
+    def _hive_connect_target(self, source):
+        pass
+
+    def _hive_is_connectable_source(self, target):
+        if not isinstance(target, TriggerTarget):
+            raise HiveConnectionError("Target {} does not implement TriggerTarget".format(target))
+
+    def _hive_connect_source(self, target):
+        target_func = target._hive_trigger_target()
+        self._trigger.add_target(target_func)
 
     def __repr__(self):
         return "Relay()"

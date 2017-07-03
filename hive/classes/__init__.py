@@ -1,6 +1,4 @@
-HIVE_OBJECT_NAMES = ("parent", "implements", "instantiate")
-
-from .drone_class_proxy import HiveClassProxy
-from .wrappers import ExternalWrapper, InternalWrapper, ArgsWrapper, MetaArgsWrapper
+from .drone_class_proxy import DroneClassProxy
+from .wrappers import *#ExternalWrapper, InternalWrapper, ArgsWrapper, MetaArgsWrapper, AttributeMapping, ImmutableAttributeMapping
 from .pusher import Pusher
-
+from .hive_descriptors import HiveDescriptor, HiveProperty

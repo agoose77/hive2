@@ -5,7 +5,7 @@
 #
 # from ..mainloop import Mainloop as _Mainloop
 # from ...event import EventHive, EventHandler
-# from ...std import Variable
+# from ...std import BuilderVariable
 #
 #
 # class MainloopClass:
@@ -62,7 +62,7 @@
 #
 #     # Scene instantiator
 #     i.scene_instantiator = Instantiator(forward_events='all')
-#     i.scene_hive_class = Variable("class", Scene)
+#     i.scene_hive_class = BuilderVariable("class", Scene)
 #     hive.connect(i.scene_hive_class, i.scene_instantiator.hive_class)
 #
 #     i.bind_id = hive.property(cls, "bind_id", ("str", "id"))

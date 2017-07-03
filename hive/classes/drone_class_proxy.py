@@ -10,7 +10,7 @@ from struct import Struct as _Struct
 getset_descriptor = type(_Struct.size)
 
 
-class HiveClassProxy(object):
+class DroneClassProxy(object):
     """Intercept attribute lookups to return bee equivalents to instance methods and properties belonging to a bind
     class."""
 

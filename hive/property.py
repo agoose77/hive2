@@ -61,7 +61,7 @@ def property(cls, attr, data_type="", start_value=None):
     if get_mode() == "immediate":
         raise ValueError("hive.property cannot be used in immediate mode")
 
-    from .classes import HiveClassProxy
-    assert isinstance(cls, HiveClassProxy), "hive.property(cls) must be the cls argument in build(cls, i, ex, args)"
+    from .classes import DroneClassProxy
+    assert isinstance(cls, DroneClassProxy), "hive.property(cls) must be the cls argument in build(cls, i, ex, args)"
 
     return Property(cls._cls, attr, data_type, start_value)

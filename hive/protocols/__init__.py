@@ -3,6 +3,16 @@ from weakref import ref
 
 from ..manager import memo_property
 
+from abc import ABC, abstractmethod
+
+
+class Descriptor(ABC):
+    _hive_redirect_self_descriptor = True
+
+    @abstractmethod
+    def __get__(self, instance, owner):
+        pass
+
 
 class Parameter:
     start_value = None
@@ -20,7 +30,6 @@ RuntimeAlias = namedtuple("RuntimeAlias", "parent_ref name")
 
 
 class Nameable:
-
     @memo_property
     def _hive_runtime_aliases(self):
         return set()

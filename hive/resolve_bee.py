@@ -27,9 +27,9 @@ class ResolveBee(Exportable):
     (resolving the getinstance & bind methods)
     """
 
-    def __init__(self, bee, own_hive_object):
+    def __init__(self, bee, defining_hive_object):
         self._bee = bee
-        self._own_hive_object = own_hive_object
+        self._defining_hive_object = defining_hive_object
 
         super().__init__()
 
@@ -46,27 +46,20 @@ class ResolveBee(Exportable):
         return result
 
     def __repr__(self):
-        return "[{}]{}".format(self._own_hive_object.__class__.__name__, self._bee)
+        return "[{}]{}".format(self._defining_hive_object.__class__.__name__, self._bee)
 
     def export(self):
         return self
 
-    def getinstance(self, redirected_hive_object):
+    def bind(self, containing_instance):
         """Return a runtime instance of the wrapped Bee.
         
         :param redirected_hive_object: TODO
         """ # TODO
 
         # Hive instance to which the ResolveBee belongs
-        hive_instantiator = self._own_hive_object.getinstance(redirected_hive_object)
-        redirected_hive_object = hive_instantiator._hive_object
-        result = self._bee.getinstance(redirected_hive_object)
-
-        # If the resulting bee is Bindable, we must resolve this later too!
-        if isinstance(result, Bindable):
-            return BindableResolveBee(hive_instantiator, result)
-
-        return result
+        run_hive = self._defining_hive_object.bind(containing_instance)
+        return self._bee.bind(run_hive)
 
     def implements(self, cls):
         return self._bee.implements(cls)

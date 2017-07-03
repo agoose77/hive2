@@ -3,7 +3,7 @@ from .manager import ModeFactory, memoize
 from .protocols import TriggerTarget, ConnectTarget, TriggerSource, Callable, Bee, Bindable, Nameable
 
 
-class Modifier(TriggerTarget, ConnectTarget, Bindable, Callable, Nameable):
+class RuntimeTriggerable(TriggerTarget, ConnectTarget, Bindable, Callable, Nameable):
     """Callable Python snippet which is passed the current run hive"""
 
     def __init__(self, func, run_hive=None):
@@ -19,8 +19,8 @@ class Modifier(TriggerTarget, ConnectTarget, Bindable, Callable, Nameable):
         return "<{}: {}>".format(self.__class__.__name__, self._func)
 
     def trigger(self):
-        # TODO: exception handling hooks
-        self._func(self._run_hive)
+        self._func(self._run_hive
+                   )
 
     @memoize
     def bind(self, run_hive):
@@ -40,7 +40,7 @@ class Modifier(TriggerTarget, ConnectTarget, Bindable, Callable, Nameable):
         pass
 
 
-class ModifierBuilder(Bee, TriggerTarget, ConnectTarget):
+class Triggerable(Bee, TriggerTarget, ConnectTarget):
     """Callable Python snippet which is passed the current run hive"""
 
     def __init__(self, target):
@@ -49,27 +49,21 @@ class ModifierBuilder(Bee, TriggerTarget, ConnectTarget):
 
         super().__init__()
 
-    @memoize
     def bind(self, run_hive):
         func = self._target
-
         if isinstance(func, Bee):
-            bound_func = func.bind(run_hive)
-            if func is not bound_func:
-                return Modifier(bound_func)
+            func = func.getinstance(run_hive)
 
-        return self
+        return RuntimeTriggerable(func)
 
     def implements(self, cls):
-        from derp.ast.formatting import Colours
-        print("IMPL MOD",Colours.green(cls.__name__),issubclass(Modifier, cls),self)
-        if issubclass(Modifier, cls):
+        if cls is Callable:
             return True
 
         return super().implements(cls)
 
     def __repr__(self):
-        return "Modifier({!r})".format(self._target)
+        return "Triggerable({!r})".format(self._target)
 
 
-modifier = ModeFactory("hive.modifier", immediate=Modifier, build=ModifierBuilder)
+triggerable = ModeFactory("hive.triggerable", immediate=RuntimeTriggerable, build=Triggerable)
