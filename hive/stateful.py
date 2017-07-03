@@ -1,7 +1,7 @@
 from collections import namedtuple
 
 from hive.functional.push_pull_in import PullInBuilder, PullIn, PushInBuilder, PushIn
-from hive.functional.stateful_descriptor import BuilderStatefulDescriptor
+from hive.functional.stateful_descriptor import StatefulDescriptorBuilder
 from hive.trigger.trigger_source import TriggerSourceBuilder, TriggerSourceRuntime
 from .interfaces import Bee, Stateful
 from .manager import memo_property
@@ -61,8 +61,8 @@ class StatefulBuilder(Bee):
         self.push_in = PushInBuilder(self)
         self.pull_out = PullOutBuilder(self)
         self.push_out = PushOutBuilder(self)
-        self.property = BuilderStatefulDescriptor(self, read_only=False)
-        self.read_only_property = BuilderStatefulDescriptor(self, read_only=True)
+        self.property = StatefulDescriptorBuilder(self, read_only=False)
+        self.read_only_property = StatefulDescriptorBuilder(self, read_only=True)
         self.updated = TriggerSourceBuilder()
 
         super().__init__()

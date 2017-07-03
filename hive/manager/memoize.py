@@ -41,7 +41,7 @@ class MemoProperty:
             return self._memo_dict[instance]
 
         except KeyError:
-            self._memo_dict[instance] = result = self.fget(instance)()
+            self._memo_dict[instance] = result = self.fget(instance)
             return result
 
 

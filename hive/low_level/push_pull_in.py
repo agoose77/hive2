@@ -3,8 +3,13 @@ from ..classes import Pusher
 from ..exception import HiveConnectionError
 from ..interfaces import (Antenna, Output, Stateful, ConnectTarget, TriggerSource, Callable,
                           Exportable, Bee)
-from ..manager import memoize, ModeFactory
+from ..manager import memoize, ModeFactory, memo_property
 from ..typing import data_type_is_untyped, data_types_match, MatchFlags, is_valid_data_type
+
+
+from .triggerfunc import TriggerFuncBuilder
+from .interfaces import ConnectableMixin
+from ..functional.triggerable import TriggerableBuilder
 
 
 def get_callable_data_type(target):
@@ -16,8 +21,8 @@ def get_callable_data_type(target):
 
 
 # TODO if we can only wrap a stateful object then we can remove the data type arg
-class PPInBase(Antenna, ConnectTarget, TriggerSource, Exportable):
-    def __init__(self, target, data_type=''):
+class PPInBase(Antenna, ConnectTarget, ConnectableMixin, Callable):
+    def __init__(self, build_bee, run_hive, target, data_type=''):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
 
@@ -37,19 +42,21 @@ class PPInBase(Antenna, ConnectTarget, TriggerSource, Exportable):
         self.target = target
         self.data_type = data_type
 
-        self._trigger = Pusher(self)
-        self._pretrigger = Pusher(self)
+        self._run_hive = run_hive
+        self._build_bee = build_bee
 
         super().__init__()
 
-    def _hive_trigger_source(self, func):
-        self._trigger.add_target(func)
-
-    def _hive_pretrigger_source(self, func):
-        self._pretrigger.add_target(func)
-
     def __repr__(self):
         return "{}({!r}, {!r})".format(self.__class__.__name__, self.target, self.data_type)
+
+    @memo_property
+    def triggered(self):
+        return self._build_bee.triggered.bind(self._run_hive)
+
+    @memo_property
+    def before_triggered(self):
+        return self._build_bee.before_triggered.bind(self._run_hive)
 
 
 class PushIn(PPInBase):
@@ -57,11 +64,9 @@ class PushIn(PPInBase):
 
     def push(self, value):
         # TODO: exception handling hooks
-        self._pretrigger.push()
-
+        self.before_triggered()
         self._set_value(value)
-
-        self._trigger.push()
+        self.triggered()
 
     def _hive_is_connectable_target(self, source):
         if not isinstance(source, Output):
@@ -77,18 +82,16 @@ class PushIn(PPInBase):
         pass
 
 
-class PullIn(PPInBase):
+class PullIn(PPInBase, Callable):
     mode = "pull"
     _pull_callback = None
 
     def pull(self):
         # TODO: exception handling hooks
-        self._pretrigger.push()
+        self.before_triggered()
         value = self._pull_callback()
-
         self._set_value(value)
-
-        self._trigger.push()
+        self.triggered()
 
     def _hive_is_connectable_target(self, source):
         if not isinstance(source, Output):
@@ -106,14 +109,16 @@ class PullIn(PPInBase):
 
         self._pull_callback = source.pull
 
-    def _hive_trigger_target(self):
-        return self.pull
-
     __call__ = pull
 
+    @memo_property
+    def trigger(self):
+        return self._build_bee.trigger.bind(self._run_hive)
 
-class PPInBuilder(Bee, Antenna):
+
+class PPInBuilder(Antenna, Exportable, ConnectableMixin):
     mode = None
+    runtime_cls = None
 
     def __init__(self, target, data_type=''):
         if not is_valid_data_type(data_type):
@@ -132,19 +137,14 @@ class PPInBuilder(Bee, Antenna):
         self.target = target
         self.data_type = data_type
 
-        self.triggered = ...
-        self.pretriggered = ...
+        self.triggered = TriggerFuncBuilder()
+        self.before_triggered = TriggerFuncBuilder()
 
         super().__init__()
 
     @memoize
     def bind(self, run_hive):
-        if self.mode == "push":
-            cls = PushIn
-        else:
-            cls = PullIn
-
-        return cls(self.target.bind(run_hive), data_type=self.data_type)
+        return self.runtime_cls(self, run_hive, self.target.bind(run_hive), data_type=self.data_type)
 
     def implements(self, cls):
         if issubclass(PPInBase, cls):
@@ -157,10 +157,16 @@ class PPInBuilder(Bee, Antenna):
 
 class PushInBuilder(PPInBuilder):
     mode = "push"
+    runtime_cls = PushIn
 
 
 class PullInBuilder(PPInBuilder):
     mode = "pull"
+    runtime_cls = PullIn
+
+    def __init__(self, target, data_type=''):
+        super().__init__(target, data_type)
+        self.trigger = TriggerableBuilder(self)
 
 
 push_in = ModeFactory("hive.push_in", immediate=PushIn, build=PushInBuilder)

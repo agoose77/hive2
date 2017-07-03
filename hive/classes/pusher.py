@@ -15,3 +15,19 @@ class Pusher(object):
         for target in self._targets:
             # TODO: exception handling
             target(*args, **kwargs)
+
+
+class Caller:
+
+    def __init__(self, parent):
+        self._targets = []
+        self._parent = ref(parent)
+
+    def add_target(self, target):
+        assert callable(target)
+        self._targets.append(target)
+
+    def __call__(self):
+        for target in self._targets:
+            # TODO: exception handling
+            target()

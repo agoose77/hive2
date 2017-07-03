@@ -2,13 +2,13 @@ from collections import namedtuple
 from itertools import product
 from operator import itemgetter
 
-from .contexts import get_mode, register_bee
-from .debug import get_debug_context
-from .exception import MatchFailedError
-from .manager import memoize
-from .protocols import (ConnectSourceBase, ConnectSourceDerived, ConnectTargetBase, ConnectTargetDerived, Bee, Bindable,
-                        Exportable)
-from .typing import get_match_score, find_matching_ast, MatchFlags, parse_type_string
+from ..contexts import get_mode, register_bee
+# from hive.debug import get_debug_context
+from ..exception import MatchFailedError
+from ..interfaces import (ConnectSourceBase, ConnectSourceDerived, ConnectTargetBase, ConnectTargetDerived, Bee,
+                          )
+from ..manager import memoize
+from ..typing import get_match_score, find_matching_ast, MatchFlags, parse_type_string
 
 ConnectionCandidate = namedtuple("ConnectionCandidate", ("bee_name", "data_type"))
 
@@ -140,7 +140,7 @@ def build_connection(source, target):
     source._hive_is_connectable_source(target)
     target._hive_is_connectable_target(source)
 
-    debug_context = get_debug_context()
+    debug_context = None  # get_debug_context()
     if debug_context is not None:
         debug_context.build_connection(source, target)
 
@@ -149,8 +149,7 @@ def build_connection(source, target):
         source._hive_connect_source(target)
 
 
-class Connection(Bindable):
-
+class ConnectionBuilder(Bee):
     def __init__(self, source, target):
         self._source = source
         self._target = target
@@ -159,45 +158,10 @@ class Connection(Bindable):
 
     @memoize
     def bind(self, run_hive):
-        source = self._source
-        if isinstance(source, Bindable):
-            source = source.bind(run_hive)
-
-        target = self._target
-
-        if isinstance(target, Bindable):
-            target = target.bind(run_hive)
+        source = self._source.bind(run_hive)
+        target = self._target.bind(run_hive)
 
         return build_connection(source, target)
-
-    def __repr__(self):
-        return "Connection({!r}, {!r})".format(self._source, self._target)
-
-
-class ConnectionBuilder(Bee):
-
-    def __init__(self, source, target):
-        self._source = source
-        self._target = target
-
-        super().__init__()
-
-    @memoize
-    def getinstance(self, hive_object):
-        source = self._source
-        target = self._target
-
-        if isinstance(source, Bee):
-            source = source.getinstance(hive_object)
-
-        if isinstance(target, Bee):
-            target = target.getinstance(hive_object)
-
-        if get_mode() == "immediate":
-            return build_connection(source, target)
-
-        else:
-            return Connection(source, target)
 
     def __repr__(self):
         return "ConnectionBuilder({!r}, {!r})".format(self._source, self._target)

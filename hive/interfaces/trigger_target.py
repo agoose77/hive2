@@ -4,10 +4,8 @@ A TriggerTarget must have a _hive_trigger_target method
 This method must return a callable or raise an informative HiveConnectError 
 """
 
-from . import Connectable
 
-
-class TriggerTargetBase(Connectable):
+class TriggerTargetBase:
     pass
 
 

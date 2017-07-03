@@ -7,7 +7,7 @@ def some_func(i, ex):
 
 def build(i, ex, args):
     i.func = hive.function(some_func)
-    ex.do = i.func.trigger
+    ex.do = i.func._trigger
     i.func.triggered.connect(i.update_score)
 
     hive.connect(i.func, i.update_score)

@@ -1,16 +1,16 @@
-from functools import partial
-
 from hive.annotations import get_return_type
-from hive.classes import Pusher
 from hive.exception import HiveConnectionError
-from hive.manager import ModeFactory, memoize
-from hive.interfaces import (Antenna, Output, Stateful, Bindable, Callable, ConnectSource, TriggerSource, TriggerTarget,
-                             Socket, Exportable, Bee)
+from hive.interfaces import (Antenna, Output, Stateful, Callable, ConnectSource, TriggerTarget,
+                             Socket, Exportable)
+from hive.manager import ModeFactory, memoize, memo_property
 from hive.typing import data_type_is_untyped, data_types_match, MatchFlags, is_valid_data_type
+from .interfaces import ConnectableMixin
+from ..functional.triggerable import TriggerableBuilder
+from ..low_level.triggerfunc import TriggerFuncBuilder
 
 
-class PPOutBase(Bindable, Output, ConnectSource, TriggerSource):
-    def __init__(self, target, data_type='', run_hive=None):
+class PPOutBase(Output, ConnectSource, ConnectableMixin, Callable):
+    def __init__(self, build_bee, run_hive, target, data_type=''):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
 
@@ -34,19 +34,34 @@ class PPOutBase(Bindable, Output, ConnectSource, TriggerSource):
         self.data_type = data_type
 
         self._run_hive = run_hive
-        self._trigger = Pusher(self)
-        self._pretrigger = Pusher(self)
+        self._build_bee = build_bee
 
         super().__init__()
 
-    def _hive_trigger_source(self, func):
-        self._trigger.add_target(func)
+    def _hive_is_connectable_source(self, target):
+        if not isinstance(target, Antenna):
+            raise HiveConnectionError("Target {} does not implement Antenna".format(target))
 
-    def _hive_pretrigger_source(self, func):
-        self._pretrigger.add_target(func)
+        if target.mode != self.mode:
+            raise HiveConnectionError("Target {} is not configured for push mode".format(target))
+
+        if not data_types_match(self.data_type, target.data_type, MatchFlags.permit_any | MatchFlags.match_shortest):
+            raise HiveConnectionError("Data types do not match")
 
     def __repr__(self):
         return "{}({!r}, {!r}, {!r})".format(self.__class__.__name__, self.target, self.data_type, self._run_hive)
+
+    @memo_property
+    def triggered(self):
+        return self._build_bee.triggered.bind(self._run_hive)
+
+    @memo_property
+    def before_triggered(self):
+        return self._build_bee.before_triggered.bind(self._run_hive)
+
+    @memo_property
+    def trigger(self):
+        return self._build_bee.trigger.bind(self._run_hive)
 
 
 class PullOut(PPOutBase):
@@ -54,69 +69,46 @@ class PullOut(PPOutBase):
 
     def pull(self):
         # TODO: exception handling hooks
-        self._pretrigger.push()
+        self.before_triggered()
         value = self._get_value()
-        self._trigger.push()
+        self.triggered()
 
         return value
-
-    def _hive_is_connectable_source(self, target):
-        # TODO what if already connected
-        if not isinstance(target, Antenna):
-            raise HiveConnectionError("Target {} does not implement Antenna".format(target))
-
-        if target.mode != "pull":
-            raise HiveConnectionError("Target {} is not configured for pull mode".format(target))
-
-        if not data_types_match(self.data_type, target.data_type, MatchFlags.permit_any | MatchFlags.match_shortest):
-            raise HiveConnectionError("Data types do not match")
 
     def _hive_connect_source(self, target):
         pass
 
+    __call__ = pull
 
-class PushOut(PPOutBase, Socket, TriggerTarget):
+
+class PushOut(PPOutBase, Socket):
     mode = "push"
 
-    def __init__(self, target, data_type='', run_hive=None):
-        super(PushOut, self).__init__(target, data_type, run_hive)
+    def __init__(self, build_bee, run_hive, target, data_type=''):
+        super().__init__(build_bee, run_hive, target, data_type)
 
         self._targets = []
 
     def push(self):
         # TODO: exception handling hooks
-        self._pretrigger.push()
+        self.before_triggered()
 
         value = self._get_value()
-
         for target in self._targets:
             target(value)
 
-        self._trigger.push()
+        self.triggered()
 
     def socket(self):
         return self.push
 
-    def _hive_is_connectable_source(self, target):
-        if not isinstance(target, Antenna):
-            raise HiveConnectionError("Target {} does not implement Antenna".format(target))
-
-        if target.mode != "push":
-            raise HiveConnectionError("Target {} is not configured for push mode".format(target))
-
-        if not data_types_match(self.data_type, target.data_type, MatchFlags.permit_any | MatchFlags.match_shortest):
-            raise HiveConnectionError("Data types do not match")
-
     def _hive_connect_source(self, target):
         self._targets.append(target.push)
-
-    def _hive_trigger_target(self):
-        return self.push
 
     __call__ = push
 
 
-class PPOutBuilder(Output, ConnectSource, TriggerSource, Exportable):
+class PPOutBuilder(Output, Exportable, ConnectableMixin):
     mode = None
 
     def __init__(self, target, data_type=''):
@@ -137,6 +129,10 @@ class PPOutBuilder(Output, ConnectSource, TriggerSource, Exportable):
         self.data_type = data_type
         self.target = target
 
+        self.triggered = TriggerFuncBuilder()
+        self.before_triggered = TriggerFuncBuilder()
+        self.trigger = TriggerableBuilder(self)
+
         super().__init__()
 
     @memoize
@@ -146,7 +142,12 @@ class PPOutBuilder(Output, ConnectSource, TriggerSource, Exportable):
         else:
             cls = PullOut
 
-        return cls(self.target.bind(run_hive), data_type=self.data_type)
+        return cls(self, run_hive, self.target.bind(run_hive), data_type=self.data_type)
+
+    def implements(self, cls):
+        if issubclass(PPOutBase, cls):
+            return True
+        return super().implements(cls)
 
     def __repr__(self):
         return "{}({!r}, {!r})".format(self.__class__.__name__, self.target, self.data_type)

@@ -1,13 +1,11 @@
-from hive.trigger import trigger
-from ..functional.triggerfunc import TriggerFuncBuilder as FunctionalTriggerFuncBuilder
+from ..functional.triggerfunc import TriggerFuncBuilder as FunctionalTriggerFuncBuilder, TriggerFunc as FunctionalTriggerFunc
+from ..interfaces import Exportable
+from .interfaces import TriggerableMixin
 
 
-class TriggerFuncBuilder(FunctionalTriggerFuncBuilder):
+class TriggerFuncRuntime(FunctionalTriggerFunc, Exportable, TriggerableMixin):
+    pass
 
-    def trigger(self, other):
-        return trigger(self, other)
 
-    def pretrigger(self, other):
-        return trigger(self, other, pretrigger=True)
-
-    connect = trigger
+class TriggerFuncBuilder(FunctionalTriggerFuncBuilder, Exportable, TriggerableMixin):
+    runtime_cls = TriggerFuncRuntime

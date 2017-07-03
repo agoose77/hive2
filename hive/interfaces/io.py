@@ -5,7 +5,7 @@ class IO:
 class Antenna(IO):
     mode = None #must be push or pull
 
-    def push(self): #only needs to be defined if mode is "push"
+    def push(self, value): #only needs to be defined if mode is "push"
         raise NotImplementedError
 
 

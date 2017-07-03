@@ -7,8 +7,13 @@ from abc import ABC, abstractmethod
 
 
 class Descriptor(ABC):
-    _hive_descriptor_get = None
-    _hive_descriptor_set = None
+    @abstractmethod
+    def _hive_descriptor_get(self):
+        pass
+
+    @abstractmethod
+    def _hive_descriptor_set(self, value):
+        pass
 
 
 class Parameter:
@@ -57,3 +62,6 @@ from .bees import Exportable, Bee
 from .io import IO, Antenna, Output
 from .stateful import Stateful
 from .trigger_source import TriggerSourceBase, TriggerSource, TriggerSourceDerived
+from .trigger_target import TriggerTargetBase, TriggerTarget, TriggerTargetDerived
+from .connect_source import ConnectSource ,ConnectSourceBase, ConnectSourceDerived
+from .connect_target import ConnectTarget, ConnectTargetBase, ConnectTargetDerived

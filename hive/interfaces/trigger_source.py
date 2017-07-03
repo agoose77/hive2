@@ -4,19 +4,14 @@ A TriggerSource must have _hive_trigger_source and _hive_pretrigger_source metho
 This method must return a callable or raise an informative HiveConnectError 
 """
 
-from . import Connectable
 
-
-class TriggerSourceBase(Connectable):
+class TriggerSourceBase:
     pass
 
 
 class TriggerSource(TriggerSourceBase):
 
     def _hive_trigger_source(self, target):
-        raise NotImplementedError
-
-    def _hive_pretrigger_source(self, target):
         raise NotImplementedError
 
 
