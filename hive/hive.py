@@ -1,17 +1,16 @@
 from abc import ABC, abstractproperty
 from collections import namedtuple
-from functools import wraps
 from inspect import currentframe, getmodule, isclass
 from itertools import count, chain
 
+# from hive.functional.connect import ConnectionCandidate
 from .classes import (AttributeMapping, InternalValidator, ExternalValidator, ArgWrapper, validate_args,
                       DroneClassProxy, HiveDescriptorProxy)
 from .compatability import next, validate_signature
-from .connect import ConnectionCandidate
 from .contexts import (bee_register_context, get_mode, hive_mode_as, building_hive_as, run_hive_as,
                        get_building_hive)
 from .manager import memoize
-from .protocols import Bee, ConnectTargetDerived, ConnectSourceDerived, TriggerSource, \
+from .interfaces import Bee, ConnectTargetDerived, ConnectSourceDerived, TriggerSource, \
     TriggerTarget, Nameable, ConnectSource, ConnectTarget, Descriptor
 from .resolve_bee import ResolveBee
 from .typing import MatchFlags, data_types_match

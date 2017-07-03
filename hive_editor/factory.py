@@ -7,7 +7,7 @@ from .utils import hive_object_instance_from_import_result, hive_import_from_pat
 class BeeNodeFactory:
     """Create bee nodes from reference paths
 
-    Bees cannot be inspected like Hives because they are the GUI primitives
+    Bees cannot be inspected like Hives because they are the GUI functional
     """
 
     def new(self, name, reference_path, params, param_info):

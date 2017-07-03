@@ -1,5 +1,5 @@
 from .manager import ModeFactory
-from .protocols import Parameter
+from .interfaces import Parameter
 from .typing import is_valid_data_type
 
 from collections.abc import Collection

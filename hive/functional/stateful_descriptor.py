@@ -1,5 +1,5 @@
-from .manager import ModeFactory, memoize
-from .protocols import Stateful, Descriptor, Exportable, Bee
+from hive.manager import ModeFactory, memoize
+from hive.interfaces import Stateful, Descriptor, Exportable, Bee
 
 
 class BoundStatefulDescriptor(Bee, Descriptor):
@@ -30,7 +30,6 @@ class BuilderStatefulDescriptor(Exportable):
     def bind(self, run_hive):
         target = self._target.bind(run_hive)
         return BoundStatefulDescriptor(target, self._read_only, run_hive)
-
 
     def implements(self, cls):
         if cls is Descriptor:

@@ -1,8 +1,8 @@
 from .manager import memoize, ModeFactory
-from .protocols import Bindable, Exportable, Nameable
+from .interfaces import Exportable, Nameable
 
 
-class BindableResolveBee(Bindable, Nameable):
+class BindableResolveBee(Nameable):
     def __init__(self, unbound_run_hive, bee):
         super().__init__()
 

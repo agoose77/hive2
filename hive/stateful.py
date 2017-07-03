@@ -1,11 +1,11 @@
 from collections import namedtuple
 
+from hive.functional.push_pull_in import PullInBuilder, PullIn, PushInBuilder, PushIn
+from hive.functional.stateful_descriptor import BuilderStatefulDescriptor
+from hive.trigger.trigger_source import TriggerSourceBuilder, TriggerSourceRuntime
+from .interfaces import Bee, Stateful
 from .manager import memo_property
-from .ppin import PullInBuilder, PullIn, PushInBuilder, PushIn
 from .ppout import PullOutBuilder, PushOutBuilder, PullOut, PushOut
-from .protocols import Bee, Stateful
-from .stateful_descriptor import BuilderStatefulDescriptor
-from .trigger_source import TriggerSourceBuilder, TriggerSourceRuntime
 
 RuntimeHelpers = namedtuple("RuntimeHelpers", "create_pull_in create_pull_out create_push_in create_push_out create_updated")
 

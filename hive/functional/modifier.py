@@ -1,9 +1,9 @@
-from .exception import HiveConnectionError
-from .manager import ModeFactory, memoize
-from .protocols import TriggerTarget, ConnectTarget, TriggerSource, Callable, Bee, Bindable, Nameable
+from hive.exception import HiveConnectionError
+from hive.manager import ModeFactory, memoize
+from hive.interfaces import TriggerTarget, ConnectTarget, TriggerSource, Callable, Bee, Bindable, Nameable
 
 
-class RuntimeTriggerable(TriggerTarget, ConnectTarget, Bindable, Callable, Nameable):
+class Modifier(TriggerTarget, ConnectTarget, Bindable, Callable, Nameable):
     """Callable Python snippet which is passed the current run hive"""
 
     def __init__(self, func, run_hive=None):
@@ -12,6 +12,8 @@ class RuntimeTriggerable(TriggerTarget, ConnectTarget, Bindable, Callable, Namea
         self._func = func
         self._run_hive = run_hive
 
+        super().__init__()
+
     def __call__(self):
         self.trigger()
 
@@ -19,8 +21,8 @@ class RuntimeTriggerable(TriggerTarget, ConnectTarget, Bindable, Callable, Namea
         return "<{}: {}>".format(self.__class__.__name__, self._func)
 
     def trigger(self):
-        self._func(self._run_hive
-                   )
+        # TODO: exception handling hooks
+        self._func(self._run_hive)
 
     @memoize
     def bind(self, run_hive):
@@ -40,7 +42,7 @@ class RuntimeTriggerable(TriggerTarget, ConnectTarget, Bindable, Callable, Namea
         pass
 
 
-class Triggerable(Bee, TriggerTarget, ConnectTarget):
+class ModifierBuilder(Bee, TriggerTarget, ConnectTarget):
     """Callable Python snippet which is passed the current run hive"""
 
     def __init__(self, target):
@@ -49,21 +51,25 @@ class Triggerable(Bee, TriggerTarget, ConnectTarget):
 
         super().__init__()
 
+    @memoize
     def bind(self, run_hive):
         func = self._target
-        if isinstance(func, Bee):
-            func = func.getinstance(run_hive)
 
-        return RuntimeTriggerable(func)
+        if isinstance(func, Bee):
+            bound_func = func.bind(run_hive)
+            if func is not bound_func:
+                return Modifier(bound_func)
+
+        return self
 
     def implements(self, cls):
-        if cls is Callable:
+        if issubclass(Modifier, cls):
             return True
 
         return super().implements(cls)
 
     def __repr__(self):
-        return "Triggerable({!r})".format(self._target)
+        return "Modifier({!r})".format(self._target)
 
 
-triggerable = ModeFactory("hive.triggerable", immediate=RuntimeTriggerable, build=Triggerable)
+modifier = ModeFactory("hive.modifier", immediate=Modifier, build=ModifierBuilder)

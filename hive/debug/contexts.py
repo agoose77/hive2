@@ -1,13 +1,11 @@
 from csv import writer as csv_writer
 from weakref import ref
 
-from ..compatability import cache
-from ..ppin import PullIn
-from ..ppout import PushOut
-from ..protocols import Nameable
-
+from hive.functional.push_pull_in import PullIn
 from .bees import DebugPushOutTarget, DebugPretriggerTarget, DebugPullInSource, DebugTriggerTarget
-
+from ..compatability import cache
+from ..ppout import PushOut
+from ..interfaces import Nameable
 
 _debug_context = None
 

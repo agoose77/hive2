@@ -29,7 +29,6 @@ class Bee:
         if get_building_hive() is None:
             logger.warning("Building hive is none for {}, is this the root hive?".format(self))
 
-    # TODO remove impleemtsn
     def implements(self, cls):
         """Return True if the Bee returned by getinstance will implement a given class.
         
@@ -41,10 +40,6 @@ class Bee:
 
     def bind(self, runtime_hive):
         return self
-
-
-class Bindable(Bee):
-    pass
 
 
 class Exportable(Bee, ABC):

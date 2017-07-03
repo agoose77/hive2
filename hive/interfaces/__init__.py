@@ -53,10 +53,7 @@ class Socket:
     pass
 
 
-from .bees import Bindable, Exportable, Bee
-from .connect_source import ConnectSourceBase, ConnectSource, ConnectSourceDerived
-from .connect_target import ConnectTargetBase, ConnectTarget, ConnectTargetDerived
+from .bees import Exportable, Bee
 from .io import IO, Antenna, Output
 from .stateful import Stateful
 from .trigger_source import TriggerSourceBase, TriggerSource, TriggerSourceDerived
-from .trigger_target import TriggerTargetBase, TriggerTarget, TriggerTargetDerived

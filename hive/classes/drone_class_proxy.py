@@ -1,5 +1,4 @@
-from ..method import Method
-# from ..property import Property
+#from ..high_level import FunctionBuilder, PropertyBuilder
 
 from ..annotations import get_argument_options, get_return_type
 from ..compatability import is_method
@@ -10,18 +9,18 @@ from struct import Struct as _Struct
 getset_descriptor = type(_Struct.size)
 
 
-class DroneClassProxy(object):
+class DroneClassProxy:
     """Intercept attribute lookups to return bee equivalents to instance methods and properties belonging to a bind
     class."""
 
     def __init__(self, cls):
-        object.__setattr__(self, "_cls", cls)
+        object.__setattr__(self, "_hive_wrapped_drone_class", cls)
 
     def __getattr__(self, attr):
-        value = getattr(self._cls, attr)
+        value = getattr(self._hive_wrapped_drone_class, attr)
 
         if is_method(value):
-            return Method(self._cls, value)
+            return FunctionBuilder(self, value)
 
         elif isinstance(value, property):
             return self._property_from_descriptor(attr, value)
@@ -33,12 +32,11 @@ class DroneClassProxy(object):
             return value
 
     def __setattr__(self, name, value):
-        raise AttributeError("HiveMethodWrapper of class '{}' is read-only".format(self._cls.__name__))
+        raise AttributeError("DroneClassProxy({!r}) is read-only".format(self))
 
     def __repr__(self):
-        self_cls = self.__class__
-        wrapped_cls = self._cls
-        return "{}({})".format(self_cls.__name__, wrapped_cls)
+        wrapped_cls = self._hive_wrapped_drone_class
+        return "DroneClassProxy({!r})".format(wrapped_cls)
 
     def _property_from_descriptor(self, attr, prop):
         """Create a hive.property object from property descriptor"""
@@ -49,8 +47,8 @@ class DroneClassProxy(object):
             if setter_data_type != data_type:
                 raise TypeError()
 
-        return Property(self._cls, attr, data_type, None)
+        return PropertyBuilder(self, attr, data_type, None)
 
     def _property_from_getset_descriptor(self, attr):
         """Create a hive.property object from getset_descriptor"""
-        return Property(self._cls, attr, None, None)
+        return PropertyBuilder(self, attr, None, None)

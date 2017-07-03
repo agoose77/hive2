@@ -1,12 +1,12 @@
 from functools import partial
 
-from .annotations import get_return_type
-from .classes import Pusher
-from .exception import HiveConnectionError
-from .manager import ModeFactory, memoize
-from .protocols import (Antenna, Output, Stateful, Bindable, Callable, ConnectSource, TriggerSource, TriggerTarget,
-                        Socket, Exportable, Bee)
-from .typing import data_type_is_untyped, data_types_match, MatchFlags, is_valid_data_type
+from hive.annotations import get_return_type
+from hive.classes import Pusher
+from hive.exception import HiveConnectionError
+from hive.manager import ModeFactory, memoize
+from hive.interfaces import (Antenna, Output, Stateful, Bindable, Callable, ConnectSource, TriggerSource, TriggerTarget,
+                             Socket, Exportable, Bee)
+from hive.typing import data_type_is_untyped, data_types_match, MatchFlags, is_valid_data_type
 
 
 class PPOutBase(Bindable, Output, ConnectSource, TriggerSource):

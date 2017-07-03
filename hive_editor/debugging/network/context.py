@@ -9,7 +9,7 @@ from threading import Event
 from weakref import WeakKeyDictionary
 
 from hive.debug import ReportedDebugContextBase
-from hive.protocols import Nameable
+from hive.interfaces import Nameable
 
 from .utils import pack_pascal_string, unpack_pascal_string
 from .network import Server, Client

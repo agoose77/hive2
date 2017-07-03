@@ -2,7 +2,7 @@ from inspect import isclass, isfunction
 
 from .annotations import update_wrapper
 from .manager import memoize
-from .protocols import Bindable, Callable, Exportable, Nameable
+from .interfaces import Bindable, Callable, Exportable, Nameable
 
 
 class Method(Bindable, Callable, Exportable, Nameable):

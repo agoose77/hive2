@@ -21,7 +21,7 @@ def memoize(func):
             return results_cache[args]
 
         except KeyError:
-            result = results_cache[args] = func.__get__(self)(*args)
+            result = results_cache[args] = func(self, *args)
             return result
 
     return wrapper
@@ -41,7 +41,7 @@ class MemoProperty:
             return self._memo_dict[instance]
 
         except KeyError:
-            self._memo_dict[instance] = result = self.fget.__get__(instance, cls)()
+            self._memo_dict[instance] = result = self.fget(instance)()
             return result
 
 

@@ -1,12 +1,10 @@
-from functools import partial
-
-from .annotations import get_argument_types
-from .classes import Pusher
-from .exception import HiveConnectionError
-from .manager import memoize, ModeFactory
-from .protocols import (Antenna, Output, Stateful, ConnectTarget, TriggerSource, TriggerTarget, Bindable, Callable,
-                        Exportable, Bee)
-from .typing import data_type_is_untyped, data_types_match, MatchFlags, is_valid_data_type
+from hive.annotations import get_argument_types
+from hive.classes import Pusher
+from hive.exception import HiveConnectionError
+from hive.interfaces import (Antenna, Output, Stateful, ConnectTarget, TriggerSource, TriggerTarget, Callable,
+                             Exportable, Bee)
+from hive.manager import memoize, ModeFactory
+from hive.typing import data_type_is_untyped, data_types_match, MatchFlags, is_valid_data_type
 
 
 def get_callable_data_type(target):
@@ -18,8 +16,7 @@ def get_callable_data_type(target):
 
 
 # TODO if we can only wrap a stateful object then we can remove the data type arg
-class PPInBase(Bindable, Antenna, ConnectTarget, TriggerSource, Exportable):
-
+class PPInBase(Antenna, ConnectTarget, TriggerSource, Exportable):
     def __init__(self, target, data_type=''):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
@@ -145,7 +142,6 @@ class PPInBuilder(Bee, Antenna, ConnectTarget, TriggerSource):
             cls = PullIn
 
         return cls(self.target.bind(run_hive), data_type=self.data_type)
-
 
     def __repr__(self):
         return "{}({!r}, {!r})".format(self.__class__.__name__, self.target, self.data_type)

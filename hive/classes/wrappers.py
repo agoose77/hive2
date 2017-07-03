@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from collections import OrderedDict, namedtuple
 
 from ..compatability import next
-from ..protocols import Bee, Exportable, Parameter
+from ..interfaces import Bee, Exportable, Parameter
 
 ExtractedArguments = namedtuple("ExtractedArguments", "args kwargs parameter_values")
 
