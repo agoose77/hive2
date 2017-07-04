@@ -7,9 +7,6 @@ from ..private.triggerfunc import TriggerFuncBuilder, TriggerFuncRuntime
 
 
 class FunctionBase(Bee, Callable):
-    before_triggered = None
-    _func = None
-    triggered = None
 
     def __call__(self):
         self.before_triggered()
