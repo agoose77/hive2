@@ -12,13 +12,13 @@ class MethodBound(Bee, Callable):
     def __init__(self, build_bee, run_hive, func):
         self._build_bee = build_bee
         self._run_hive = run_hive
-        self._func = func
+        self._method = func
 
         super().__init__()
 
     def __call__(self):
         self.before_triggered()
-        self._func()
+        self._method()
         self.triggered()
 
     @memo_property
@@ -38,7 +38,7 @@ class MethodBuilder(Bee):
 
     def __init__(self, cls, name):
         self._drone_cls = getattr(cls, '_hive_wrapped_drone_class')
-        self._name = name
+        self._func = getattr(self._drone_cls, name)
 
         super().__init__()
 
@@ -49,7 +49,7 @@ class MethodBuilder(Bee):
     @memoize
     def bind(self, run_hive):
         instance = run_hive._drone_class_to_instance[self._drone_cls]
-        method = getattr(instance, self._name)
+        method = self._func.__get__(instance)
         return MethodBound(self, run_hive, method)
 
     def implements(self, cls):
