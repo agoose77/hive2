@@ -37,6 +37,7 @@ from .contexts import (get_building_hive, get_mode, get_run_hive, get_matchmaker
 from .manager import memo_property, memoize, MemoProperty, ModeFactory
 #
 from .public import attribute, function, method, plugin, property, socket
+from .private import READ_WRITE, READ, WRITE
 
 
 # # i functional
