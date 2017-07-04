@@ -2,7 +2,8 @@ from abc import ABC, abstractmethod
 from collections import OrderedDict, namedtuple
 
 from ..compatability import next
-from ..interfaces import Bee, Exportable, Parameter
+from ..interfaces import Bee, Exportable
+from ..parameter import Parameter
 
 ExtractedArguments = namedtuple("ExtractedArguments", "args kwargs parameter_values")
 
@@ -21,7 +22,7 @@ class ImmutableAttributeMapping:
         except KeyError:
             raise AttributeError("{} has no attribute {!r}".format(self._name, name))
 
-    def __delattr_(self, name):
+    def __delattr__(self, name):
         raise AttributeError("Cannot delete attributes from {}".format(self._name))
 
     def __setattr__(self, name, value):
@@ -31,7 +32,7 @@ class ImmutableAttributeMapping:
         return bool(self._ordered_mapping)
 
     def __dir__(self):
-        return super().__dir__() + tuple(self._ordered_mapping)
+        return object.__dir__(self) + list(self._ordered_mapping)
 
     def __iter__(self):
         return iter(self._ordered_mapping.items())

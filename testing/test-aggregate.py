@@ -1,37 +1,54 @@
 import hive
+from unittest import TestCase, main
 
 
 def build_a(i, ex, args):
-    i.mod_a = hive.modifier(lambda self: print("A modifier()"))
-    ex.a = hive.entry(i.mod_a)
+    i.b = hive.attribute('int', 1)
+    ex.a = i.b.property()
 
 
 def build_b(i, ex, args):
-    i.mod_b = hive.modifier(lambda self: print("B modifier()"))
-    ex.b = hive.entry(i.mod_b)
+    i.b = hive.attribute('int', 2)
+    ex.b = i.b.property()
 
 
 A = hive.hive("A", build_a)
 B = hive.hive("B", build_b)
 
 
+def mod_c(i, ex):
+    i.c.value = ex.a + ex.b
+
+
 def build_c(i, ex, args):
-    i.mod_c = hive.modifier(lambda self: self._mod_a() or self._mod_b())
-    ex.c = hive.entry(i.mod_c)
+    i.c = hive.attribute('int', 0)
+    i.set_c = hive.modifier(mod_c)
+    ex.get_c = i.c.pull_out
+
+    ex.get_c.before_triggered.connect(i.set_c.trigger)
+
 
 C = hive.hive("C", build_c, bases=(A, B))
 D = C.extend("D")
 
-c = C()
-print("c.a()")
-c.a()
 
-print("\nc.b()")
-c.b()
+class Case(TestCase):
 
-print("\nc.C()")
-c.c()
+    def test_a(self):
+        a = A()
+        self.assertEqual(a.a, 1)
 
-d = D()
-print("\nd.c()")
-d.c()
+    def test_b(self):
+        b = B()
+        self.assertEqual(b.b, 2)
+
+    def test_c(self):
+        c = C()
+        self.assertEqual(c.get_c(), 3)
+
+    def test_d(self):
+        d = D()
+        self.assertEqual(d.get_c(), 3)
+
+if __name__ == "__main__":
+    main()

@@ -16,14 +16,6 @@ class Descriptor(ABC):
         pass
 
 
-class Parameter:
-    start_value = None
-    data_type = None
-    options = None
-
-    no_value = object()
-
-
 class Connectable:
     pass
 

@@ -1,13 +1,14 @@
 from .manager import ModeFactory
-from .interfaces import Parameter
 from .typing import is_valid_data_type
 
 from collections.abc import Collection
 
 
-class HiveParameter(Parameter):
+class Parameter:
 
-    def __init__(self, data_type='', start_value=Parameter.no_value, options=None):
+    no_value = object()
+
+    def __init__(self, data_type='', start_value=no_value, options=None):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
 
@@ -44,4 +45,4 @@ class HiveParameter(Parameter):
         return "HiveParameter({!r}, {!r}, {!r})".format(self._data_type, self._start_value, self._options)
 
 
-parameter = ModeFactory("hive.parameter", declare=HiveParameter, build=HiveParameter)
+parameter = ModeFactory("hive.parameter", declare=Parameter, build=Parameter)

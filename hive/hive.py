@@ -84,7 +84,6 @@ class RuntimeHive(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource
             kwargs = hive_object._hive_builder_kwargs
 
             for builder, drone_cls in builders:
-
                 if drone_cls is not None:
                     assert drone_cls not in self._drone_class_to_instance, drone_cls
 
@@ -98,34 +97,24 @@ class RuntimeHive(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource
 
             with building_hive_as(hive_object.__class__), hive_mode_as("build"):
                 # Add external public to runtime hive
-                external_bees = hive_object._hive_ex
-                for bee_name, bee in external_bees:
+                for bee_name, bee in hive_object._hive_ex:
                     if bee.implements(Descriptor):
                         continue
 
-                    # TODO: nice exception reporting
                     instance = bee.bind(self)
-                    if instance is None:
-                        continue
+                    if isinstance(instance, Nameable):
+                        instance.register_alias(self, bee_name)
 
-                    # Store runtime information on exported bee # TODO rethink this
-                    # if isinstance(instance, Nameable):
-                    #     instance.register_alias(self, bee_name)
                     setattr(self, bee_name, instance)
 
                 # Add internal public (that are hives, Callable or Stateful) to runtime hive
-                internal_bees = hive_object._hive_i
-                for bee_name, bee in internal_bees:
+                for bee_name, bee in hive_object._hive_i:
                     if bee.implements(Descriptor):
                         continue
-                    # Some runtime hive attributes are protected, but in the case of Stateful public,
-                    # The RuntimeHive already has corresponding property descriptors
-                    # Bee.implements indicates that the final bee (following bee.getinstance(...)) will be Stateful
 
-                    # TODO: nice exception reporting
                     instance = bee.bind(self)
-                    if instance is None:
-                        continue
+                    if isinstance(instance, Nameable):
+                        instance.register_alias(self, bee_name)
 
                     setattr(hive_i, bee_name, instance)
 
@@ -156,9 +145,6 @@ class RuntimeHive(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource
     def _hive_get_connect_target(self, source):
         target_name = self._hive_object._hive_find_connect_target(source)
         return getattr(self, target_name)
-
-    def implements(self, cls):
-        return isinstance(self, cls)
 
 
 class HiveObject(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource, TriggerTarget):
@@ -392,7 +378,7 @@ class HiveBuilder:
 
     @classmethod
     @memoize
-    def factory(cls, hive_object_class, args, kwarg_items):
+    def _instantiate_hive_object(cls, hive_object_class, args, kwarg_items):
         kwargs = dict(kwarg_items)
         return hive_object_class(*args, **kwargs)
 
@@ -402,7 +388,7 @@ class HiveBuilder:
             return cls._create_meta_primitive(*args, **kwargs)
 
         args, kwargs, hive_object_class = cls._build_hive_object_from_arguments(args, kwargs)
-        hive_object = cls.factory(hive_object_class, args, tuple(kwargs.items()))
+        hive_object = cls._instantiate_hive_object(hive_object_class, args, tuple(kwargs.items()))
 
         if get_mode() == "immediate":
             return hive_object.instantiate()

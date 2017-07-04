@@ -2,8 +2,9 @@ from ..interfaces import Stateful, Bee
 from ..manager import ModeFactory, memoize, memo_property
 from ..private.push_pull_in import PushInBuilder, PullInBuilder, PushInImmediate, PullInImmediate
 from ..private.push_pull_out import PushOutBuilder, PullOutBuilder, PushOutImmediate, PullOutImmediate
-from ..private.stateful_descriptor import stateful_descriptor, READ_WRITE
+from ..private.stateful_descriptor import StatefulDescriptorBuilder, READ_WRITE
 from ..private.triggerfunc import TriggerFuncBuilder, TriggerFuncRuntime
+from ..parameter import Parameter
 
 
 class AttributeImplementation(Bee, Stateful):
@@ -97,7 +98,7 @@ class AttributeBuilder(Bee):
         self.updated = TriggerFuncBuilder()
 
     def property(self, flags=READ_WRITE):
-        return stateful_descriptor(self, flags=flags)
+        return StatefulDescriptorBuilder(self, flags=flags)
 
     @builtin_property
     def data_type(self):
@@ -115,7 +116,12 @@ class AttributeBuilder(Bee):
 
     @memoize
     def bind(self, run_hive):
-        return AttributeBound(self, run_hive, self._data_type, self._start_value)
+        start_value = self._start_value
+
+        if isinstance(start_value, Parameter):
+            start_value = run_hive._hive_object._hive_args_frozen.resolve_parameter(start_value)
+
+        return AttributeBound(self, run_hive, self._data_type, start_value)
 
     def __repr__(self):
         return "AttributeBuilder({!r}, {!r})".format(self._data_type, self._start_value)

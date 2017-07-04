@@ -17,20 +17,20 @@ class Dog(object):
 
 def declare_dog(meta_args):
     print("Invoked Declarator")
-    meta_args.puppies = hive.parameter(("int",), 1)
+    meta_args.puppies = hive.parameter("int", 1)
 
 
 def build_dog(cls, i, ex, args, meta_args):
-
-    print(meta_args)
     print("Invoked Builder")
+    print(args)
     args.name = hive.parameter("str")
-    ex.name = hive.property(cls, "name", "str", args.name)
+    i.name = hive.property(cls, "name", "str", args.name)
+    ex.name = i.name.property(hive.READ)
 
     for ix in range(meta_args.puppies):
-        mod = hive.modifier(lambda h: print("Puppy {} barked".format(h.name)))
+        mod = hive.modifier(lambda i, ex: print("Puppy {} barked".format(ex.name)))
         setattr(i, "mod_{}".format(ix), mod)
-        setattr(ex, "bark_{}".format(ix), hive.entry(mod))
+        setattr(ex, "bark_{}".format(ix), mod.trigger)
 
 
 DogHive = hive.dyna_hive("Dog", build_dog, declare_dog, Dog)
