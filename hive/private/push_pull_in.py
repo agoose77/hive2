@@ -67,7 +67,7 @@ class PushInBase:
     __call__ = push
 
 
-class PullInBase(Callable):
+class PullInBase:
     mode = "pull"
     _pull_callback = None
 

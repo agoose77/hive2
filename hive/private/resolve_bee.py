@@ -63,16 +63,3 @@ class ResolveBee(Exportable):
     def implements(self, cls):
         return self._bee.implements(cls)
 
-
-class DescriptorResolveBee(ResolveBee):
-
-    def __get__(self, instance, owner):
-        return self._bee.__get__(instance, owner)
-
-    def __set__(self, instance, value):
-        return self._bee.__set__(instance, value)
-
-    def __delete__(self, instance):
-        return self._bee.__delete_(instance)
-
-resolve_bee = ModeFactory("hive.resolve_bee", build=ResolveBee)

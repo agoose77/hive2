@@ -8,3 +8,4 @@
   - Configure search paths
   - Configure pin names (titlized or underscore)
 # honeycomb-mouselook,movement
+* Add

@@ -3,16 +3,16 @@ from collections import namedtuple
 from inspect import currentframe, getmodule, isclass
 from itertools import count, chain
 
-from hive.private.resolve_bee import ResolveBee
 from .classes import (AttributeMapping, InternalValidator, ExternalValidator, ArgWrapper, validate_args,
                       DroneClassProxy, HiveDescriptorProxy)
 from .compatability import next, validate_signature
 from .contexts import (bee_register_context, get_mode, hive_mode_as, building_hive_as, run_hive_as,
-                       get_building_hive)
+                       get_building_hive, get_matchmaker_validation_enabled)
+from .exception import MatchmakingPolicyError
 from .interfaces import Bee, ConnectTargetDerived, ConnectSourceDerived, TriggerSource, \
-    TriggerTarget, Nameable, ConnectSource, ConnectTarget, Descriptor
+    TriggerTarget, Nameable, ConnectSource, ConnectTarget, Descriptor, Plugin, Socket
 from .manager import memoize
-from .private.connect import ConnectionCandidate
+from .private import ResolveBee, ConnectionCandidate, connect
 from .typing import MatchFlags, data_types_match
 
 MatchmakerConnectivityState = namedtuple("MatchmakerConnectivityState", "active_policies plugins sockets")
@@ -459,11 +459,11 @@ class HiveBuilder:
                     print("Unable to invoke builder '{}'".format(builder))
                     raise
 
-                    # cls._build_namespace(hive_object_class)
-                    #
-                    # # Root hives build
-                    # if is_root:
-                    #     cls._do_matchmaking(hive_object_class)
+            cls._build_namespace(hive_object_class)
+
+            # Root hives build
+            if is_root:
+                cls._do_matchmaking(hive_object_class)
 
         # Find "anonymous (non-stored)" public (using the anonymous register API) which aren't held by any wrappers,
         # anonymous_bees must be ordered to ensure execution ordering
@@ -493,7 +493,7 @@ class HiveBuilder:
                                if bee.implements(Descriptor)}
 
         hive_i_class = type("{}._hive_i".format(run_hive_cls_name),
-                                                    (HiveInternalRuntimeWrapper,), internal_proxy_dict)
+                            (HiveInternalRuntimeWrapper,), internal_proxy_dict)
         run_hive_class_dict = {"__doc__": cls.__doc__, "__module__": cls.__module__, '_hive_i_class': hive_i_class}
 
         # For external public
@@ -505,146 +505,148 @@ class HiveBuilder:
         hive_object_class._hive_runtime_class = type(run_hive_cls_name, (RuntimeHive,), run_hive_class_dict)
         return hive_object_class
 
-    #
-    # @staticmethod
-    # def _build_matchmaking_layer(resolved_hive_object, connectivity_state: MatchmakerConnectivityState):
-    #     """Build the matchmaking connections for a ResolveBee referring to a HiveObject instance
-    #
-    #     :param resolved_hive_object: ResolveBee instance referring to a HiveObject instance bee
-    #     :param connectivity_state: MatchmakingConnectivityState instance
-    #     """
-    #     # These public will have already been handled by parent (as this method is called top-down)
-    #     active_policies, plugins, sockets = connectivity_state
-    #     exportable_to_parent = resolved_hive_object._hive_exportable_to_parent \
-    #         if resolved_hive_object._hive_allow_export_namespace else frozenset()
-    #
-    #     # Find sockets and plugins that are exportable
-    #     for bee_name, _ in resolved_hive_object._hive_ex:
-    #         if bee_name in exportable_to_parent:
-    #             continue
-    #
-    #         # Get fully resolvable bee reference (relative to root hive)
-    #         resolved_bee = getattr(resolved_hive_object, bee_name)
-    #
-    #         if resolved_bee.implements(Plugin):
-    #             register_dict = plugins
-    #             lookup_dict = sockets
-    #             connect_bees = connect
-    #
-    #         elif resolved_bee.implements(Socket):
-    #             register_dict = sockets
-    #             lookup_dict = plugins
-    #
-    #             def connect_bees(target, source):
-    #                 return connect(source, target)
-    #         else:
-    #             continue
-    #
-    #         identifier = resolved_bee.identifier
-    #         if identifier is None:
-    #             continue
-    #
-    #         policy = resolved_bee.policy()
-    #         match_info = resolved_bee, policy
-    #         # Store in map of plugins or sockets
-    #         register_dict.setdefault(identifier, []).append(match_info)
-    #         # Keep track of instantiated policies
-    #         active_policies.append(match_info)
-    #
-    #         # Can we connect to a socket?
-    #         try:
-    #             other_bees = lookup_dict[identifier]
-    #         except KeyError:
-    #             continue
-    #
-    #         for other_bee, other_policy in other_bees:
-    #             try:
-    #                 policy.pre_connected()
-    #                 other_policy.pre_connected()
-    #
-    #                 connect_bees(resolved_bee, other_bee)
-    #
-    #                 policy.on_connected()
-    #                 other_policy.on_connected()
-    #
-    #             except MatchmakingPolicyError as err:
-    #                 raise MatchmakingPolicyError(
-    #                     "An error occurred during matchmaking {}, {}".format(bee_name, identifier)) from err
-    #
-    # @classmethod
-    # def _do_matchmaking(cls, resolved_hive_object_or_class, connectivity_state: MatchmakerConnectivityState = None):
-    #     """Connect plugins and sockets together by identifier.
-    #
-    #     If children allow importing of namespace, pass namespace to children.
-    #
-    #     :param resolved_hive_object_or_class: the HiveObject class if root, else HiveObject() instance
-    #     :param connectivity_state: state of matchmaking
-    #     """
-    #     internals = resolved_hive_object_or_class._hive_i
-    #
-    #     # The first time this function is called, we are building the root hive
-    #     is_root = connectivity_state is None
-    #     # If root, importing/exporting from/to parent has no meaning
-    #     if is_root:
-    #         active_policies = []
-    #         plugins = {}
-    #         sockets = {}
-    #
-    #         resolved_child_hive_objects = get_unique_child_hive_objects(internals)
-    #
-    #     # Otherwise method call applies to a HiveObject instance (resolved_bee_source)
-    #     else:
-    #         active_policies, plugins, sockets = connectivity_state
-    #         cls._build_matchmaking_layer(resolved_hive_object_or_class, connectivity_state)
-    #         # Get the external public' ResolveBee instead of raw bee, so that connect() resolves bee relative to root
-    #         # Due to chaining of resolve public, this works
-    #         resolved_child_hive_objects = (ResolveBee(b, resolved_hive_object_or_class) for b in
-    #                                        get_unique_child_hive_objects(internals))
-    #
-    #     # Now export to child hives
-    #     for hive_object in resolved_child_hive_objects:
-    #         if hive_object._hive_allow_import_namespace:
-    #             child_connectivity_state = MatchmakerConnectivityState(active_policies, plugins.copy(), sockets.copy())
-    #             cls._do_matchmaking(hive_object, child_connectivity_state)
-    #
-    #     # Validate policies at the very end
-    #     if is_root and get_matchmaker_validation_enabled():
-    #         for resolved_bee, policy in active_policies:
-    #             try:
-    #                 policy.validate()
-    #
-    #             except MatchmakingPolicyError as err:
-    #                 raise MatchmakingPolicyError("Error in validating policy of {}".format(resolved_bee)) from err
-    #
-    # @classmethod
-    # def _build_namespace(cls, hive_object_cls):
-    #     """Build namespace of plugins and sockets within a given HiveObject class
-    #
-    #     Requires that child HiveObjects have already performed this step
-    #
-    #     :param hive_object_cls: HiveObject class being built
-    #     """
-    #     externals = hive_object_cls._hive_ex
-    #     internals = hive_object_cls._hive_i
-    #
-    #     # Export public from drone-like child hives
-    #     for child_hive in get_unique_child_hive_objects(internals):
-    #         if not child_hive._hive_allow_export_namespace:
-    #             continue
-    #
-    #         # Find exportable from child and save to HiveObject instance
-    #         importable_from_child = child_hive._hive_exportable_to_parent
-    #
-    #         # Find public at set them on parent
-    #         for bee_name in importable_from_child:
-    #             assert not hasattr(externals, bee_name), bee_name
-    #             bee = getattr(child_hive, bee_name)
-    #             setattr(externals, bee_name, bee)
-    #
-    #     # Exportable public to parent if drone
-    #     exportable_to_parent = frozenset((n for n, b in externals if (b.implements(Plugin) or b.implements(Socket))
-    #                                       and b.identifier is not None and b.export_to_parent))
-    #     hive_object_cls._hive_exportable_to_parent = exportable_to_parent
+    @staticmethod
+    def _build_matchmaking_layer(resolved_hive_object, connectivity_state: MatchmakerConnectivityState):
+        """Build the matchmaking connections for a ResolveBee referring to a HiveObject instance
+
+        :param resolved_hive_object: ResolveBee instance referring to a HiveObject instance bee
+        :param connectivity_state: MatchmakingConnectivityState instance
+        """
+        # These public will have already been handled by parent (as this method is called top-down)
+        active_policies, plugins, sockets = connectivity_state
+        exportable_to_parent = resolved_hive_object._hive_exportable_to_parent \
+            if getattr(resolved_hive_object,'_hive_allow_export_namespace',None) else frozenset()
+
+        # TLDR fix this
+        print("BUILD",resolved_hive_object)
+        # Find sockets and plugins that are exportable
+        for bee_name, _ in resolved_hive_object._hive_ex:
+            if bee_name in exportable_to_parent:
+                continue
+
+            # Get fully resolvable bee reference (relative to root hive)
+            resolved_bee = getattr(resolved_hive_object, bee_name)
+
+            if resolved_bee.implements(Plugin):
+                register_dict = plugins
+                lookup_dict = sockets
+                connect_bees = connect
+
+            elif resolved_bee.implements(Socket):
+                register_dict = sockets
+                lookup_dict = plugins
+
+                def connect_bees(target, source):
+                    return connect(source, target)
+            else:
+                continue
+
+            identifier = resolved_bee.identifier
+            if identifier is None:
+                continue
+            policy = resolved_bee.policy()
+            match_info = resolved_bee, policy
+            # Store in map of plugins or sockets
+            register_dict.setdefault(identifier, []).append(match_info)
+            # Keep track of instantiated policies
+            active_policies.append(match_info)
+
+            # Can we connect to a socket?
+            try:
+                other_bees = lookup_dict[identifier]
+            except KeyError:
+                continue
+
+            for other_bee, other_policy in other_bees:
+                try:
+                    policy.pre_connected()
+                    other_policy.pre_connected()
+
+                    connect_bees(resolved_bee, other_bee)
+
+                    policy.on_connected()
+                    other_policy.on_connected()
+
+                except MatchmakingPolicyError as err:
+                    raise MatchmakingPolicyError(
+                        "An error occurred during matchmaking {}, {}".format(bee_name, identifier)) from err
+
+    @classmethod
+    def _do_matchmaking(cls, resolved_hive_object_or_class, connectivity_state: MatchmakerConnectivityState = None):
+        """Connect plugins and sockets together by identifier.
+
+        If children allow importing of namespace, pass namespace to children.
+
+        :param resolved_hive_object_or_class: the HiveObject class if root, else HiveObject() instance
+        :param connectivity_state: state of matchmaking
+        """
+        internals = resolved_hive_object_or_class._hive_i
+
+        # The first time this function is called, we are building the root hive
+        is_root = connectivity_state is None
+        # If root, importing/exporting from/to parent has no meaning
+        if is_root:
+            active_policies = []
+            plugins = {}
+            sockets = {}
+            connectivity_state = MatchmakerConnectivityState(active_policies, plugins, sockets)
+            resolved_child_hive_objects = get_unique_child_hive_objects(internals)
+
+        # Otherwise method call applies to a HiveObject instance (resolved_bee_source)
+        else:
+            active_policies, plugins, sockets = connectivity_state
+            # Get the external public' ResolveBee instead of raw bee, so that connect() resolves bee relative to root
+            # Due to chaining of resolve public, this works
+            resolved_child_hive_objects = (ResolveBee(b, resolved_hive_object_or_class) for b in
+                                           get_unique_child_hive_objects(internals))
+        cls._build_matchmaking_layer(resolved_hive_object_or_class, connectivity_state)
+
+        print(resolved_hive_object_or_class, resolved_child_hive_objects)
+        # Now export to child hives
+        for hive_object in resolved_child_hive_objects:
+            if hive_object._hive_allow_import_namespace:
+                child_connectivity_state = MatchmakerConnectivityState(active_policies, plugins.copy(), sockets.copy())
+                print("DO")
+                cls._do_matchmaking(hive_object, child_connectivity_state)
+
+        # Validate policies at the very end
+        if is_root and get_matchmaker_validation_enabled():
+            for resolved_bee, policy in active_policies:
+                try:
+                    policy.validate()
+
+                except MatchmakingPolicyError as err:
+                    raise MatchmakingPolicyError("Error in validating policy of {}".format(resolved_bee)) from err
+
+    @classmethod
+    def _build_namespace(cls, hive_object_cls):
+        """Build namespace of plugins and sockets within a given HiveObject class
+
+        Requires that child HiveObjects have already performed this step
+
+        :param hive_object_cls: HiveObject class being built
+        """
+        externals = hive_object_cls._hive_ex
+        internals = hive_object_cls._hive_i
+
+        # Export public from drone-like child hives
+        for child_hive in get_unique_child_hive_objects(internals):
+            if not child_hive._hive_allow_export_namespace:
+                continue
+
+            # Find exportable from child and save to HiveObject instance
+            importable_from_child = child_hive._hive_exportable_to_parent
+
+            # Find public at set them on parent
+            for bee_name in importable_from_child:
+                assert not hasattr(externals, bee_name), bee_name
+                bee = getattr(child_hive, bee_name)
+                setattr(externals, bee_name, bee)
+
+        # Exportable public to parent if drone
+        exportable_to_parent = frozenset((n for n, b in externals if (b.implements(Plugin) or b.implements(Socket))
+                                          and b.identifier is not None and b.export_to_parent))
+        hive_object_cls._hive_exportable_to_parent = exportable_to_parent
 
     @classmethod
     def _hive_build_meta_args_wrapper(cls):

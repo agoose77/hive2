@@ -7,51 +7,6 @@ from ..interfaces import Antenna, Output, Stateful, Callable, ConnectSource, Soc
 from ..manager import ModeFactory, memoize, memo_property
 from ..typing import data_type_is_untyped, data_types_match, MatchFlags, is_valid_data_type
 
-
-class PullOutBase:
-    mode = "pull"
-
-    def pull(self):
-        # TODO: exception handling hooks
-        self.before_triggered()
-        value = self._get_value()
-        self.triggered()
-
-        return value
-
-    def _hive_connect_source(self, target):
-        pass
-
-    __call__ = pull
-
-
-class PushOutBase(Socket):
-    mode = "push"
-
-    def __init__(self, target, data_type=''):
-        self._targets = []
-
-        super().__init__(target, data_type)
-
-    def push(self):
-        # TODO: exception handling hooks
-        self.before_triggered()
-
-        value = self._get_value()
-        for target in self._targets:
-            target(value)
-
-        self.triggered()
-
-    def socket(self):
-        return self.push
-
-    def _hive_connect_source(self, target):
-        self._targets.append(target.push)
-
-    __call__ = push
-
-
 class PushPullOutBase(Bee, Output, ConnectSource, ConnectableMixin, Callable):
     def __init__(self, target, data_type=''):
         if not is_valid_data_type(data_type):
@@ -90,6 +45,50 @@ class PushPullOutBase(Bee, Output, ConnectSource, ConnectableMixin, Callable):
 
     def __repr__(self):
         return "{}({!r}, {!r})".format(self.__class__.__name__, self.target, self.data_type)
+
+
+class PullOutBase:
+    mode = "pull"
+
+    def pull(self):
+        # TODO: exception handling hooks
+        self.before_triggered()
+        value = self._get_value()
+        self.triggered()
+
+        return value
+
+    def _hive_connect_source(self, target):
+        pass
+
+    __call__ = pull
+
+
+class PushOutBase(Socket):
+    mode = "push"
+
+    def __init__(self, *args, **kwargs):
+        self._targets = []
+
+        super().__init__(*args, **kwargs) # TODO ugly
+
+    def push(self):
+        # TODO: exception handling hooks
+        self.before_triggered()
+
+        value = self._get_value()
+        for target in self._targets:
+            target(value)
+
+        self.triggered()
+
+    def socket(self):
+        return self.push
+
+    def _hive_connect_source(self, target):
+        self._targets.append(target.push)
+
+    __call__ = push
 
 
 class PushPullInImmediate(PushPullOutBase):
