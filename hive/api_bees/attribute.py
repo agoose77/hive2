@@ -1,8 +1,8 @@
-from ..functional.stateful_descriptor import stateful_descriptor, READ_WRITE
+from hive.internal_bees.stateful_descriptor import stateful_descriptor, READ_WRITE
 from ..interfaces import Stateful, Bee
-from ..low_level.push_pull_in import PushInBuilder, PullInBuilder, PullInBound, PushInBound, PushInImmediate, PullInImmediate
-from ..low_level.push_pull_out import PushOutBuilder, PullOutBuilder, PullOutBound, PushOutBound, PushOutImmediate, PullOutImmediate
-from ..low_level.triggerfunc import TriggerFuncBuilder, TriggerFuncRuntime
+from ..internal_bees.push_pull_in import PushInBuilder, PullInBuilder, PushInImmediate, PullInImmediate
+from ..internal_bees.push_pull_out import PushOutBuilder, PullOutBuilder, PushOutImmediate, PullOutImmediate
+from ..internal_bees.triggerfunc import TriggerFuncBuilder, TriggerFuncRuntime
 from ..manager import ModeFactory, memoize, memo_property
 
 

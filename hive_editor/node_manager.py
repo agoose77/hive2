@@ -684,7 +684,7 @@ class NodeManager(object):
 
         created_nodes = {}
 
-        # Load IO bees
+        # Load IO api_bees
         for spyder_node in hivemap.nodes:
             reference_path = spyder_node.reference_path
             params = parameter_group_array_to_dict(spyder_node.parameter_groups)
@@ -710,7 +710,7 @@ class NodeManager(object):
 
             node_to_spyder_node[node] = spyder_node
 
-        # Attempt to set common data between IO bees and Hives
+        # Attempt to set common data between IO api_bees and Hives
         for node, spyder_node in node_to_spyder_node.items():
             # Try to use original name, otherwise make unique
             self.rename_node(node, spyder_node.identifier, attempt_till_success=True)

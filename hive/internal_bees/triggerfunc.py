@@ -1,9 +1,10 @@
+from .interfaces import TriggerableMixin
 from ..exception import HiveConnectionError
-from ..interfaces import TriggerSource, TriggerTarget, ConnectSource, Callable, Bee
+from ..interfaces import TriggerSource, TriggerTarget, ConnectSource, Callable, Bee, Exportable
 from ..manager import ModeFactory, memoize
 
 
-class TriggerFunc(TriggerSource, ConnectSource, Callable):
+class TriggerFuncRuntime(Bee, TriggerSource, ConnectSource, Callable, TriggerableMixin):
     """Callable interface to HIVE (pre)trigger"""
 
     data_type = 'trigger'
@@ -32,16 +33,15 @@ class TriggerFunc(TriggerSource, ConnectSource, Callable):
         return "TriggerFunc()".format()
 
 
-class TriggerFuncBuilder(Bee, TriggerSource, ConnectSource):
+class TriggerFuncBuilder(TriggerSource, ConnectSource, Exportable, TriggerableMixin):
     data_type = 'trigger'
-    runtime_cls = TriggerFunc
 
     @memoize
     def bind(self, run_hive):
-        return self.runtime_cls()
+        return TriggerFuncRuntime()
 
     def implements(self, cls):
-        if issubclass(self.runtime_cls, cls):
+        if issubclass(TriggerFuncRuntime, cls):
             return True
 
         return super().implements(cls)
@@ -50,4 +50,4 @@ class TriggerFuncBuilder(Bee, TriggerSource, ConnectSource):
         return "TriggerFuncBuilder()".format()
 
 
-triggerfunc = ModeFactory("hive.triggerfunc", immediate=TriggerFunc, build=TriggerFuncBuilder)
+triggerfunc = ModeFactory("hive.triggerfunc", immediate=TriggerFuncRuntime, build=TriggerFuncBuilder)

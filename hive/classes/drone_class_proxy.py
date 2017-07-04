@@ -1,5 +1,5 @@
-from ..high_level.property import PropertyBuilder
-from ..high_level.method import MethodBuilder
+from ..api_bees.property import PropertyBuilder
+from ..api_bees.method import MethodBuilder
 
 from ..annotations import get_argument_options, get_return_type
 from ..compatability import is_method

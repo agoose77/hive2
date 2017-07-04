@@ -1,10 +1,9 @@
 # from ..functional.modifier import Modifier
-from functools import partial
 
-from ..low_level.triggerfunc import TriggerFuncBuilder, TriggerFuncRuntime
-from ..functional.triggerable import TriggerableBuilder, TriggerableRuntime
+from hive.internal_bees.triggerable import TriggerableBuilder
+from ..interfaces import Bee, Callable
+from ..internal_bees.triggerfunc import TriggerFuncBuilder
 from ..manager import ModeFactory, memoize, memo_property
-from ..interfaces import Bee, TriggerSource, Callable
 
 
 class MethodBound(Bee, Callable):

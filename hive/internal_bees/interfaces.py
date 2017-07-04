@@ -1,5 +1,5 @@
-from ..functional.connect import connect
-from ..functional.trigger import trigger
+from .trigger import trigger
+from .connect import connect
 
 
 class ConnectableMixin:

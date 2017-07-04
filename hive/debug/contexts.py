@@ -82,7 +82,7 @@ class BeeNotNameableError(Exception):
 class FileDebugContext(ReportedDebugContextBase):
     """Basic debug context to write to file.
 
-    Uses first absolute name (for aliased bees, this may create some confusion).
+    Uses first absolute name (for aliased api_bees, this may create some confusion).
     """
 
     class _NoData:

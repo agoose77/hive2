@@ -2,13 +2,13 @@ from collections import namedtuple
 from itertools import product
 from operator import itemgetter
 
-from ..contexts import get_mode, register_bee
+from hive.contexts import get_mode, register_bee
 # from hive.debug import get_debug_context
-from ..exception import MatchFailedError
-from ..interfaces import (ConnectSourceBase, ConnectSourceDerived, ConnectTargetBase, ConnectTargetDerived, Bee,
-                          )
-from ..manager import memoize
-from ..typing import get_match_score, find_matching_ast, MatchFlags, parse_type_string
+from hive.exception import MatchFailedError
+from hive.interfaces import (ConnectSourceBase, ConnectSourceDerived, ConnectTargetBase, ConnectTargetDerived, Bee,
+                             )
+from hive.manager import memoize
+from hive.typing import get_match_score, find_matching_ast, MatchFlags, parse_type_string
 
 ConnectionCandidate = namedtuple("ConnectionCandidate", ("bee_name", "data_type"))
 
@@ -105,7 +105,7 @@ def find_connection_between_hives(source_hive, target_hive):
 
     source_candidate, target_candidate = candidates[0]
 
-    # Get runtime bees
+    # Get runtime api_bees
     source = getattr(source_hive, source_candidate.bee_name)
     target = getattr(target_hive, target_candidate.bee_name)
 
@@ -118,7 +118,7 @@ def resolve_endpoints(source, target):
     hive_source = isinstance(source, ConnectSourceDerived)
     hive_target = isinstance(target, ConnectTargetDerived)
 
-    # Find appropriate bees to connect within respective hives
+    # Find appropriate api_bees to connect within respective hives
     if hive_source and hive_target:
         source, target = find_connection_between_hives(source, target)
 

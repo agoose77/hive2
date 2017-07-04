@@ -23,7 +23,7 @@ class BindableResolveBee(Nameable):
 
 
 class ResolveBee(Exportable):
-    """Implements support for connecting between bees of different HiveObjects 
+    """Implements support for connecting between api_bees of different HiveObjects 
     (resolving the getinstance & bind methods)
     """
 

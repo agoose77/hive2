@@ -97,7 +97,7 @@ class RuntimeHive(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource
                     drone.__init__(*args, **kwargs)
 
             with building_hive_as(hive_object.__class__), hive_mode_as("build"):
-                # Add external bees to runtime hive
+                # Add external api_bees to runtime hive
                 external_bees = hive_object._hive_ex
                 for bee_name, bee in external_bees:
                     if bee.implements(Descriptor):
@@ -113,12 +113,12 @@ class RuntimeHive(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource
                     #     instance.register_alias(self, bee_name)
                     setattr(self, bee_name, instance)
 
-                # Add internal bees (that are hives, Callable or Stateful) to runtime hive
+                # Add internal api_bees (that are hives, Callable or Stateful) to runtime hive
                 internal_bees = hive_object._hive_i
                 for bee_name, bee in internal_bees:
                     if bee.implements(Descriptor):
                         continue
-                    # Some runtime hive attributes are protected, but in the case of Stateful bees,
+                    # Some runtime hive attributes are protected, but in the case of Stateful api_bees,
                     # The RuntimeHive already has corresponding property descriptors
                     # Bee.implements indicates that the final bee (following bee.getinstance(...)) will be Stateful
 
@@ -164,7 +164,7 @@ class RuntimeHive(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource
 class HiveObject(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource, TriggerTarget):
     """Built Hive base-class responsible for creating new Hive instances.
 
-    All bees defined with the builder functions are memoized and cached for faster instantiation
+    All api_bees defined with the builder functions are memoized and cached for faster instantiation
     """
 
     _hive_parent_class = None
@@ -490,12 +490,12 @@ class HiveBuilder:
                     # if is_root:
                     #     cls._do_matchmaking(hive_object_class)
 
-        # Find "anonymous (non-stored)" bees (using the anonymous register API) which aren't held by any wrappers,
+        # Find "anonymous (non-stored)" api_bees (using the anonymous register API) which aren't held by any wrappers,
         # anonymous_bees must be ordered to ensure execution ordering
         all_wrapper_bees = frozenset(b for n, b in chain(internals, externals))
         anonymous_bees = tuple((b for b in registered_bees if b not in all_wrapper_bees))
 
-        # Save anonymous bees to internal wrapper, with unique names
+        # Save anonymous api_bees to internal wrapper, with unique names
         sequential_bee_names = generate_anonymous_names()
         for bee in anonymous_bees:
             # Find unique name for bee
@@ -507,12 +507,12 @@ class HiveBuilder:
             setattr(internals, bee_name, bee)
 
         # TODO: auto-remove connections/triggers for which the source/target has been deleted
-        # TODO: this implies that bees must be registered on wrappers to "work"
+        # TODO: this implies that api_bees must be registered on wrappers to "work"
 
         # Build runtime hive class
         run_hive_cls_name = "{}(RuntimeHive)".format(cls.__name__)
 
-        # For internal bees
+        # For internal api_bees
         internal_proxy_dict = {name: HiveDescriptorProxy(bee, internal=True)
                                for name, bee in internals
                                if bee.implements(Descriptor)}
@@ -521,7 +521,7 @@ class HiveBuilder:
                                                     (HiveInternalRuntimeWrapper,), internal_proxy_dict)
         run_hive_class_dict = {"__doc__": cls.__doc__, "__module__": cls.__module__, '_hive_i_class': hive_i_class}
 
-        # For external bees
+        # For external api_bees
         for bee_name, bee in externals:
             # If the bee requires a property interface, build a property
             if bee.implements(Descriptor):
@@ -538,7 +538,7 @@ class HiveBuilder:
     #     :param resolved_hive_object: ResolveBee instance referring to a HiveObject instance bee
     #     :param connectivity_state: MatchmakingConnectivityState instance
     #     """
-    #     # These bees will have already been handled by parent (as this method is called top-down)
+    #     # These api_bees will have already been handled by parent (as this method is called top-down)
     #     active_policies, plugins, sockets = connectivity_state
     #     exportable_to_parent = resolved_hive_object._hive_exportable_to_parent \
     #         if resolved_hive_object._hive_allow_export_namespace else frozenset()
@@ -621,8 +621,8 @@ class HiveBuilder:
     #     else:
     #         active_policies, plugins, sockets = connectivity_state
     #         cls._build_matchmaking_layer(resolved_hive_object_or_class, connectivity_state)
-    #         # Get the external bees' ResolveBee instead of raw bee, so that connect() resolves bee relative to root
-    #         # Due to chaining of resolve bees, this works
+    #         # Get the external api_bees' ResolveBee instead of raw bee, so that connect() resolves bee relative to root
+    #         # Due to chaining of resolve api_bees, this works
     #         resolved_child_hive_objects = (ResolveBee(b, resolved_hive_object_or_class) for b in
     #                                        get_unique_child_hive_objects(internals))
     #
@@ -652,7 +652,7 @@ class HiveBuilder:
     #     externals = hive_object_cls._hive_ex
     #     internals = hive_object_cls._hive_i
     #
-    #     # Export bees from drone-like child hives
+    #     # Export api_bees from drone-like child hives
     #     for child_hive in get_unique_child_hive_objects(internals):
     #         if not child_hive._hive_allow_export_namespace:
     #             continue
@@ -660,13 +660,13 @@ class HiveBuilder:
     #         # Find exportable from child and save to HiveObject instance
     #         importable_from_child = child_hive._hive_exportable_to_parent
     #
-    #         # Find bees at set them on parent
+    #         # Find api_bees at set them on parent
     #         for bee_name in importable_from_child:
     #             assert not hasattr(externals, bee_name), bee_name
     #             bee = getattr(child_hive, bee_name)
     #             setattr(externals, bee_name, bee)
     #
-    #     # Exportable bees to parent if drone
+    #     # Exportable api_bees to parent if drone
     #     exportable_to_parent = frozenset((n for n, b in externals if (b.implements(Plugin) or b.implements(Socket))
     #                                       and b.identifier is not None and b.export_to_parent))
     #     hive_object_cls._hive_exportable_to_parent = exportable_to_parent
@@ -796,8 +796,8 @@ def meta_hive(name, builder, declarator, drone_cls=None, bases=()):
 # ==========Hive build path================
 # Hive building is bottom-up after builder functions, top down before
 # 1. Call all builder functions with i, ex and args wrappers (and frozen meta args)
-# 2. Find all defined HiveObject bees.
-# 3. If bees set _hive_allow_export_namespace true, import appropriate plugins and sockets from child HiveObject
+# 2. Find all defined HiveObject api_bees.
+# 3. If api_bees set _hive_allow_export_namespace true, import appropriate plugins and sockets from child HiveObject
 # 4. For all plugins and sockets of current building hive, if export_to_parent, add names to class
 #       set "_hive_exportable_to_parent"
 # 5. If root HIVE (get_building_hive() is None after building), top-down recurse HiveObject._hive_build_connectivity

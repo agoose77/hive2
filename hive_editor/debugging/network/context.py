@@ -375,7 +375,7 @@ class NetworkDebugContext(ReportedDebugContextBase):
         self._send_operation(opcode, container_hive_id, container_pair_info.source_container_name,
                              container_pair_info.target_container_name, data)
 
-        # Check if any breakpoints are set on involved bees
+        # Check if any breakpoints are set on involved api_bees
         self._check_for_breakpoint(container_pair_info.source_container_name, container_hive_id,
                                    container_pair_info.hivemap_path)
         self._check_for_breakpoint(container_pair_info.target_container_name, container_hive_id,

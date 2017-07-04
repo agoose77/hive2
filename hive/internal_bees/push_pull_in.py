@@ -1,8 +1,8 @@
+from hive.internal_bees.triggerable import TriggerableBuilder, TriggerableRuntime
 from .interfaces import ConnectableMixin
 from .triggerfunc import TriggerFuncBuilder, TriggerFuncRuntime
 from ..annotations import get_argument_types
 from ..exception import HiveConnectionError
-from ..functional.triggerable import TriggerableBuilder, TriggerableRuntime
 from ..interfaces import (Antenna, Output, Stateful, ConnectTarget, Callable,
                           Exportable, Bee)
 from ..manager import memoize, ModeFactory, memo_property

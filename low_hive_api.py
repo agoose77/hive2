@@ -1,7 +1,8 @@
 import hive
-from hive.high_level.attribute import attribute
-from hive.high_level.function import function
-
+from hive.api_bees.attribute import attribute
+from hive.api_bees.function import function
+from hive.api_bees.plugin import plugin
+from hive.api_bees.socket import socket
 # attr = attribute("int")
 #
 # def debug():
@@ -12,11 +13,10 @@ from hive.high_level.function import function
 # attr.after_update.connect(trig.trigger)
 #
 # attr.value = 12
+from hive.internal_bees.stateful_descriptor import WRITE
 
-from hive.functional.stateful_descriptor import READ_WRITE, READ, WRITE
 
 class DroneClass:
-
     @property
     def foo(self):
         return 'x'
@@ -28,19 +28,24 @@ class DroneClass:
 def on_attr_updated(i, ex):
     print("attr updated!", i.attr.value)
 
+
 def on_attr_updated_pre(i, ex):
     print("attr pre-updated!", i.attr.value)
+
 
 def on_attr_pulled_in(i, ex):
     print("attr pull invoked!")
 
+
 def on_attr_pulled_out(i, ex):
     print("attr pulled out!")
+
 
 def do_pull(i, ex):
     print("invoking pull of attr")
 
-def build(cls, i,ex,args):
+
+def build(cls, i, ex, args):
     i.attr = attribute("int")
 
     i.before_updated = function(on_attr_updated_pre)
@@ -68,8 +73,10 @@ def build(cls, i,ex,args):
     ex.value_out = i.attr.pull_out
     ex.print_foo = cls.print_foo.trigger
 
+    ex.plug = plugin(i.updated.trigger)
 
-H = hive.hive("build",build, drone_cls=DroneClass)
+
+H = hive.hive("build", build, drone_cls=DroneClass)
 h = H()
 print("START")
 
@@ -78,6 +85,15 @@ attr.pull_out.connect(h.value_in)
 print(h.do_pull())
 print(h.foo)
 h.print_foo()
+
+
+def get_plug(p):
+    print("Got plug", p)
+    p()
+
+
+s = socket(get_plug)
+h.plug.connect(s)
 # h.value = 9
 # print(h.do_pull())
 # print(h.value)

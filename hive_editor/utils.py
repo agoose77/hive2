@@ -1,7 +1,7 @@
 import ast
 import hive
 
-# IO bees
+# IO api_bees
 from hive.hook import Hook
 from hive.entry import Entry
 from hive.antenna import HiveAntenna
