@@ -35,32 +35,10 @@ from .contexts import (get_building_hive, get_mode, get_run_hive, get_matchmaker
                        set_matchmaker_validation_enabled,
                        matchmaker_validation_enabled_as)
 from .manager import memo_property, memoize, MemoProperty, ModeFactory
-#
 from .public import attribute, function, method, plugin, property, socket
 from .private import READ_WRITE, READ, WRITE
-
-
-# # i functional
-# from hive.functional.modifier import modifier
-# from hive.functional.push_pull_in import push_in, pull_in
-# from .relay import relay
-# from .property import property
-# from .variable import variable
-#
-# # connection functional
-# from hive.functional.connect import connect
-#
-# # i/ex functional
-# from hive.functional.stateful_descriptor import stateful_descriptor
-#
-# # ex functional
-# from hive.functional.socket import socket
-# from hive.functional.plugin import plugin
-# from .policies import SingleOptional, SingleRequired, MultipleOptional, MultipleRequired
-#
-# # args functional
-# from .parameter import parameter
-# from .exception import HiveException
-#
-# from .annotations import (types, options, return_type, get_argument_options, get_argument_types, get_return_type,
-#                           update_wrapper, typed_property)
+from .policies import SingleOptional, SingleRequired, MultipleOptional, MultipleRequired
+from .parameter import parameter
+from .exception import HiveException
+from .annotations import (types, options, return_type, get_argument_options, get_argument_types, get_return_type,
+                          update_wrapper, typed_property)

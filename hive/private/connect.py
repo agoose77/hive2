@@ -3,7 +3,6 @@ from itertools import product
 from operator import itemgetter
 
 from ..contexts import get_mode, register_bee
-# from hive.debug import get_debug_context
 from ..exception import MatchFailedError, HiveConnectionError
 from ..interfaces import ConnectSourceBase, ConnectSourceDerived, ConnectTargetBase, ConnectTargetDerived, Bee
 from ..manager import memoize
@@ -139,15 +138,8 @@ def build_connection(source, target):
     source._hive_is_connectable_source(target)
     target._hive_is_connectable_target(source)
 
-    debug_context = None  # get_debug_context()
-    if debug_context is not None:
-        debug_context.build_connection(source, target)
-
-    else:
-        target._hive_connect_target(source)
-        source._hive_connect_source(target)
-
-    print("BUIDL", source, target)
+    target._hive_connect_target(source)
+    source._hive_connect_source(target)
 
 
 class ConnectionBuilder(Bee):
