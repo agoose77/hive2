@@ -1,5 +1,5 @@
-from .manager import memoize, ModeFactory
-from .interfaces import Exportable, Nameable
+from hive.manager import memoize, ModeFactory
+from hive.interfaces import Exportable, Nameable
 
 
 class BindableResolveBee(Nameable):
