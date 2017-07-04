@@ -1,5 +1,5 @@
-from hive.manager import ModeFactory, memoize
-from hive.interfaces import Stateful, Descriptor, Exportable, Bee
+from ..manager import ModeFactory, memoize
+from ..interfaces import Stateful, Descriptor, Exportable, Bee
 
 from enum import auto, IntFlag
 

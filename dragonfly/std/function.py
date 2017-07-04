@@ -135,7 +135,7 @@ def build_func(i, ex, args, meta_args):
     exec(modifier_decl, namespace)
     modifier_func = namespace['modifier']
 
-    # Create modifier api_bees
+    # Create modifier public
     i.modifier = hive.modifier(modifier_func)
     ex.trigger = hive.entry(i.modifier)
 

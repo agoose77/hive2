@@ -3,7 +3,7 @@ from collections import namedtuple
 from hive.functional.push_pull_in import PullInBuilder, PullIn, PushInBuilder, PushIn
 from hive.trigger.trigger_source import TriggerSourceBuilder, TriggerSourceRuntime
 
-from hive.internal_bees.stateful_descriptor import StatefulDescriptorBuilder
+from hive.private.stateful_descriptor import StatefulDescriptorBuilder
 from .interfaces import Bee, Stateful
 from .manager import memo_property
 from .ppout import PullOutBuilder, PushOutBuilder, PullOut, PushOut

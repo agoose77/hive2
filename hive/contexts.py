@@ -88,12 +88,12 @@ def run_hive_as(run_hive):
 
 
 def register_bee(bee):
-    assert _bees, "No valid state exists registering api_bees, call register_bee_push()"
+    assert _bees, "No valid state exists registering public, call register_bee_push()"
     _bees[-1].append(bee)
 
 
 def register_bee_pop():
-    assert _bees, "No valid state exists registering api_bees"
+    assert _bees, "No valid state exists registering public"
     return _bees.pop()
 
 

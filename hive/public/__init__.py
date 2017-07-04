@@ -1,5 +1,5 @@
 from .attribute import attribute
-from .function import function
+from .modifier import modifier
 from .method import method
 from .plugin import plugin
 from .property import property

@@ -1,11 +1,11 @@
 from functools import partial
 
-from hive.internal_bees.stateful_descriptor import stateful_descriptor, READ_WRITE
 from ..interfaces import Stateful, Bee
-from ..internal_bees.push_pull_in import PushInBuilder, PullInBuilder
-from ..internal_bees.push_pull_out import PushOutBuilder, PullOutBuilder
-from ..internal_bees.triggerfunc import TriggerFuncBuilder
 from ..manager import ModeFactory, memoize, memo_property
+from ..private.push_pull_in import PushInBuilder, PullInBuilder
+from ..private.push_pull_out import PushOutBuilder, PullOutBuilder
+from ..private.stateful_descriptor import stateful_descriptor, READ_WRITE
+from ..private.triggerfunc import TriggerFuncBuilder
 
 builtin_property = property
 

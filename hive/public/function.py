@@ -1,10 +1,9 @@
-# from ..functional.modifier import Modifier
-from functools import partial
+from abc import ABC, abstractmethod
 
-from hive.internal_bees.triggerable import TriggerableBuilder, TriggerableRuntime
 from ..interfaces import Bee, Callable
-from ..internal_bees.triggerfunc import TriggerFuncBuilder, TriggerFuncRuntime
-from ..manager import ModeFactory, memoize, memo_property
+from ..manager import memoize, memo_property
+from ..private.triggerable import TriggerableBuilder, TriggerableRuntime
+from ..private.triggerfunc import TriggerFuncBuilder, TriggerFuncRuntime
 
 
 class FunctionBase(Bee, Callable):
@@ -19,7 +18,6 @@ class FunctionBase(Bee, Callable):
 
 
 class FunctionImmediate(FunctionBase):
-
     def __init__(self, func):
         assert callable(func)
         self._func = func
@@ -32,11 +30,10 @@ class FunctionImmediate(FunctionBase):
 
 
 class FunctionBound(FunctionBase):
-
     def __init__(self, build_bee, run_hive, func):
         self._build_bee = build_bee
         self._run_hive = run_hive
-        self._func = partial(func, run_hive._hive_i, run_hive)
+        self._func = func
 
         super().__init__()
 
@@ -53,11 +50,8 @@ class FunctionBound(FunctionBase):
         return self._build_bee.trigger.bind(self._run_hive)
 
 
-class FunctionBuilder(Bee):
-
-    def __init__(self, func):
-        self._func = func
-
+class FunctionBuilder(Bee, ABC):
+    def __init__(self):
         super().__init__()
 
         self.triggered = TriggerFuncBuilder()
@@ -65,14 +59,12 @@ class FunctionBuilder(Bee):
         self.trigger = TriggerableBuilder(self)
 
     @memoize
+    @abstractmethod
     def bind(self, run_hive):
-        return FunctionBound(self, run_hive, self._func)
+        pass
 
     def implements(self, cls):
         if issubclass(FunctionBound, cls):
             return True
 
         return super().implements(cls)
-
-
-function = ModeFactory("hive.function", build=FunctionBuilder, immediate=FunctionImmediate)

@@ -2,13 +2,12 @@ from collections import namedtuple
 from itertools import product
 from operator import itemgetter
 
-from hive.contexts import get_mode, register_bee
+from ..contexts import get_mode, register_bee
 # from hive.debug import get_debug_context
-from hive.exception import MatchFailedError, HiveConnectionError
-from hive.interfaces import (ConnectSourceBase, ConnectSourceDerived, ConnectTargetBase, ConnectTargetDerived, Bee,
-                             )
-from hive.manager import memoize
-from hive.typing import get_match_score, find_matching_ast, MatchFlags, parse_type_string
+from ..exception import MatchFailedError, HiveConnectionError
+from ..interfaces import ConnectSourceBase, ConnectSourceDerived, ConnectTargetBase, ConnectTargetDerived, Bee
+from ..manager import memoize
+from ..typing import get_match_score, find_matching_ast, MatchFlags, parse_type_string
 
 ConnectionCandidate = namedtuple("ConnectionCandidate", ("bee_name", "data_type"))
 
@@ -105,7 +104,7 @@ def find_connection_between_hives(source_hive, target_hive):
 
     source_candidate, target_candidate = candidates[0]
 
-    # Get runtime api_bees
+    # Get runtime public
     source = getattr(source_hive, source_candidate.bee_name)
     target = getattr(target_hive, target_candidate.bee_name)
 
@@ -118,7 +117,7 @@ def resolve_endpoints(source, target):
     hive_source = isinstance(source, ConnectSourceDerived)
     hive_target = isinstance(target, ConnectTargetDerived)
 
-    # Find appropriate api_bees to connect within respective hives
+    # Find appropriate public to connect within respective hives
     if hive_source and hive_target:
         source, target = find_connection_between_hives(source, target)
 
@@ -148,7 +147,7 @@ def build_connection(source, target):
         target._hive_connect_target(source)
         source._hive_connect_source(target)
 
-    print("BUIDL",source,target)
+    print("BUIDL", source, target)
 
 
 class ConnectionBuilder(Bee):

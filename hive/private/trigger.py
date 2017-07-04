@@ -1,7 +1,7 @@
-from hive.contexts import get_mode, register_bee
-from hive.interfaces import TriggerSourceBase, TriggerTargetBase, Bee
+from ..contexts import get_mode, register_bee
+from ..interfaces import TriggerSourceBase, TriggerTargetBase, Bee
 # from hive.debug import get_debug_context
-from hive.manager import memoize
+from ..manager import memoize
 
 
 def build_trigger(source, target):

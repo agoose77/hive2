@@ -1,9 +1,9 @@
-from hive.internal_bees.stateful_descriptor import stateful_descriptor, READ_WRITE
 from ..interfaces import Stateful, Bee
-from ..internal_bees.push_pull_in import PushInBuilder, PullInBuilder, PushInImmediate, PullInImmediate
-from ..internal_bees.push_pull_out import PushOutBuilder, PullOutBuilder, PushOutImmediate, PullOutImmediate
-from ..internal_bees.triggerfunc import TriggerFuncBuilder, TriggerFuncRuntime
 from ..manager import ModeFactory, memoize, memo_property
+from ..private.push_pull_in import PushInBuilder, PullInBuilder, PushInImmediate, PullInImmediate
+from ..private.push_pull_out import PushOutBuilder, PullOutBuilder, PushOutImmediate, PullOutImmediate
+from ..private.stateful_descriptor import stateful_descriptor, READ_WRITE
+from ..private.triggerfunc import TriggerFuncBuilder, TriggerFuncRuntime
 
 
 class AttributeImplementation(Bee, Stateful):

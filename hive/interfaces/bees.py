@@ -20,7 +20,7 @@ logger = getLogger(__name__)
 
 
 class Bee:
-    # TODO: resolve method for arguments that are api_bees (returns a new HiveBee class?)
+    # TODO: resolve method for arguments that are public (returns a new HiveBee class?)
 
     _parent_hive_object_class = None
 
@@ -32,7 +32,7 @@ class Bee:
     def implements(self, cls):
         """Return True if the Bee returned by getinstance will implement a given class.
         
-        Required to support inspection of runtime-api_bees
+        Required to support inspection of runtime-public
         
         :param cls: class
         """

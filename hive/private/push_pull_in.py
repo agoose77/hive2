@@ -1,5 +1,5 @@
-from hive.internal_bees.triggerable import TriggerableBuilder, TriggerableRuntime
 from .interfaces import ConnectableMixin
+from .triggerable import TriggerableBuilder, TriggerableRuntime
 from .triggerfunc import TriggerFuncBuilder, TriggerFuncRuntime
 from ..annotations import get_argument_types
 from ..exception import HiveConnectionError

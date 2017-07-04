@@ -1,8 +1,8 @@
 import hive
-from hive.api_bees.attribute import attribute
-from hive.api_bees.function import function
-from hive.api_bees.plugin import plugin
-from hive.api_bees.socket import socket
+from hive.public.attribute import attribute
+from hive.public.function import function
+from hive.public.plugin import plugin
+from hive.public.socket import socket
 # attr = attribute("int")
 #
 # def debug():
@@ -13,7 +13,7 @@ from hive.api_bees.socket import socket
 # attr.after_update.connect(trig.trigger)
 #
 # attr.value = 12
-from hive.internal_bees.stateful_descriptor import WRITE
+from hive.private.stateful_descriptor import WRITE
 
 
 class DroneClass:
@@ -79,7 +79,7 @@ def build(cls, i, ex, args):
 H = hive.hive("build", build, drone_cls=DroneClass)
 h = H()
 h2 = H()
-import hive.internal_bees.connect as c
+import hive.private.connect as c
 c.connect(h,h2)
 
 h.value = 99
