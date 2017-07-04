@@ -46,8 +46,11 @@ class Nameable:
         self._hive_runtime_aliases.add(alias)
 
 
-class Callable:
-    pass
+class Callable(ABC):
+
+    @abstractmethod
+    def __call__(self):
+        pass
 
 
 class Plugin:

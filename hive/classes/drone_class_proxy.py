@@ -1,11 +1,12 @@
-#from ..high_level import FunctionBuilder, PropertyBuilder
+from ..high_level.property import PropertyBuilder
+# from ..high_level.function import FunctionBuilder
 
 from ..annotations import get_argument_options, get_return_type
 from ..compatability import is_method
 
-
 # Hack to find the type of a getset_descriptor
 from struct import Struct as _Struct
+
 getset_descriptor = type(_Struct.size)
 
 
