@@ -4,10 +4,10 @@ from functools import partial
 from ..low_level.triggerfunc import TriggerFuncBuilder, TriggerFuncRuntime
 from ..functional.triggerable import TriggerableBuilder, TriggerableRuntime
 from ..manager import ModeFactory, memoize, memo_property
-from ..interfaces import TriggerTarget, ConnectTarget, Bee, TriggerSource, Callable
+from ..interfaces import Bee, TriggerSource, Callable
 
 
-class FunctionBase(Bee, ConnectTarget, TriggerTarget, Callable):
+class FunctionBase(Bee, Callable):
     before_triggered = None
     _func = None
     triggered = None
@@ -16,16 +16,6 @@ class FunctionBase(Bee, ConnectTarget, TriggerTarget, Callable):
         self.before_triggered()
         self._func()
         self.triggered()
-
-    def _hive_trigger_target(self):
-        return self
-
-    def _hive_is_connectable_target(self, source):
-        if not isinstance(source, TriggerSource):
-            raise Exception("Connect target {} is not a TriggerSource".format(source))
-
-    def _hive_connect_target(self, source):
-        pass
 
 
 class FunctionImmediate(FunctionBase):

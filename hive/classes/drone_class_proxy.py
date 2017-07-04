@@ -1,5 +1,5 @@
 from ..high_level.property import PropertyBuilder
-# from ..high_level.function import FunctionBuilder
+from ..high_level.method import MethodBuilder
 
 from ..annotations import get_argument_options, get_return_type
 from ..compatability import is_method
@@ -21,7 +21,7 @@ class DroneClassProxy:
         value = getattr(self._hive_wrapped_drone_class, attr)
 
         if is_method(value):
-            return FunctionBuilder(self, value)
+            return MethodBuilder(self, attr)
 
         elif isinstance(value, property):
             return self._property_from_descriptor(attr, value)
