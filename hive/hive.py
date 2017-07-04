@@ -3,7 +3,7 @@ from collections import namedtuple
 from inspect import currentframe, getmodule, isclass
 from itertools import count, chain
 
-# from hive.functional.connect import ConnectionCandidate
+from .internal_bees.connect import ConnectionCandidate
 from .classes import (AttributeMapping, InternalValidator, ExternalValidator, ArgWrapper, validate_args,
                       DroneClassProxy, HiveDescriptorProxy)
 from .compatability import next, validate_signature
@@ -209,10 +209,7 @@ class HiveObject(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource,
         with hive_mode_as("build"):
             external_bees = self._hive_ex
             for bee_name, bee in external_bees:
-                # ResolveBee.export returns self, (to support multiple indirectino) so we must export target here
-                # TODO this is crap. Instead return descriptorproxy at of resolvebee chain?
                 resolve_bee = ResolveBee(bee, self)
-
                 setattr(self, bee_name, resolve_bee)
 
     def instantiate(self):
@@ -237,9 +234,7 @@ class HiveObject(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource,
         trigger_targets = []
 
         for bee_name, bee in external_bees:
-            exported_bee = bee.export()
-
-            if isinstance(exported_bee, TriggerTarget):
+            if isinstance(bee, TriggerTarget):
                 assert bee.implements(TriggerTarget)
                 trigger_targets.append(bee_name)
 
@@ -261,9 +256,7 @@ class HiveObject(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource,
         trigger_sources = []
 
         for bee_name, bee in external_bees:
-            exported_bee = bee.export()
-
-            if isinstance(exported_bee, TriggerSource):
+            if isinstance(bee, TriggerSource):
                 trigger_sources.append(bee_name)
 
         if not trigger_sources:
@@ -281,12 +274,10 @@ class HiveObject(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource,
         # Find source hive ConnectSources
         connect_sources = []
         for bee_name, bee in externals:
-            exported_bee = bee.export()
-
-            if not exported_bee.implements(ConnectSource):
+            if not bee.implements(ConnectSource):
                 continue
 
-            candidate = ConnectionCandidate(bee_name, exported_bee.data_type)
+            candidate = ConnectionCandidate(bee_name, bee.data_type)
             connect_sources.append(candidate)
 
         return connect_sources
@@ -298,12 +289,10 @@ class HiveObject(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource,
         # Find target hive ConnectTargets
         connect_targets = []
         for bee_name, bee in externals:
-            exported_bee = bee.export()
-
-            if not exported_bee.implements(ConnectTarget):
+            if not bee.implements(ConnectTarget):
                 continue
 
-            candidate = ConnectionCandidate(bee_name, exported_bee.data_type)
+            candidate = ConnectionCandidate(bee_name, bee.data_type)
             connect_targets.append(candidate)
 
         return connect_targets

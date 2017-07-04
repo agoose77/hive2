@@ -58,4 +58,4 @@ class MethodBuilder(Bee):
         return super().implements(cls)
 
 
-function = ModeFactory("Function", build=MethodBuilder)
+method = ModeFactory("hive.method", build=MethodBuilder)

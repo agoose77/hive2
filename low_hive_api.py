@@ -78,22 +78,34 @@ def build(cls, i, ex, args):
 
 H = hive.hive("build", build, drone_cls=DroneClass)
 h = H()
-print("START")
+h2 = H()
+import hive.internal_bees.connect as c
+c.connect(h,h2)
 
-attr = attribute("int", 99)
-attr.pull_out.connect(h.value_in)
-print(h.do_pull())
-print(h.foo)
-h.print_foo()
+h.value = 99
+h2.value = 10
 
+print(h2.value_out())
 
-def get_plug(p):
-    print("Got plug", p)
-    p()
+h2.do_pull()
+print(h2.value_out())
 
-
-s = socket(get_plug)
-h.plug.connect(s)
+# print("START")
+#
+# attr = attribute("int", 99)
+# attr.pull_out.connect(h.value_in)
+# print(h.do_pull())
+# print(h.foo)
+# h.print_foo()
+#
+#
+# def get_plug(p):
+#     print("Got plug", p)
+#     p()
+#
+#
+# s = socket(get_plug)
+# h.plug.connect(s)
 # h.value = 9
 # print(h.do_pull())
 # print(h.value)

@@ -36,6 +36,9 @@ from .contexts import (get_building_hive, get_mode, get_run_hive, get_matchmaker
                        matchmaker_validation_enabled_as)
 from .manager import memo_property, memoize, MemoProperty, ModeFactory
 #
+from .api_bees import attribute, function, method, plugin, property, socket
+
+
 # # i functional
 # from hive.functional.modifier import modifier
 # from hive.functional.push_pull_in import push_in, pull_in

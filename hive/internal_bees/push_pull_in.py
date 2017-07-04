@@ -3,8 +3,7 @@ from .interfaces import ConnectableMixin
 from .triggerfunc import TriggerFuncBuilder, TriggerFuncRuntime
 from ..annotations import get_argument_types
 from ..exception import HiveConnectionError
-from ..interfaces import (Antenna, Output, Stateful, ConnectTarget, Callable,
-                          Exportable, Bee)
+from ..interfaces import Antenna, Output, Stateful, ConnectTarget, Callable, Exportable, Bee
 from ..manager import memoize, ModeFactory, memo_property
 from ..typing import data_type_is_untyped, data_types_match, MatchFlags, is_valid_data_type
 

@@ -75,4 +75,4 @@ class FunctionBuilder(Bee):
         return super().implements(cls)
 
 
-function = ModeFactory("Function", build=FunctionBuilder, immediate=FunctionImmediate)
+function = ModeFactory("hive.function", build=FunctionBuilder, immediate=FunctionImmediate)

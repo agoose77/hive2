@@ -4,7 +4,7 @@ from operator import itemgetter
 
 from hive.contexts import get_mode, register_bee
 # from hive.debug import get_debug_context
-from hive.exception import MatchFailedError
+from hive.exception import MatchFailedError, HiveConnectionError
 from hive.interfaces import (ConnectSourceBase, ConnectSourceDerived, ConnectTargetBase, ConnectTargetDerived, Bee,
                              )
 from hive.manager import memoize
@@ -44,7 +44,7 @@ def find_connection_candidates(source_hive, target_hive):
         try:
             source_bee._hive_is_connectable_source(target_bee)
             target_bee._hive_is_connectable_target(source_bee)
-        except ConnectionError:
+        except HiveConnectionError:
             continue
 
         # Use new match API & score API
@@ -147,6 +147,8 @@ def build_connection(source, target):
     else:
         target._hive_connect_target(source)
         source._hive_connect_source(target)
+
+    print("BUIDL",source,target)
 
 
 class ConnectionBuilder(Bee):
