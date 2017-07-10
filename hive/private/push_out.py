@@ -1,4 +1,4 @@
-from .interfaces import ConnectableMixin
+from .mixins import ConnectableMixin
 from .triggerable import TriggerableBuilder, TriggerableRuntime
 from .triggerfunc import TriggerFuncBuilder, TriggerFuncRuntime
 from ..exception import HiveConnectionError

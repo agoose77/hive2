@@ -1,4 +1,4 @@
-from .interfaces import TriggerableMixin
+from .mixins import TriggerableMixin
 from ..exception import HiveConnectionError
 from ..interfaces import TriggerSource, TriggerTarget, ConnectSource, Callable, Bee, Exportable
 from ..manager import ModeFactory, memoize

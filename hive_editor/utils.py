@@ -133,7 +133,6 @@ def get_io_info(hive_object):
 
     for bee_name, bee in external_bees._items:
         # Find IO pins
-        exported_bee = bee.export()
 
         if isinstance(bee, HiveAntenna):
             storage_target = inputs

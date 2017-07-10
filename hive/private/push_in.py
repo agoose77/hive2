@@ -1,4 +1,4 @@
-from .interfaces import ConnectableMixin
+from .mixins import ConnectableMixin
 from .triggerfunc import TriggerFuncBuilder
 from ..exception import HiveConnectionError
 from ..interfaces import Antenna, Output, Stateful, ConnectTarget, Callable, Exportable, Bee, IOModes
@@ -78,6 +78,10 @@ class PushInBuilder(Antenna, Exportable, ConnectableMixin):
         self.before_triggered = TriggerFuncBuilder()
 
         super().__init__()
+
+    @property
+    def data_type(self):
+        return self._target.data_type
 
     @memoize
     def bind(self, run_hive):

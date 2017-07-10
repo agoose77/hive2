@@ -3,7 +3,7 @@ from ..identifier import is_valid_identifier
 from ..interfaces import Plugin, Socket, ConnectSource, Exportable, Bee
 from ..manager import memoize, ModeFactory
 from ..policies import MultipleOptional
-from ..private.interfaces import ConnectableMixin
+from ..private.mixins import ConnectableMixin
 from ..typing import is_valid_data_type
 
 

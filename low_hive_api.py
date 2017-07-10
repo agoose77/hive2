@@ -71,8 +71,8 @@ H = hive.hive("build", build, drone_cls=DroneClass)
 h = H()
 h2 = H()
 
-# hive.connect(h,h2)
-h.value_out.connect(h2.value_in)
+hive.connect(h,h2)
+# h.value_out.connect(h2.value_in)
 
 h.value = 99
 h2.value = 10
