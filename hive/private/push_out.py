@@ -7,7 +7,7 @@ from ..manager import ModeFactory, memoize, memo_property
 from ..typing import data_types_match, MatchFlags
 
 
-class PushOutBase(Bee, Output, ConnectSource, ConnectableMixin, Callable):
+class PushOutBase(Bee, Output, ConnectableMixin, Callable):
     mode = IOModes.PUSH
 
     def __init__(self, target):

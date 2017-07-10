@@ -7,7 +7,7 @@ from ..manager import memoize, ModeFactory, memo_property
 from ..typing import data_types_match, MatchFlags
 
 
-class PullInBase(Bee, Antenna, ConnectTarget, ConnectableMixin, Callable):
+class PullInBase(Bee, Antenna, ConnectableMixin, Callable):
     mode = IOModes.PULL
 
     def __init__(self, target):

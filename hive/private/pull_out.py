@@ -6,7 +6,7 @@ from ..manager import ModeFactory, memoize, memo_property
 from ..typing import data_types_match, MatchFlags
 
 
-class PullOutBase(Bee, Output, ConnectSource, ConnectableMixin, Callable):
+class PullOutBase(Bee, Output, ConnectableMixin, Callable):
     mode = IOModes.PULL
 
     def __init__(self, target):
