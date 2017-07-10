@@ -1,14 +1,18 @@
 from weakref import WeakKeyDictionary
 
 
-class HiveDescriptorProxy:
-    def __init__(self, bee, internal=False):
-        self._descriptor_bee = bee
+class HiveDescriptor:
+    """Hive descriptor interface to Python descriptor protocol"""
+    def __init__(self, bee, instance_is_internal=False):
+        """Initialiser for HiveDescriptor
 
-        # TODO weakkeydicts are much slower than dicts - could add an explicit cleanup sys instead?
+        :param bee: Descriptor Bee instance
+        :param instance_is_internal: whether to expect run hive or internal hive in descriptor magic methods
+        """
+        self._descriptor_bee = bee
+        self._instance_is_internal = instance_is_internal
         self._run_hive_to_getter = WeakKeyDictionary()
         self._run_hive_to_setter = WeakKeyDictionary()
-        self._internal = internal
 
     def __get__(self, instance, owner):
         if instance is None:
@@ -18,7 +22,7 @@ class HiveDescriptorProxy:
             return self._run_hive_to_getter[instance]()
 
         except KeyError:
-            if self._internal:
+            if self._instance_is_internal:
                 bound_bee = self._descriptor_bee.bind(instance._run_hive)
             else:
                 bound_bee = self._descriptor_bee.bind(instance)
@@ -31,7 +35,7 @@ class HiveDescriptorProxy:
             self._run_hive_to_setter[instance](value)
 
         except KeyError:
-            if self._internal:
+            if self._instance_is_internal:
                 bound_bee = self._descriptor_bee.bind(instance._run_hive)
             else:
                 bound_bee = self._descriptor_bee.bind(instance)

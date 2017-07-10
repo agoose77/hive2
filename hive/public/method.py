@@ -3,8 +3,8 @@ from ..manager import ModeFactory, memoize
 
 
 class MethodBuilder(FunctionBuilder):
-    def __init__(self, cls, name):
-        self._drone_cls = getattr(cls, '_hive_wrapped_drone_class')
+    def __init__(self, cls_proxy, name):
+        self._drone_cls = getattr(cls_proxy, '_hive_wrapped_drone_class')
         self._name = name
 
         super().__init__()

@@ -2,15 +2,16 @@ from abc import ABC, abstractmethod
 
 from ..interfaces import Bee, Callable
 from ..manager import memoize, memo_property
-from ..private.triggerable import TriggerableBuilder, TriggerableRuntime
-from ..private.triggerfunc import TriggerFuncBuilder, TriggerFuncRuntime
+from ..private import TriggerableBuilder, TriggerableRuntime, TriggerFuncBuilder, TriggerFuncRuntime
+from ..public.socket import HiveSocketBuilder
+from ..public.plugin import HivePluginBuilder
 
 
 class FunctionBase(Bee, Callable):
 
-    def __call__(self):
+    def __call__(self, *args, **kwargs):
         self.before_triggered()
-        self._func()
+        self._func(*args, **kwargs)
         self.triggered()
 
 
@@ -55,7 +56,12 @@ class FunctionBuilder(Bee, ABC):
         self.before_triggered = TriggerFuncBuilder()
         self.trigger = TriggerableBuilder(self)
 
-    @memoize
+    def socket(self, *args, **kwargs):
+        return HiveSocketBuilder(self, *args, **kwargs)
+
+    def plugin(self, *args, **kwargs):
+        return HivePluginBuilder(self, *args, **kwargs)
+
     @abstractmethod
     def bind(self, run_hive):
         pass

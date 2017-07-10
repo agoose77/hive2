@@ -1,4 +1,3 @@
-from hive.manager import memoize, ModeFactory
 from hive.interfaces import Exportable, Nameable
 
 
@@ -10,7 +9,7 @@ class BindableResolveBee(Nameable):
         self._unbound_run_hive = unbound_run_hive
 
         # Support ResolveBees used for hive_objects
-        self._hive_object = getattr(bee, '._hive_object', None)
+        self._hive_object = getattr(bee, '_hive_object', None)
 
     @property
     def _hive_runtime_aliases(self):
@@ -46,20 +45,16 @@ class ResolveBee(Exportable):
         return result
 
     def __repr__(self):
-        return "RB[{}]{}".format(self._defining_hive_object.__class__.__name__, self._bee)
-
-    def export(self):
-        return self
+        return "{}<{}>".format(self._bee, self._defining_hive_object.__class__.__name__)
 
     def bind(self, containing_instance):
         """Return a runtime instance of the wrapped Bee.
         
         :param redirected_hive_object: TODO
-        """ # TODO
+        """  # TODO
         # Hive instance to which the ResolveBee belongs
         run_hive = self._defining_hive_object.bind(containing_instance)
         return self._bee.bind(run_hive)
 
     def implements(self, cls):
         return self._bee.implements(cls)
-

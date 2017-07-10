@@ -54,7 +54,7 @@ class Socket:
 
 
 from .bees import Exportable, Bee
-from .io import IO, Antenna, Output
+from .io import IO, Antenna, Output, IOModes
 from .stateful import Stateful
 from .trigger_source import TriggerSourceBase, TriggerSource, TriggerSourceDerived
 from .trigger_target import TriggerTargetBase, TriggerTarget, TriggerTargetDerived

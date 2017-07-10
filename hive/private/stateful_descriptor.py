@@ -60,10 +60,7 @@ class StatefulDescriptorBuilder(Exportable):
         return StatefulDescriptorBound(target, self._flags)
 
     def implements(self, cls):
-        if cls is Descriptor:
-            return True
-
-        return super().implements(cls)
+        return issubclass(StatefulDescriptorBound, cls) or super().implements(cls)
 
     def __repr__(self):
         return "BuilderStatefulDescriptor({!r}, {!r})".format(self._target, self._flags)

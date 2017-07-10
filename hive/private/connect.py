@@ -91,11 +91,11 @@ def find_connection_between_hives(source_hive, target_hive):
     if not source_hive._hive_can_connect_hive(target_hive):
         raise ValueError("Both hives must be either Hive runtimes or Hive objects")
 
-    # First try: match candidates with named data_type
     candidates = find_connection_candidates(source_hive, target_hive)
     if not candidates:
         raise ValueError("No matching connections found")
 
+    # TODO - allow multiple if not more than 1 untyped
     if len(candidates) > 1:
         candidate_names = [(a.bee_name, b.bee_name) for a, b in candidates]
         raise TypeError("Multiple matches found between {} and {}: {}"

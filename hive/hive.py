@@ -4,7 +4,7 @@ from inspect import currentframe, getmodule, isclass
 from itertools import count, chain
 
 from .classes import (AttributeMapping, InternalValidator, ExternalValidator, ArgWrapper, validate_args,
-                      DroneClassProxy, HiveDescriptorProxy)
+                      DroneClassProxy, HiveDescriptor)
 from .compatability import next, validate_signature
 from .contexts import (bee_register_context, get_mode, hive_mode_as, building_hive_as, run_hive_as,
                        get_building_hive, get_matchmaker_validation_enabled)
@@ -488,7 +488,7 @@ class HiveBuilder:
         run_hive_cls_name = "{}(RuntimeHive)".format(cls.__name__)
 
         # For internal public
-        internal_proxy_dict = {name: HiveDescriptorProxy(bee, internal=True)
+        internal_proxy_dict = {name: HiveDescriptor(bee, instance_is_internal=True)
                                for name, bee in internals
                                if bee.implements(Descriptor)}
 
@@ -500,7 +500,7 @@ class HiveBuilder:
         for bee_name, bee in externals:
             # If the bee requires a property interface, build a property
             if bee.implements(Descriptor):
-                run_hive_class_dict[bee_name] = HiveDescriptorProxy(bee)  #
+                run_hive_class_dict[bee_name] = HiveDescriptor(bee)  #
 
         hive_object_class._hive_runtime_class = type(run_hive_cls_name, (RuntimeHive,), run_hive_class_dict)
         return hive_object_class
@@ -525,7 +525,11 @@ class HiveBuilder:
                 continue
 
             # Get fully resolvable bee reference (relative to root hive)
-            resolved_bee = getattr(resolved_hive_object, bee_name)
+            # Stateful descriptors fail this
+            try:
+                resolved_bee = getattr(resolved_hive_object, bee_name)
+            except AttributeError:
+                continue
 
             if resolved_bee.implements(Plugin):
                 register_dict = plugins

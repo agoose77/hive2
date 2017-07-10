@@ -2,11 +2,9 @@ from functools import partial
 
 from ..interfaces import Stateful, Bee
 from ..manager import ModeFactory, memoize, memo_property
-from ..private.push_pull_in import PushInBuilder, PullInBuilder
-from ..private.push_pull_out import PushOutBuilder, PullOutBuilder
-from ..private.stateful_descriptor import StatefulDescriptorBuilder, READ_WRITE
-from ..private.triggerfunc import TriggerFuncBuilder
 from ..parameter import Parameter
+from ..private import (PushInBuilder, PullInBuilder, PushOutBuilder, PullOutBuilder, StatefulDescriptorBuilder,
+                       READ_WRITE, TriggerFuncBuilder)
 
 builtin_property = property
 

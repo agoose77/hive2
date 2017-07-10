@@ -1,6 +1,7 @@
 from ..exception import HiveConnectionError
 from ..interfaces import TriggerTarget, ConnectTarget, TriggerSource, Callable, Bee, Exportable
 from ..manager import ModeFactory, memoize
+from ..public.plugin import HivePluginBuilder
 
 
 class TriggerableRuntime(TriggerTarget, ConnectTarget, Callable, Bee):
@@ -53,6 +54,9 @@ class TriggerableBuilder(TriggerTarget, ConnectTarget, Exportable):
             return True
 
         return super().implements(cls)
+
+    def plugin(self, *args, **kwargs):
+        return HivePluginBuilder(self, *args, **kwargs)
 
     def __repr__(self):
         return "Triggerable({!r})".format(self._target)

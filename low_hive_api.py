@@ -1,19 +1,5 @@
 import hive
-from hive.public.attribute import attribute
-from hive.public.function import function
-from hive.public.plugin import plugin
-from hive.public.socket import socket
-# attr = attribute("int")
-#
-# def debug():
-#     print("Updated!", attr.value)
-#
-# trig = function(debug)
-# attr.before_update.connect(trig.trigger)
-# attr.after_update.connect(trig.trigger)
-#
-# attr.value = 12
-from hive.private.stateful_descriptor import WRITE
+
 
 
 class DroneClass:
@@ -23,6 +9,10 @@ class DroneClass:
 
     def print_foo(self):
         print("Printing foo", self.foo)
+
+    def set_plugin(self, p):
+        print("Plugin", p)
+        p()
 
 
 def on_attr_updated(i, ex):
@@ -46,26 +36,26 @@ def do_pull(i, ex):
 
 
 def build(cls, i, ex, args):
-    i.attr = attribute("int")
+    i.attr = hive.attribute("int")
 
-    i.before_updated = function(on_attr_updated_pre)
+    i.before_updated = hive.modifier(on_attr_updated_pre)
     i.attr.before_updated.connect(i.before_updated.trigger)
 
-    i.updated = function(on_attr_updated)
+    i.updated = hive.modifier(on_attr_updated)
     i.attr.updated.connect(i.updated.trigger)
 
-    i.on_attr_pulled_out = function(on_attr_pulled_out)
+    i.on_attr_pulled_out = hive.modifier(on_attr_pulled_out)
     i.attr.pull_out.triggered.connect(i.on_attr_pulled_out.trigger)
 
-    i.on_attr_pulled_in = function(on_attr_pulled_in)
+    i.on_attr_pulled_in = hive.modifier(on_attr_pulled_in)
     i.attr.pull_in.triggered.connect(i.on_attr_pulled_in.trigger)
 
-    i.do_pull = function(do_pull)
+    i.do_pull = hive.modifier(do_pull)
     i.do_pull.triggered.connect(i.attr.pull_in.trigger)
 
     ex.foo = cls.foo.property()
 
-    ex.value = i.attr.property(WRITE)
+    ex.value = i.attr.property(hive.WRITE)
 
     ex.do_pull = i.do_pull.trigger
     ex.value_in = i.attr.pull_in
@@ -73,14 +63,16 @@ def build(cls, i, ex, args):
     ex.value_out = i.attr.pull_out
     ex.print_foo = cls.print_foo.trigger
 
-    ex.plug = plugin(i.updated.trigger)
+    ex.plug = i.updated.trigger.plugin()
+    # ex.sock = hive.socket(cls.set_plugin)
 
 
 H = hive.hive("build", build, drone_cls=DroneClass)
 h = H()
 h2 = H()
-import hive.private.connect as c
-c.connect(h,h2)
+
+# hive.connect(h,h2)
+h.value_out.connect(h2.value_in)
 
 h.value = 99
 h2.value = 10
@@ -89,6 +81,8 @@ print(h2.value_out())
 
 h2.do_pull()
 print(h2.value_out())
+
+print(h2.plug.plugin()())
 
 # print("START")
 #

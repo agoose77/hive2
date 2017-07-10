@@ -36,7 +36,7 @@ from .contexts import (get_building_hive, get_mode, get_run_hive, get_matchmaker
                        matchmaker_validation_enabled_as)
 from .manager import memo_property, memoize, MemoProperty, ModeFactory
 from .public import attribute, modifier, method, plugin, property, socket
-from .private import READ_WRITE, READ, WRITE
+from .private import READ_WRITE, READ, WRITE, connect, trigger
 from .policies import SingleOptional, SingleRequired, MultipleOptional, MultipleRequired
 from .parameter import parameter
 from .exception import HiveException

@@ -1,3 +1,12 @@
+from enum import auto, Enum
+
+
+class IOModes(Enum):
+    PUSH = auto()
+    PULL = auto()
+
+
+
 class IO:
     pass
 

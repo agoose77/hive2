@@ -43,6 +43,4 @@ class Bee:
 
 
 class Exportable(Bee, ABC):
-
-    def export(self):
-        raise NotImplementedError
+    pass

@@ -75,11 +75,11 @@ class HivePluginBuilder(Exportable, Plugin, ConnectSource, ConnectableMixin):
 
     @memoize
     def bind(self, run_hive):
-        func = self._target
-        if isinstance(func, Bee):
-            func = func.bind(run_hive)
+        target = self._target
+        if isinstance(target, Bee):
+            target = target.bind(run_hive)
 
-        return HivePluginRuntime(func, self._data_type)
+        return HivePluginRuntime(target, self._data_type)
 
     def __repr__(self):
         return "HivePluginBuilder({!r}, {!r}, {!r}, {!r}, {!r})".format(self._target, self._identifier, self._data_type,

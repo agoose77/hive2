@@ -1,9 +1,8 @@
 from ..interfaces import Stateful, Bee
 from ..manager import ModeFactory, memoize, memo_property
-from ..private.push_pull_in import PushInBuilder, PullInBuilder, PushInImmediate, PullInImmediate
-from ..private.push_pull_out import PushOutBuilder, PullOutBuilder, PushOutImmediate, PullOutImmediate
-from ..private.stateful_descriptor import StatefulDescriptorBuilder, READ_WRITE
-from ..private.triggerfunc import TriggerFuncBuilder, TriggerFuncRuntime
+from ..private import (PushInBuilder, PushInImmediate, PullInBuilder, PullInImmediate, PushOutBuilder, PullOutBuilder,
+                       PullOutImmediate, PushOutImmediate, StatefulDescriptorBuilder, READ_WRITE, TriggerFuncBuilder,
+                       TriggerFuncRuntime)
 from ..parameter import Parameter
 
 
@@ -83,6 +82,17 @@ class AttributeBound(AttributeImplementation):
 builtin_property = property
 
 
+class BoundAttributePrimitives:
+
+    def __init__(self, pull_in, pull_out, push_in, push_out, before_updated, updated):
+        self.pull_in = pull_in
+        self.pull_out = pull_out
+        self.push_in = push_in
+        self.push_out = push_out
+        self.before_updated = before_updated
+        self.updated = updated
+
+
 class AttributeBuilder(Bee):
     def __init__(self, data_type='', start_value=None):
         self._data_type = data_type
@@ -109,17 +119,16 @@ class AttributeBuilder(Bee):
         return self._start_value
 
     def implements(self, cls):
-        if issubclass(AttributeBound, cls):
-            return True
-
-        return super().implements(cls)
+        return issubclass(AttributeBound, cls) or super().implements(cls)
 
     @memoize
     def bind(self, run_hive):
         start_value = self._start_value
 
         if isinstance(start_value, Parameter):
-            start_value = run_hive._hive_object._hive_args_frozen.resolve_parameter(start_value)
+            hive_args_resolved = run_hive._hive_object._hive_args_frozen
+            start_value = hive_args_resolved.resolve_parameter(start_value)
+
 
         return AttributeBound(self, run_hive, self._data_type, start_value)
 
