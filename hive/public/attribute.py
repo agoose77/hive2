@@ -1,12 +1,12 @@
-from ..interfaces import Stateful, Bee
+from ..interfaces import Stateful, BeeBase
 from ..manager import ModeFactory, memoize, memo_property
+from ..parameter import Parameter
 from ..private import (PushInBuilder, PushInImmediate, PullInBuilder, PullInImmediate, PushOutBuilder, PullOutBuilder,
                        PullOutImmediate, PushOutImmediate, StatefulDescriptorBuilder, READ_WRITE, TriggerFuncBuilder,
                        TriggerFuncRuntime)
-from ..parameter import Parameter
 
 
-class AttributeImplementation(Bee, Stateful):
+class AttributeImplementation(BeeBase, Stateful):
     before_updated = None
     updated = None
 
@@ -83,7 +83,6 @@ builtin_property = property
 
 
 class BoundAttributePrimitives:
-
     def __init__(self, pull_in, pull_out, push_in, push_out, before_updated, updated):
         self.pull_in = pull_in
         self.pull_out = pull_out
@@ -93,7 +92,7 @@ class BoundAttributePrimitives:
         self.updated = updated
 
 
-class AttributeBuilder(Bee):
+class AttributeBuilder(BeeBase):
     def __init__(self, data_type='', start_value=None):
         self._data_type = data_type
         self._start_value = start_value
@@ -128,7 +127,6 @@ class AttributeBuilder(Bee):
         if isinstance(start_value, Parameter):
             hive_args_resolved = run_hive._hive_object._hive_args_frozen
             start_value = hive_args_resolved.resolve_parameter(start_value)
-
 
         return AttributeBound(self, run_hive, self._data_type, start_value)
 

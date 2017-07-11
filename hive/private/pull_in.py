@@ -2,12 +2,12 @@ from .mixins import ConnectableMixin
 from .triggerable import TriggerableBuilder, TriggerableRuntime
 from .triggerfunc import TriggerFuncBuilder, TriggerFuncRuntime
 from ..exception import HiveConnectionError
-from ..interfaces import Antenna, Output, Stateful, ConnectTarget, Callable, Exportable, Bee, IOModes
+from ..interfaces import Antenna, Output, Stateful, ConnectTarget, Callable, Exportable, BeeBase, IOModes
 from ..manager import memoize, ModeFactory, memo_property
 from ..typing import data_types_match, MatchFlags
 
 
-class PullInBase(Bee, Antenna, ConnectableMixin, Callable):
+class PullInBase(BeeBase, Antenna, ConnectableMixin, Callable):
     mode = IOModes.PULL
 
     def __init__(self, target):
@@ -84,7 +84,7 @@ class PullInBound(PullInBase):
         return "PullInBound({!r}, {!r}, {!r})".format(self._build_bee, self._run_hive, self._target)
 
 
-class PullInBuilder(Antenna, Exportable, ConnectableMixin):
+class PullInBuilder(BeeBase, Antenna, Exportable, ConnectableMixin):
     mode = IOModes.PULL
 
     def __init__(self, target):

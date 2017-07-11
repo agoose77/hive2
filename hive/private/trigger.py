@@ -1,5 +1,5 @@
 from ..contexts import get_mode, register_bee
-from ..interfaces import TriggerSourceBase, TriggerTargetBase, Bee
+from ..interfaces import TriggerSourceBase, TriggerTargetBase, BeeBase, Bee
 from ..manager import memoize
 
 
@@ -9,7 +9,7 @@ def build_trigger(source, target):
     source._hive_trigger_source(target_func)
 
 
-class TriggerBuilder(Bee):
+class TriggerBuilder(BeeBase):
     def __init__(self, source, target):
         self._source = source
         self._target = target
@@ -30,7 +30,6 @@ def trigger(source, target):
     if isinstance(source, Bee):
         assert source.implements(TriggerSourceBase), source
         assert target.implements(TriggerTargetBase), target
-
     else:
         assert isinstance(source, TriggerSourceBase), source
         assert isinstance(target, TriggerTargetBase), target

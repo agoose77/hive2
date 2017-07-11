@@ -1,5 +1,5 @@
 from ..manager import ModeFactory, memoize
-from ..interfaces import Stateful, Descriptor, Exportable, Bee
+from ..interfaces import Stateful, Descriptor, Exportable, BeeBase
 
 from enum import auto, IntFlag
 
@@ -14,7 +14,7 @@ WRITE = _ReadWriteFlags.WRITE
 READ_WRITE = _ReadWriteFlags.READ_WRITE
 
 
-class StatefulDescriptorBound(Bee, Descriptor):
+class StatefulDescriptorBound(BeeBase, Descriptor):
 
     def __init__(self, target, flags):
         self._target = target
@@ -41,7 +41,7 @@ class StatefulDescriptorBound(Bee, Descriptor):
         return "StatefulDescriptorBound({!r}, {!r})".format(self._target, self._flags)
 
 
-class StatefulDescriptorBuilder(Exportable):
+class StatefulDescriptorBuilder(BeeBase, Exportable):
 
     def __init__(self, target, flags=READ_WRITE):
         assert target.implements(Stateful)

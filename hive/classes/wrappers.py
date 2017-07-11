@@ -67,9 +67,6 @@ class AttributeMapping(ImmutableAttributeMapping):
                 raise AttributeError("Error setting attribute {}.{}".format(self._name, name)) from err
 
     def __setattr__(self, name, value):
-        if name.startswith("_"):
-            return object.__setattr__(self, name, value)
-
         self._validate_attribute(name, value)
         self._ordered_mapping[name] = value
 
@@ -93,14 +90,17 @@ class BaseBeeValidator(ValidatorBase):
         self._hive_object_class = hive_object_class
 
     def __call__(self, wrapper: AttributeMapping, name: str, value):
-        if not isinstance(value, Bee):
-            raise ValueError("Invalid attribute data type {}, expected a Bee instance".format(type(value)))
+        if name.startswith("_"):
+            raise ValueError("BeeBase names cannot start with underscores")
 
-        if value._parent_hive_object_class is None:
+        if not isinstance(value, Bee):
+            raise ValueError("Invalid attribute data type {}, expected a BeeBase instance".format(type(value)))
+
+        if value._hive_parent_hive_object_class is None:
             raise ValueError("Bees must be defined inside the builder function")
 
         # TODO should permit ResolveBees here
-        if value._parent_hive_object_class is not self._hive_object_class:
+        if value._hive_parent_hive_object_class is not self._hive_object_class:
             raise ValueError("Bees cannot be built by a different hive")
 
 
@@ -117,7 +117,7 @@ class ExternalValidator(BaseBeeValidator):
         super().__call__(wrapper, name, value)
 
         if not isinstance(value, Bee):
-            raise ValueError("Attribute must be Bee, not {}".format(type(value)))
+            raise ValueError("Attribute must be BeeBase, not {}".format(type(value)))
 
         if not isinstance(value, Exportable):
             raise ValueError("Attribute must be Exportable")
@@ -165,7 +165,12 @@ class ArgWrapper(AttributeMapping):
             # If param name in kwargs dict, switch to kwargs
             if name in kwargs:
                 break
-            value = next(iter_args)  # TODO error
+
+            try:
+                value = next(iter_args)
+            except StopIteration:
+                break
+
             found_param_values[name] = value
 
         remaining_args = tuple(iter_args)

@@ -1,6 +1,6 @@
 from hive.exception import HiveConnectionError
 from hive.identifier import is_valid_identifier
-from hive.interfaces import Plugin, Socket, ConnectSource, Exportable, Bee
+from hive.interfaces import Plugin, Socket, ConnectSource, Exportable, BeeBase
 from hive.manager import memoize, ModeFactory
 from hive.policies import MultipleOptional
 from hive.private.mixins import ConnectableMixin
@@ -37,7 +37,7 @@ class HivePluginRuntime(Plugin, ConnectSource, ConnectableMixin):
         return "HivePluginRuntime({!r}, {!r})".format(self._func, self.data_type)
 
 
-class HivePluginBuilder(Exportable, Plugin, ConnectSource, ConnectableMixin):
+class HivePluginBuilder(BeeBase, Exportable, Plugin, ConnectSource, ConnectableMixin):
     def __init__(self, target, identifier=None, data_type='', policy=None, export_to_parent=False):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)

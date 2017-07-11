@@ -9,10 +9,11 @@ from .compatability import next, validate_signature
 from .contexts import (bee_register_context, get_mode, hive_mode_as, building_hive_as, run_hive_as,
                        get_building_hive, get_matchmaker_validation_enabled)
 from .exception import MatchmakingPolicyError
-from .interfaces import Bee, ConnectTargetDerived, ConnectSourceDerived, TriggerSource, \
-    TriggerTarget, Nameable, ConnectSource, ConnectTarget, Descriptor, Plugin, Socket
+from .interfaces import (BeeBase, ConnectTargetDerived, ConnectSourceDerived, TriggerSource, TriggerTarget, Nameable,
+                         ConnectSource, ConnectTarget, Descriptor, Plugin, Socket)
 from .manager import memoize
 from .private import ResolveBee, ConnectionCandidate, connect
+from .super import register_drone
 from .typing import MatchFlags, data_types_match
 
 MatchmakerConnectivityState = namedtuple("MatchmakerConnectivityState", "active_policies plugins sockets")
@@ -37,7 +38,7 @@ def get_unique_child_hive_objects(internals):
         yield bee
 
 
-def validate_external_name(attr_name):  # todo check not leading with _ somewhere
+def validate_external_name(attr_name):
     """Raise AttributeError if attribute name belongs to HiveObject or RuntimeHive"""
     if hasattr(HiveObject, attr_name):
         raise AttributeError('Cannot overwrite special attribute HiveObject.{}'.format(attr_name))
@@ -62,7 +63,7 @@ class HiveInternalRuntimeWrapper:
         self._run_hive = run_hive
 
 
-class RuntimeHive(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource, TriggerTarget, Nameable):
+class RuntimeHive(BeeBase, ConnectSourceDerived, ConnectTargetDerived, TriggerSource, TriggerTarget, Nameable):
     """Unique Hive instance that is created at runtime for a Hive object.
 
     Lightweight instantiation is supported through caching performed by the HiveObject instance.
@@ -75,7 +76,6 @@ class RuntimeHive(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource
         self._hive_object = hive_object
         self._drone_class_to_instance = {}
         self._name_to_runtime_bee = {}
-        self._drones = []
         self._hive_i = hive_i = self._hive_i_class(self)
 
         with run_hive_as(self):
@@ -91,7 +91,9 @@ class RuntimeHive(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource
                     drone = drone_cls.__new__(drone_cls)
 
                     self._drone_class_to_instance[drone_cls] = drone
-                    self._drones.append(drone)
+
+                    # Register drone with global lookup
+                    register_drone(drone, self)
 
                     drone.__init__(*args, **kwargs)
 
@@ -147,7 +149,7 @@ class RuntimeHive(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource
         return getattr(self, target_name)
 
 
-class HiveObject(Bee, ConnectSourceDerived, ConnectTargetDerived, TriggerSource, TriggerTarget):
+class HiveObject(BeeBase, ConnectSourceDerived, ConnectTargetDerived, TriggerSource, TriggerTarget):
     """Built Hive base-class responsible for creating new Hive instances.
 
     All public defined with the builder functions are memoized and cached for faster instantiation
@@ -515,10 +517,10 @@ class HiveBuilder:
         # These public will have already been handled by parent (as this method is called top-down)
         active_policies, plugins, sockets = connectivity_state
         exportable_to_parent = resolved_hive_object._hive_exportable_to_parent \
-            if getattr(resolved_hive_object,'_hive_allow_export_namespace',None) else frozenset()
+            if getattr(resolved_hive_object, '_hive_allow_export_namespace', None) else frozenset()
 
         # TLDR fix this
-        print("BUILD",resolved_hive_object)
+        print("BUILD", resolved_hive_object)
         # Find sockets and plugins that are exportable
         for bee_name, _ in resolved_hive_object._hive_ex:
             if bee_name in exportable_to_parent:

@@ -6,7 +6,7 @@ class HiveDescriptor:
     def __init__(self, bee, instance_is_internal=False):
         """Initialiser for HiveDescriptor
 
-        :param bee: Descriptor Bee instance
+        :param bee: Descriptor BeeBase instance
         :param instance_is_internal: whether to expect run hive or internal hive in descriptor magic methods
         """
         self._descriptor_bee = bee

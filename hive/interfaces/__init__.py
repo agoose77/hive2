@@ -1,9 +1,8 @@
+from abc import ABC, abstractmethod
 from collections import namedtuple
 from weakref import ref
 
 from ..manager import memo_property
-
-from abc import ABC, abstractmethod
 
 
 class Descriptor(ABC):
@@ -39,7 +38,6 @@ class Nameable:
 
 
 class Callable(ABC):
-
     @abstractmethod
     def __call__(self):
         pass
@@ -53,10 +51,10 @@ class Socket:
     pass
 
 
-from .bees import Exportable, Bee
+from .bees import Exportable, Bee, BeeBase
 from .io import IO, Antenna, Output, IOModes
 from .stateful import Stateful
 from .trigger_source import TriggerSourceBase, TriggerSource, TriggerSourceDerived
 from .trigger_target import TriggerTargetBase, TriggerTarget, TriggerTargetDerived
-from .connect_source import ConnectSource ,ConnectSourceBase, ConnectSourceDerived
+from .connect_source import ConnectSource, ConnectSourceBase, ConnectSourceDerived
 from .connect_target import ConnectTarget, ConnectTargetBase, ConnectTargetDerived

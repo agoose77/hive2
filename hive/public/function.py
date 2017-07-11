@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
 
 from hive.private.socket import HiveSocketBuilder
-from ..interfaces import Bee, Callable
+from ..interfaces import BeeBase, Callable
 from ..manager import memo_property
 from ..private import TriggerableBuilder, TriggerableRuntime, TriggerFuncBuilder, TriggerFuncRuntime, HivePluginBuilder
 
 
-class FunctionBase(Bee, Callable):
+class FunctionBase(BeeBase, Callable):
     def __call__(self, *args, **kwargs):
         self.before_triggered()
         if self._func is not None:
@@ -47,7 +47,7 @@ class FunctionBound(FunctionBase):
         return self._build_bee.trigger.bind(self._run_hive)
 
 
-class FunctionBuilder(Bee, ABC):
+class FunctionBuilder(BeeBase, ABC):
     def __init__(self):
         super().__init__()
 

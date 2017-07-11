@@ -1,6 +1,6 @@
 from hive.exception import HiveConnectionError
 from hive.identifier import is_valid_identifier
-from hive.interfaces import ConnectTarget, Plugin, Socket, Exportable, Bee
+from hive.interfaces import ConnectTarget, Plugin, Socket, Exportable, BeeBase
 from hive.manager import memoize, ModeFactory
 from hive.policies import SingleRequired
 from hive.typing import is_valid_data_type
@@ -34,7 +34,7 @@ class HiveSocketRuntime(Socket, ConnectTarget):
         return "HiveSocketRuntime({!r}, {!r})".format(self._func, self._data_type)
 
 
-class HiveSocketBuilder(Exportable, Socket, ConnectTarget):
+class HiveSocketBuilder(BeeBase, Exportable, Socket, ConnectTarget):
     def __init__(self, target, identifier=None, data_type="", policy=None, export_to_parent=False):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)

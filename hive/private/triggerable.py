@@ -1,10 +1,10 @@
 from .plugin import HivePluginBuilder
 from ..exception import HiveConnectionError
-from ..interfaces import TriggerTarget, ConnectTarget, TriggerSource, Callable, Bee, Exportable
+from ..interfaces import TriggerTarget, ConnectTarget, TriggerSource, Callable, BeeBase, Exportable, Bee
 from ..manager import ModeFactory, memoize
 
 
-class TriggerableRuntime(TriggerTarget, ConnectTarget, Callable, Bee):
+class TriggerableRuntime(TriggerTarget, ConnectTarget, Callable, BeeBase):
     """Callable Python snippet which is passed the current run hive"""
 
     def __init__(self, func):
@@ -33,7 +33,7 @@ class TriggerableRuntime(TriggerTarget, ConnectTarget, Callable, Bee):
         return "TriggerableRuntime({!r})".format(self._func)
 
 
-class TriggerableBuilder(TriggerTarget, ConnectTarget, Exportable):
+class TriggerableBuilder(BeeBase, TriggerTarget, ConnectTarget, Exportable):
     """Callable Python snippet which is passed the current run hive"""
 
     def __init__(self, target):
@@ -59,7 +59,7 @@ class TriggerableBuilder(TriggerTarget, ConnectTarget, Exportable):
         return HivePluginBuilder(self, *args, **kwargs)
 
     def __repr__(self):
-        return "Triggerable({!r})".format(self._target)
+        return "TriggerableBuilder({!r})".format(self._target)
 
 
 triggerable = ModeFactory("hive.triggerable", immediate=TriggerableRuntime, build=TriggerableBuilder)

@@ -19,18 +19,15 @@ from ..contexts import get_building_hive
 logger = getLogger(__name__)
 
 
-class Bee:
+class Bee(ABC):
     # TODO: resolve method for arguments that are public (returns a new HiveBee class?)
-
-    _parent_hive_object_class = None
-
-    def __init__(self):
-        self._parent_hive_object_class = get_building_hive()
-        if get_building_hive() is None:
-            logger.warning("Building hive is none for {}, is this the root hive?".format(self))
+    @property
+    @abstractmethod
+    def _hive_parent_hive_object_class(self):
+        pass
 
     def implements(self, cls):
-        """Return True if the Bee returned by getinstance will implement a given class.
+        """Return True if the BeeBase returned by getinstance will implement a given class.
         
         Required to support inspection of runtime-public
         
@@ -42,5 +39,15 @@ class Bee:
         return self
 
 
-class Exportable(Bee, ABC):
+class BeeBase(Bee):
+
+    _hive_parent_hive_object_class = None
+
+    def __init__(self):
+        self._hive_parent_hive_object_class = get_building_hive()
+        if get_building_hive() is None:
+            logger.warning("Building hive is none for {}, is this the root hive?".format(self))
+
+
+class Exportable:
     pass

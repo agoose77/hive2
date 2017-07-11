@@ -1,10 +1,10 @@
 from .mixins import TriggerableMixin
 from ..exception import HiveConnectionError
-from ..interfaces import TriggerSource, TriggerTarget, ConnectSource, Callable, Bee, Exportable
+from ..interfaces import TriggerSource, TriggerTarget, ConnectSource, Callable, BeeBase, Exportable
 from ..manager import ModeFactory, memoize
 
 
-class TriggerFuncRuntime(Bee, TriggerSource, ConnectSource, Callable, TriggerableMixin):
+class TriggerFuncRuntime(BeeBase, TriggerSource, ConnectSource, Callable, TriggerableMixin):
     """Callable interface to HIVE (pre)trigger"""
 
     data_type = 'trigger'
@@ -33,7 +33,7 @@ class TriggerFuncRuntime(Bee, TriggerSource, ConnectSource, Callable, Triggerabl
         return "TriggerFunc()".format()
 
 
-class TriggerFuncBuilder(TriggerSource, ConnectSource, Exportable, TriggerableMixin):
+class TriggerFuncBuilder(BeeBase, TriggerSource, ConnectSource, Exportable, TriggerableMixin):
     data_type = 'trigger'
 
     @memoize

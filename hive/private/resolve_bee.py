@@ -1,4 +1,4 @@
-from hive.interfaces import Exportable, Nameable
+from hive.interfaces import Exportable, Nameable, Bee
 
 
 class BindableResolveBee(Nameable):
@@ -21,10 +21,12 @@ class BindableResolveBee(Nameable):
         return self._bee.bind(hive_instance)
 
 
-class ResolveBee(Exportable):
+class ResolveBee(Bee, Exportable):
     """Implements support for connecting between public of different HiveObjects 
     (resolving the getinstance & bind methods)
     """
+
+    _hive_parent_hive_object_class = None
 
     def __init__(self, bee, defining_hive_object):
         self._bee = bee
@@ -48,7 +50,7 @@ class ResolveBee(Exportable):
         return "{}<{}>".format(self._bee, self._defining_hive_object.__class__.__name__)
 
     def bind(self, containing_instance):
-        """Return a runtime instance of the wrapped Bee.
+        """Return a runtime instance of the wrapped BeeBase.
         
         :param redirected_hive_object: TODO
         """  # TODO

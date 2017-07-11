@@ -4,7 +4,7 @@ from operator import itemgetter
 
 from ..contexts import get_mode, register_bee
 from ..exception import MatchFailedError, HiveConnectionError
-from ..interfaces import ConnectSourceBase, ConnectSourceDerived, ConnectTargetBase, ConnectTargetDerived, Bee
+from ..interfaces import ConnectSourceBase, ConnectSourceDerived, ConnectTargetBase, ConnectTargetDerived, BeeBase
 from ..manager import memoize
 from ..typing import get_match_score, find_matching_ast, MatchFlags, parse_type_string
 
@@ -142,7 +142,7 @@ def build_connection(source, target):
     source._hive_connect_source(target)
 
 
-class ConnectionBuilder(Bee):
+class ConnectionBuilder(BeeBase):
     def __init__(self, source, target):
         self._source = source
         self._target = target

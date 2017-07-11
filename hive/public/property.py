@@ -1,6 +1,6 @@
 from functools import partial
 
-from ..interfaces import Stateful, Bee
+from ..interfaces import Stateful, BeeBase
 from ..manager import ModeFactory, memoize, memo_property
 from ..parameter import Parameter
 from ..private import (PushInBuilder, PullInBuilder, PushOutBuilder, PullOutBuilder, StatefulDescriptorBuilder,
@@ -9,7 +9,7 @@ from ..private import (PushInBuilder, PullInBuilder, PushOutBuilder, PullOutBuil
 builtin_property = property
 
 
-class PropertyBound(Bee, Stateful):
+class PropertyBound(BeeBase, Stateful):
     def __init__(self, build_bee, run_hive, drone_class, name, data_type='', start_value=None):
         self._drone_class = drone_class
         self._name = name
@@ -67,7 +67,7 @@ class PropertyBound(Bee, Stateful):
                                                               self._start_value)
 
 
-class PropertyBuilder(Bee):
+class PropertyBuilder(BeeBase):
     def __init__(self, cls, name: str, data_type: str = '', start_value=None):
         self._drone_cls = getattr(cls, '_hive_wrapped_drone_class')
         self._name = name
