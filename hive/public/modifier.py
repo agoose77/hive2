@@ -12,7 +12,9 @@ class ModifierBuilder(FunctionBuilder):
 
     @memoize
     def bind(self, run_hive):
-        func = partial(self._func, run_hive._hive_i, run_hive)
+        func = self._func
+        if func is not None:
+            func = partial(func, run_hive._hive_i, run_hive)
         return FunctionBound(self, run_hive, func)
 
 
