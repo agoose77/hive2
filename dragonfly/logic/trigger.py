@@ -8,7 +8,7 @@ def declare_trigger(meta_args):
 
 def build_trigger(i, ex, args, meta_args):
     """Collapse multiple trigger inputs to single trigger output"""
-    i.trigger = hive.triggerfunc()
+    i.trigger = hive.modifier()
 
     ex.trigger = i.trigger.triggered
 

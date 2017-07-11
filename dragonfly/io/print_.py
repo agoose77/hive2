@@ -2,7 +2,7 @@ import hive
 
 
 def do_print(i, ex):
-    print(i.value.property)
+    print(i.value.value)
 
 
 def build_print(i, ex, args):

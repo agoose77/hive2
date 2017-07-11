@@ -34,7 +34,7 @@ class PushOutBase(BeeBase, Output, ConnectableMixin, Callable):
 
     def push(self):
         # TODO: exception handling hooks
-        self.before_triggered()
+        self.pre_triggered()
 
         value = self._target._hive_stateful_getter()
         for target in self._targets:
@@ -55,7 +55,7 @@ class PushOutImmediate(PushOutBase):
     def __init__(self, target):
         super().__init__(target)
 
-        self.before_triggered = TriggerFuncRuntime()
+        self.pre_triggered = TriggerFuncRuntime()
         self.triggered = TriggerFuncRuntime()
         self.trigger = TriggerableRuntime(self)
 
@@ -75,8 +75,8 @@ class PushOutBound(PushOutBase):
         return self._build_bee.triggered.bind(self._run_hive)
 
     @memo_property
-    def before_triggered(self):
-        return self._build_bee.before_triggered.bind(self._run_hive)
+    def pre_triggered(self):
+        return self._build_bee.pre_triggered.bind(self._run_hive)
 
     @memo_property
     def trigger(self):
@@ -92,23 +92,27 @@ class PushOutBuilder(BeeBase, Output, Exportable, ConnectableMixin):
     def __init__(self, target):
         assert target.implements(Stateful)
 
-        self.target = target
+        self._target = target
 
         self.triggered = TriggerFuncBuilder()
-        self.before_triggered = TriggerFuncBuilder()
+        self.pre_triggered = TriggerFuncBuilder()
         self.trigger = TriggerableBuilder(self)
 
         super().__init__()
 
+    @property
+    def data_type(self):
+        return self._target.data_type
+
     @memoize
     def bind(self, run_hive):
-        return PushOutBound(self, run_hive, self.target.bind(run_hive))
+        return PushOutBound(self, run_hive, self._target.bind(run_hive))
 
     def implements(self, cls):
         return issubclass(PushOutBound, cls) or super().implements(cls)
 
     def __repr__(self):
-        return "PushOutBuilder({!r})".format(self.target)
+        return "PushOutBuilder({!r})".format(self._target)
 
 
 push_out = ModeFactory("hive.push_out", immediate=PushOutImmediate, build=PushOutBuilder)

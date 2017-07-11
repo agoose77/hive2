@@ -6,7 +6,6 @@ from ..event import EventHandler
 class Mouse_:
 
     def __init__(self):
-        self._hive = hive.get_run_hive()
         self.button = None
 
         self._pressed_listener = None
@@ -22,11 +21,11 @@ class Mouse_:
 
     def _on_button_down(self):
         self.is_pressed = True
-        self._hive._on_pressed()
+        hive.internal(self).on_pressed()
 
     def _on_button_up(self):
         self.is_pressed = False
-        self._hive._on_released()
+        hive.internal(self).on_released()
 
     def on_moved(self, leader):
         old_x = self.pos_x
@@ -39,7 +38,7 @@ class Mouse_:
         self.dx = pos_x - old_x
         self.dy = pos_y - old_y
 
-        self._hive._on_moved()
+        hive.internal(self).on_moved()
 
     def get_pattern(self, state):
         return "mouse", state, self.button.lower()
@@ -60,21 +59,21 @@ class Mouse_:
 
 
 def build_mouse(cls, i, ex, args):
-    ex.on_event = hive.socket(cls.set_add_handler, identifier="event.add_handler")
-    i.on_tick = hive.triggerfunc()
+    ex.on_event = cls.set_add_handler.socket(identifier="event.add_handler")
+    i.on_tick = hive.modifier()
 
     args.button = hive.parameter("str", "left", options={"left", "middle", "right"})
 
     i.button = hive.property(cls, "button", "str", args.button)
     ex.button = i.button.push_in
 
-    i.on_button_changed = hive.triggerable(cls.change_listener_buttons)
+    i.on_button_changed = cls.change_listener_buttons
     i.push_button.triggered.connect(i.on_button_changed.trigger)
 
-    i.on_pressed = hive.triggerfunc()
+    i.on_pressed = hive.modifier()
     ex.on_pressed = i.on_pressed.trigger
 
-    i.on_moved = hive.triggerfunc()
+    i.on_moved = hive.modifier()
     ex.on_moved = i.on_moved.trigger
 
     i.pos_x = hive.property(cls, "pos_x", "float")

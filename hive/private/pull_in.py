@@ -24,7 +24,7 @@ class PullInBase(BeeBase, Antenna, ConnectableMixin, Callable):
 
     def pull(self):
         # TODO: exception handling hooks
-        self.before_triggered()
+        self.pre_triggered()
         value = self._pull_callback()
         self._target._hive_stateful_setter(value)
         self.triggered()
@@ -50,12 +50,13 @@ class PullInBase(BeeBase, Antenna, ConnectableMixin, Callable):
 
 
 class PullInImmediate(PullInBase):
+
     def __init__(self, target):
-        self.before_triggered = TriggerFuncRuntime()
+        super().__init__(target)
+
+        self.pre_triggered = TriggerFuncRuntime()
         self.triggered = TriggerFuncRuntime()
         self.trigger = TriggerableRuntime(self)
-
-        super().__init__(target)
 
     def __repr__(self):
         return "PullInImmediate({!r})".format(self._target)
@@ -73,8 +74,8 @@ class PullInBound(PullInBase):
         return self._build_bee.triggered.bind(self._run_hive)
 
     @memo_property
-    def before_triggered(self):
-        return self._build_bee.before_triggered.bind(self._run_hive)
+    def pre_triggered(self):
+        return self._build_bee.pre_triggered.bind(self._run_hive)
 
     @memo_property
     def trigger(self):
@@ -93,7 +94,7 @@ class PullInBuilder(BeeBase, Antenna, Exportable, ConnectableMixin):
         self._target = target
 
         self.triggered = TriggerFuncBuilder()
-        self.before_triggered = TriggerFuncBuilder()
+        self.pre_triggered = TriggerFuncBuilder()
         self.trigger = TriggerableBuilder(self)
 
         super().__init__()

@@ -1,14 +1,14 @@
 import hive
 
 
-def evaluate_toggle(self):
-    self._toggle = not self._toggle
+def evaluate_toggle(i):
+    i.toggle.value = not i.toggle.value
 
-    if self._toggle:
-        self._trig_a()
+    if i.toggle.value:
+        i.trig_a()
 
     else:
-        self._trig_b()
+        i.trig_b()
 
 
 def build_toggle(i, ex, args):
@@ -19,8 +19,8 @@ def build_toggle(i, ex, args):
     i.modifier = hive.modifier(evaluate_toggle)
     ex.trig_in = i.modifier.trigger
 
-    i.trig_a = hive.triggerfunc()
-    i.trig_b = hive.triggerfunc()
+    i.trig_a = hive.modifier()
+    i.trig_b = hive.modifier()
 
     ex.trig_a = i.trig_a.trigger
     ex.trig_b = i.trig_b.trigger

@@ -18,14 +18,15 @@ class VariableRecorder(ast.NodeVisitor):
 def create_func(expression, names):
     declaration = """
 from math import *
-def func(self):
+def func(i, ex):
     {}
-    self._result = {}"""
+    i.result.value = ({})"""
 
-    declarations = "\n    ".join(["{0}=self._{0}".format(name) for name in names])
+    declarations = "\n    ".join(["{0}=i.{0}.property".format(name) for name in names])
     declare_func = declaration.format(declarations, expression)
 
     namespace = {}
+    print(declare_func)
     exec(declare_func, namespace)
     func = namespace['func']
 
@@ -47,20 +48,18 @@ def build_expression(i, ex, args, meta_args):
     variable_names = visitor.undefined_ids
 
     i.result = hive.attribute(meta_args.result_type)
-    i.pull_result = hive.pull_out(i.result)
-    ex.result = hive.output(i.pull_result)
+    ex.result = i.result.pull_out
 
     for name in variable_names:
         attribute = hive.attribute(meta_args.result_type)
         setattr(i, name, attribute)
-        pull_in = hive.pull_in(attribute)
-        setattr(ex, name, hive.antenna(pull_in))
+        setattr(ex, name, attribute.pull_in)
 
-        hive.trigger(i.pull_result, pull_in, pretrigger=True)
+        i.result.pull_out.pre_triggered.connect(attribute.pull_in.trigger)
 
     func = create_func(meta_args.expression, variable_names)
     i.modifier = hive.modifier(func)
-    hive.trigger(i.pull_result, i.modifier, pretrigger=True)
+    i.result.pull_out.pre_triggered.connect(i.modifier.trigger)
 
 
 Expression = hive.dyna_hive("Expression", build_expression, declarator=declare_expression)

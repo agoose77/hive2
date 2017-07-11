@@ -79,17 +79,18 @@ class InstantiatorClass:
 
         self._plugins = None
 
-        self._hive = hive.get_run_hive()
         self._active_hives = {}
 
         self._bind_class_creation_callbacks = []
         self._process_id_generator = id_generator()
 
         self.last_created_process_id = None
+        self.stop_process_id = None
         self.bind_meta_class = None
 
         # Runtime attributes
         self.hive_class = None
+        self._frozen_meta_args = hive.external(self)._hive_object._hive_meta_args_frozen
 
     def _create_context(self):
         """Create context object for new hive instances.
@@ -129,22 +130,20 @@ class InstantiatorClass:
         """
         self._bind_class_creation_callbacks.append(on_created)
 
-    @hive.types(process_id="int.process_id")
-    def stop_hive(self, process_id):
+    def stop_hive(self):
         """Forget child hive when it is stopped"""
-        instance = self._active_hives.pop(process_id)
+        instance = self._active_hives.pop(self.stop_process_id)
         instance.on_stopped()
 
     def stop_all_processes(self):
         """Stop all child hives if instantiator is stopped"""
         for instance_id in list(self._active_hives.keys()):
-            self.stop_hive(instance_id)
+            self.stop_hive(instance_id) # TODO
 
     def instantiate(self):
         context = self._create_context()
 
-        bind_meta_args = self._hive._hive_object._hive_meta_args_frozen
-        print("PRE", (self.bind_meta_class))
+        bind_meta_args = self._frozen_meta_args
         bind_class = self.bind_meta_class(bind_meta_args=bind_meta_args, hive_class=self.hive_class)
 
         # Create Hive and track ID
@@ -174,23 +173,19 @@ def build_instantiator(cls, i, ex, args, meta_args):
     #assert bind_meta_class._hive_object_class
     i.bind_meta_class = hive.property(cls, "bind_meta_class", "class", bind_meta_class)
 
-    i.trig_instantiate = hive.triggerfunc(cls.instantiate)
-    i.do_instantiate = hive.triggerable(i.trig_instantiate)
 
     i.hive_class = hive.property(cls, "hive_class", "class")
-    i.pull_hive_class = hive.pull_in(i.hive_class)
-    ex.hive_class = hive.antenna(i.pull_hive_class)
+    ex.hive_class = i.hive_class.pull_in
 
-    ex.create = hive.entry(i.do_instantiate)
-
+    ex.create = cls.instantiate.trigger
     hive.trigger(i.trig_instantiate, i.pull_hive_class, pretrigger=True)
 
-    ex.process_id = hive.property(cls, "last_created_process_id", "int.process_id")
-    i.pull_process_id = hive.pull_out(ex.process_id)
-    ex.last_process_id = hive.output(i.pull_process_id)
+    i.last_created_process_id = hive.property(cls, "last_created_process_id", "int.process_id")
+    ex.last_process_id = i.last_created_process_id.pull_out
 
-    i.push_stop_process = hive.push_in(cls.stop_hive)
-    ex.stop_process = hive.antenna(i.push_stop_process)
+    i.stop_process_id = hive.property(cls, "stop_process_id", "int.process_id")
+    i.stop_process_id.push_in.triggered.connect(cls.stop_hive.trigger)
+    ex.stop_process = i.stop_process_id.push_in
 
     # Bind class plugin
     ex.bind_on_created = hive.socket(cls.add_on_created, identifier="bind.on_created", policy=hive.MultipleOptional)

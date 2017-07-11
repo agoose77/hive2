@@ -5,7 +5,7 @@ from ..manager import ModeFactory, memoize
 
 
 class ModifierBuilder(FunctionBuilder):
-    def __init__(self, func):
+    def __init__(self, func=None):
         self._func = func
 
         super().__init__()

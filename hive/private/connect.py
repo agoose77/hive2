@@ -4,7 +4,7 @@ from operator import itemgetter
 
 from ..contexts import get_mode, register_bee
 from ..exception import MatchFailedError, HiveConnectionError
-from ..interfaces import ConnectSourceBase, ConnectSourceDerived, ConnectTargetBase, ConnectTargetDerived, BeeBase
+from ..interfaces import ConnectSourceBase, ConnectSourceDerived, ConnectTargetBase, ConnectTargetDerived, BeeBase, Bee
 from ..manager import memoize
 from ..typing import get_match_score, find_matching_ast, MatchFlags, parse_type_string
 

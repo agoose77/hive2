@@ -4,11 +4,13 @@ from .connect import connect
 
 class ConnectableMixin:
 
-    def connect(self, other):
-        return connect(self, other)
+    def connect(self, *targets):
+        for target in targets:
+            connect(self, target)
 
 
 class TriggerableMixin:
 
-    def connect(self, other):
-        return trigger(self, other)
+    def connect(self, *targets):
+        for target in targets:
+            trigger(self, target)

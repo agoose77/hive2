@@ -1,26 +1,26 @@
 import hive
 
 
-def do_while(self):
+def do_while(i, ex):
     while True:
-        self.condition_in()
-        if not self.condition:
+        i.condition.pull_in()
+
+        if not i.condition.value:
             break
 
-        self.trig_out()
+        i.do_trig()
 
 
 def build_while(i, ex, args):
     """Trigger output while condition is True"""
-    ex.condition = hive.attribute()
-    i.condition_in = hive.pull_in(ex.condition)
-    ex.condition_in = hive.antenna(i.condition_in)
+    i.condition = hive.attribute()
+    ex.condition_in = i.condition.pull_in
 
-    i.trig = hive.triggerfunc()
-    ex.trig_out = hive.hook(i.trig)
+    i.do_trig = hive.modifier()
+    ex.trig_out = i.do_trig.triggered
 
     i.trig_in = hive.modifier(do_while)
-    ex.trig_in = hive.entry(i.trig_in)
+    ex.trig_in = i.trig_in.trigger
 
 
 While = hive.hive("While", build_while)

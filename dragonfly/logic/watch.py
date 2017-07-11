@@ -5,14 +5,11 @@ from dragonfly.event import EventHandler
 
 class WatchClass:
     def __init__(self):
-        self._last_value = None
         self.current_value = None
-
-        self._hive = hive.get_run_hive()
+        self._last_value = None
 
     def _on_tick(self):
-        self._hive.value()
-
+        hive.internal(self).value()
         self.compare_values()
 
     def compare_values(self):
@@ -20,7 +17,7 @@ class WatchClass:
         last_value, self._last_value = self._last_value, current_value
 
         if current_value != last_value:
-            self._hive._on_changed()
+            hive.internal(self).on_changed()
 
     def set_add_handler(self, add_handler):
         handler = EventHandler(self._on_tick, ("tick",), mode='match')
@@ -46,16 +43,16 @@ def build_watch(cls, i, ex, args, meta_args):
     else:
         i.value_in = i.value.push_in
 
-    ex.value = i.value_in
+    i.on_changed = hive.modifier()
 
-    i.on_changed = hive.triggerfunc()
+    ex.value = i.value_in
     ex.on_changed = i.on_changed.trigger
 
     if meta_args.mode == 'pull':
-        ex.get_add_handler = hive.socket(cls.set_add_handler, identifier="event.add_handler")
+        ex.get_add_handler = cls.set_add_handler.socket(identifier="event.add_handler")
 
     else:
-        hive.trigger(i.value_in.triggered, cls.compare_values.trigger)
+        i.value_in.triggered.connect(cls.compare_values.trigger)
 
 
 Watch = hive.dyna_hive("Watch", build_watch, declare_watch, drone_class=WatchClass)

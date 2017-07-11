@@ -8,7 +8,7 @@ from ..private import TriggerableBuilder, TriggerableRuntime, TriggerFuncBuilder
 
 class FunctionBase(BeeBase, Callable):
     def __call__(self, *args, **kwargs):
-        self.before_triggered()
+        self.pre_triggered()
         if self._func is not None:
             self._func(*args, **kwargs)
         self.triggered()
@@ -20,7 +20,7 @@ class FunctionImmediate(FunctionBase):
         self._func = func
 
         self.triggered = TriggerFuncRuntime()
-        self.before_triggered = TriggerFuncRuntime()
+        self.pre_triggered = TriggerFuncRuntime()
         self.trigger = TriggerableRuntime(self)
 
         super().__init__()
@@ -39,8 +39,8 @@ class FunctionBound(FunctionBase):
         return self._build_bee.triggered.bind(self._run_hive)
 
     @memo_property
-    def before_triggered(self):
-        return self._build_bee.before_triggered.bind(self._run_hive)
+    def pre_triggered(self):
+        return self._build_bee.pre_triggered.bind(self._run_hive)
 
     @memo_property
     def trigger(self):
@@ -52,7 +52,7 @@ class FunctionBuilder(BeeBase, ABC):
         super().__init__()
 
         self.triggered = TriggerFuncBuilder()
-        self.before_triggered = TriggerFuncBuilder()
+        self.pre_triggered = TriggerFuncBuilder()
         self.trigger = TriggerableBuilder(self)
 
     def socket(self, *args, **kwargs):

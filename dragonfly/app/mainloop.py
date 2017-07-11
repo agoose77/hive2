@@ -10,14 +10,13 @@ class _Mainloop(object):
 
     @hive.types(tick_rate='int')
     def __init__(self, tick_rate=60):
-        self._hive = hive.get_run_hive()
         self.tick_rate = tick_rate
 
         self._running = True
         self._listeners = []
 
     def run(self):
-        self._hive.on_started()
+        hive.internal(self).on_started()
 
         accumulator = 0.0
         last_time = time.clock()
@@ -35,9 +34,9 @@ class _Mainloop(object):
             accumulator += elapsed_time
             while accumulator > time_step:
                 accumulator -= time_step
-                self.tick()
+                hive.internal(self).tick()
 
-        self._hive.on_stopped()
+        hive.internal(self).on_stopped()
 
     def get_tick_rate(self):
         return self.tick_rate
@@ -45,15 +44,12 @@ class _Mainloop(object):
     def stop(self):
         self._running = False
 
-    def tick(self):
-        self._hive.tick()
-
 
 def build_mainloop(cls, i, ex, args):
     """Blocking fixed-timestep trigger generator"""
-    i.tick = hive.function() # todo
+    i.tick = hive.modifier()
 
-    ex.tick = i.tick.trigger
+    ex.on_tick = i.tick.triggered
     ex.stop = cls.stop.trigger
     ex.run = cls.run.trigger
 

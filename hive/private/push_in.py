@@ -22,7 +22,7 @@ class PushInBase(BeeBase, Antenna, ConnectableMixin, Callable):
 
     def push(self, value):
         # TODO: exception handling hooks
-        self.before_triggered()
+        self.pre_triggered()
         self._target._hive_stateful_setter(value)
         self.triggered()
 
@@ -59,8 +59,8 @@ class PushInBound(PushInBase):
         return self._build_bee.triggered.bind(self._run_hive)
 
     @memo_property
-    def before_triggered(self):
-        return self._build_bee.before_triggered.bind(self._run_hive)
+    def pre_triggered(self):
+        return self._build_bee.pre_triggered.bind(self._run_hive)
 
     def __repr__(self):
         return "PushInBound({!r}, {!r}, {!r})".format(self._build_bee, self._run_hive, self._target)
@@ -75,7 +75,7 @@ class PushInBuilder(BeeBase, Antenna, Exportable, ConnectableMixin):
         self._target = target
 
         self.triggered = TriggerFuncBuilder()
-        self.before_triggered = TriggerFuncBuilder()
+        self.pre_triggered = TriggerFuncBuilder()
 
         super().__init__()
 

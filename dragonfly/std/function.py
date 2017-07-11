@@ -93,15 +93,13 @@ class FunctionDefinitionVisitor(ast.NodeVisitor):
 
 
 modifier_str = """
-def modifier(self):
-    self._pull_all_inputs()
+def modifier(i, ex):
     result = {function_call_str}
     {result_body}
 """
 
 result_str = """
-    self._result = result
-    self.result.push()
+    i.result.value = result
 """
 
 
@@ -125,10 +123,9 @@ def build_func(i, ex, args, meta_args):
     has_return = visitor.output_type_name is not function_no_return
 
     # Define modifier source code (here, we will lookup the "user_func" name later)
-    function_call_str = "user_func({})".format(", ".join(["self._{}".format(a) for a in visitor.antennae]))
+    function_call_str = "user_func({})".format(", ".join(["i.{}.property".format(a) for a in visitor.antennae]))
     result_body = result_str if has_return else ""
-    modifier_decl = modifier_str.format(function_call_str=function_call_str,
-                                        result_body=result_body)
+    modifier_decl = modifier_str.format(function_call_str=function_call_str, result_body=result_body)
 
     # Build modifier function
     namespace = {'user_func': user_func}
@@ -137,24 +134,21 @@ def build_func(i, ex, args, meta_args):
 
     # Create modifier public
     i.modifier = hive.modifier(modifier_func)
-    ex.trigger = hive.entry(i.modifier)
-
-    i.pull_all_inputs = hive.triggerfunc()
+    ex.trigger = i.modifier.trigger
 
     # Create IO pins
     for arg, (type_name, default) in visitor.antennae.items():
         attr = hive.attribute(type_name, start_value=default)
         setattr(i, arg, attr)
-        pull_in = hive.pull_in(attr)
-        setattr(ex, arg, hive.antenna(pull_in))
-        hive.trigger(i.pull_all_inputs, pull_in, pretrigger=True)
+        setattr(ex, arg, attr.pull_in)
+        i.modifier.pre_triggered.connect(attr.pull_in.trigger)
 
     if has_return:
         result_name = 'result'
         attr = hive.attribute(visitor.output_type_name)
         setattr(i, result_name, attr)
-        push_out = hive.push_out(attr)
-        setattr(ex, result_name, hive.output(push_out))
+        setattr(ex, result_name, attr.push_out)
+        i.modifier.triggered.connect(attr.push_out.trigger)
 
 
 Function = hive.dyna_hive("Function", build_func, declarator=declare_func)

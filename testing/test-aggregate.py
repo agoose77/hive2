@@ -25,7 +25,7 @@ def build_c(i, ex, args):
     i.set_c = hive.modifier(mod_c)
     ex.get_c = i.c.pull_out
 
-    ex.get_c.before_triggered.connect(i.set_c.trigger)
+    ex.get_c.pre_triggered.connect(i.set_c.trigger)
 
 
 C = hive.hive("C", build_c, bases=(A, B))

@@ -38,8 +38,8 @@ def do_pull(i, ex):
 def build(cls, i, ex, args):
     i.attr = hive.attribute("int")
 
-    i.before_updated = hive.modifier(on_attr_updated_pre)
-    i.attr.before_updated.connect(i.before_updated.trigger)
+    i.pre_updated = hive.modifier(on_attr_updated_pre)
+    i.attr.pre_updated.connect(i.pre_updated.trigger)
 
     i.updated = hive.modifier(on_attr_updated)
     i.attr.updated.connect(i.updated.trigger)

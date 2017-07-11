@@ -188,6 +188,8 @@ def get_base_data_type(type_string):
         return type_ast.type
     elif isinstance(type_ast, TypeName):
         return type_ast.type_name[0]
+    elif isinstance(type_ast, AnyType):
+        return None
     raise ValueError
 
 

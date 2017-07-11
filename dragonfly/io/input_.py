@@ -2,7 +2,7 @@ import hive
 
 
 def get_input(i, ex):
-    i.value.property = input(i.message.property)
+    i.value.value = input(i.message.value)
 
 def build_input(i, ex, args):
     """Get input from Python stdin"""
@@ -15,7 +15,7 @@ def build_input(i, ex, args):
     ex.value = i.value.pull_out
 
     i.get_input = hive.modifier(get_input)
-    i.value.pull_out.before_triggered.connect(i.get_input.trigger)
+    i.value.pull_out.pre_triggered.connect(i.get_input.trigger)
 
 
 Input = hive.hive("Input", build_input)

@@ -15,7 +15,7 @@ def declare_convert(meta_args):
 
 
 def move_value(i, ex):
-    i.converted.property = i.value.property
+    i.converted.value = i.value.value
 
 
 def build_convert(i, ex, args, meta_args):
@@ -34,7 +34,7 @@ def build_convert(i, ex, args, meta_args):
     else:
         i.value_in = i.value.pull_in
         i.converted_out = i.converted.pull_out
-        i.converted_out.before_triggered.connect(i.value_in.trigger)
+        i.converted_out.pre_triggered.connect(i.value_in.trigger)
 
     ex.value = i.value_in
     ex.converted = i.converted_out
@@ -45,10 +45,10 @@ def build_convert(i, ex, args, meta_args):
         value_cls = _type_map[to_base_type_name]
 
         def converter(i, ex):
-            i.converted.property = value_cls(i.value.property)
+            i.converted.value = value_cls(i.value.value)
 
         i.do_conversion = hive.modifier(converter)
-        i.converted_out.before_triggered.connect(i.do_conversion.trigger)
+        i.converted_out.pre_triggered.connect(i.do_conversion.trigger)
 
 
 Convert = hive.dyna_hive("Convert", builder=build_convert, declarator=declare_convert)

@@ -9,18 +9,16 @@ import hive2_gui
 class ImportClass:
 
     def __init__(self):
-        self._hive = hive.get_run_hive()
-
         self.import_path = None
         self.module = None
 
     def do_import_from_path(self):
         # Find first runtime info object and assume is the only one required
-        runtime_aliases = self._hive._hive_runtime_aliases
+        runtime_aliases = hive.external(self)._hive_runtime_aliases # TODO
         if not runtime_aliases:
-            raise RuntimeError("This hive does not have any runtime aliases (it is not nested within another HiveObject)")
+            raise RuntimeError("This hive does not have any runtime aliases (not nested within another HiveObject)")
 
-        # Find first hive to embed this hive (TODO maybe iterate here)
+        # Find first hive to embed this hive
         first_runtime_info = next(iter(runtime_aliases))
         parent = first_runtime_info.parent_ref()
         container_parent_class = parent._hive_object._hive_parent_class
@@ -43,17 +41,15 @@ class ImportClass:
 def build_import(cls, i, ex, args):
     """Interface to python import mechanism, with respect to editor project path"""
     i.import_path = hive.property(cls, "import_path", 'str')
-    i.pull_import_path = hive.pull_in(i.import_path)
-    ex.import_path = hive.antenna(i.pull_import_path)
+    ex.import_path = i.import_path.pull_in
 
-    i.do_import = hive.triggerable(cls.do_import_from_path)
+    i.do_import = cls.do_import_from_path
 
     i.module = hive.property(cls, "module", "module")
-    i.pull_module = hive.pull_out(i.module)
-    ex.module = hive.output(i.pull_module)
+    ex.module = i.module.pull_out
 
-    hive.trigger(i.pull_module, i.pull_import_path, pretrigger=True)
-    hive.trigger(i.pull_module, i.do_import, pretrigger=True)
+    i.module.pull_in.pre_triggered.connect(i.import_path.pull_in.trigger)
+    i.module.pull_in.pre_triggered.connect(i.do_import.trigger)
 
 
 Import = hive.hive("Import", build_import, drone_class=ImportClass)

@@ -6,7 +6,8 @@ def declare_sorted(meta_args):
 
 
 def sort(i, ex):
-    i.result.property = sorted(i.value.property, reverse=i.reverse.property)
+    i.result.value = sorted(i.value.value, reverse=i.reverse.value)
+
 
 def build_sorted(i, ex, args, meta_args):
     """Sort an iterable and output list"""
@@ -20,8 +21,8 @@ def build_sorted(i, ex, args, meta_args):
     ex.value = i.value.pull_in
 
     i.sort = hive.modifier(sort)
-    i.result.pull_out.before_triggered.connect(i.value.pull_in.trigger)
-    i.result.pull_out.triggered.connect(i.sort.trigger)
+    i.result.pull_out.pre_triggered.connects(i.value.pull_in.trigger,
+                                                i.sort.trigger)
 
 
 Sorted = hive.dyna_hive("Sorted", build_sorted, declare_sorted)

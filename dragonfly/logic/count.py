@@ -1,11 +1,11 @@
 import hive
 
 
-def do_count_up(self, i):
+def do_count_up(i, ex):
     i.count.value += 1
 
 
-def do_count_down(self, i):
+def do_count_down(i, ex):
     i.count.value += 1
 
 
@@ -21,7 +21,7 @@ def build_count(i, ex, args):
     ex.decrement = i.do_count_down.trigger
 
     ex.count = i.count.push_out
-    i.count.updated.triggers(i.count.push_out.trigger)
+    i.count.updated.connect(i.count.push_out.trigger)
 
 
 Count = hive.hive("Count", build_count)

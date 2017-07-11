@@ -1,26 +1,24 @@
 import hive
 
 
+def encode(i, ex):
+    i.bytes.value = i.string.value.encode(i.encoding.value)
+
+
 def build_encode(i, ex, args):
     """Encode a string into bytes"""
     args.encoding = hive.parameter('str', 'utf-8')
     ex.encoding = hive.attribute('str', args.encoding)
 
     i.string = hive.attribute("str")
-    i.pull_string = hive.pull_in(i.string)
-    ex.string = hive.antenna(i.pull_string)
+    ex.string = i.string.pull_in
 
-    i.bytes_ = hive.attribute('bytes')
-    i.pull_bytes_ = hive.pull_out(i.bytes_)
-    ex.bytes_ = hive.output(i.pull_bytes_)
+    i.bytes = hive.attribute('bytes')
+    ex.bytes = i.bytes.pull_out
 
-    def do_encoding(self):
-        self._bytes_ = self._string.encode(self.encoding)
-
-    i.do_encoding = hive.modifier(do_encoding)
-
-    hive.trigger(i.pull_bytes_, i.pull_string, pretrigger=True)
-    hive.trigger(i.pull_string, i.do_encoding)
+    i.encode = hive.modifier(encode)
+    i.bytes.pull_out.pre_triggered.connect(i.string.pull_in.trigger)
+    i.string.pull_in.triggered.connect(i.encode.trigger)
 
 
 Encode = hive.hive("Encode", build_encode)

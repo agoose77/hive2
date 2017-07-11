@@ -60,7 +60,7 @@ class PropertyBound(BeeBase, Stateful):
 
     @memo_property
     def before_updated(self):
-        return self._build_bee.before_updated.bind(self._run_hive)
+        return self._build_bee.pre_updated.bind(self._run_hive)
 
     def __repr__(self):
         return "PropertyBound({!r}, {!r}, {!r}, {!r})".format(self._build_bee, self._run_hive, self._data_type,

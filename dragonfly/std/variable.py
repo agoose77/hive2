@@ -9,20 +9,17 @@ def declare_variable(meta_args):
 def build_variable(i, ex, args, meta_args):
     """Simple value-holding hive"""
     args.start_value = hive.parameter(meta_args.data_type)
-    ex.value = hive.attribute(meta_args.data_type, args.start_value)
+    i.value = hive.attribute(meta_args.data_type, args.start_value)
 
-    i.pull_value = hive.pull_out(ex.value)
-    ex.value_out = hive.output(i.pull_value)
-
-    i.push_value = hive.push_in(ex.value)
-    ex.value_in = hive.antenna(i.push_value)
+    ex.value = i.value.property()
+    ex.value_out = i.value.pull_out
+    ex.value_in = i.value.push_in
 
     if meta_args.advanced:
-        i.pre_output = hive.triggerfunc()
-        ex.pre_output = hive.hook(i.pre_output)
+        i.pre_output = hive.modifier()
+        i.value.pull_out.pre_triggered.connect(i.pre_output.triggered)
 
-        i.do_pre_output = hive.triggerable(i.pre_output)
-        hive.trigger(i.pull_value, i.do_pre_output, pretrigger=True)
+        ex.pre_output = i.pre_output.triggered
 
 Variable = hive.dyna_hive("BuilderVariable", build_variable, declarator=declare_variable)
 

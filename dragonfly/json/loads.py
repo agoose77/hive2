@@ -3,24 +3,22 @@ import hive
 from json import loads
 
 
+def do_loads(i, ex):
+    i.result.value = loads(i.object.value)
+
+
 def build_loads(i, ex, args):
     """Interface to JSON loads function"""
-    def do_loads(self):
-        self._result = loads(self._object_)
 
     i.result = hive.attribute('str')
-    i.object_ = hive.attribute()
+    i.object = hive.attribute()
 
-    i.pull_result = hive.pull_out(i.result)
-    ex.result = hive.output(i.pull_result)
-
-    i.pull_object = hive.pull_in(i.object_)
-    ex.object_ = hive.antenna(i.pull_object)
+    ex.result = i.result.pull_out
+    ex.object = i.object.pull_in
 
     i.do_loads = hive.modifier(do_loads)
-
-    hive.trigger(i.pull_result, i.pull_object, pretrigger=True)
-    hive.trigger(i.pull_object, i.do_loads)
+    i.result.pull_out.pre_triggered.connect(i.pull_object.trigger)
+    i.object.pull_in.triggered.connect(i.do_loads.trigger)
 
 
 Loads = hive.hive("Loads", build_loads)

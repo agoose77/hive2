@@ -1,10 +1,9 @@
-from operator import add, sub, mul, truediv, mod, eq, or_, not_, and_, gt, lt, ge, le
+from operator import eq, or_, not_, and_, gt, lt, ge, le
 
 import hive
 
-
 operators = {'=': eq, '!': not_, '|': or_, '&': and_, '>': gt, '<': lt, '>=': ge, '<=': le}
-single_arg_operators = {not_,}
+single_arg_operators = {not_, }
 operator_names = set(operators)
 
 
@@ -29,13 +28,13 @@ def build_operator(i, ex, args, meta_args):
     i.pull_a = hive.pull_in(i.a)
 
     if is_single_arg:
-        ex.value = hive.antenna(i.pull_a)
+        ex.value = hive.antenna(i.a.pull_in)
 
-        def calc(self):
-            self._result = op(self._a)
+        def calc(i, ex):
+            i.result.value = op(i.a.value)
 
     else:
-        ex.a = hive.antenna(i.pull_a)
+        ex.a = i.a.pull_in
 
         def calc(self):
             self._result = op(self._a, self._b)

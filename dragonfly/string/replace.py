@@ -1,8 +1,8 @@
 import hive
 
 
-def do_replace(self):
-    self._result = self._string.replace(self._substring, self._replacement_string)
+def do_replace(i, ex):
+    i.result.value = i.string.value.replace(i.substring.value, i.replacement_string.value)
 
 
 def build_replace(i, ex, args):
@@ -11,24 +11,18 @@ def build_replace(i, ex, args):
     i.substring = hive.attribute('str')
     i.replacement = hive.attribute('str')
 
-    i.pull_string = hive.pull_in(i.string)
-    i.pull_substring = hive.pull_in(i.substring)
-    i.pull_replacement = hive.pull_in(i.replacement)
-
-    ex.string = hive.antenna(i.pull_string)
-    ex.substring = hive.antenna(i.pull_substring)
-    ex.replacement = hive.antenna(i.pull_replacement)
+    ex.string = i.string.pull_in
+    ex.substring = i.substring.pull_in
+    ex.replacement = i.replacement.pull_in
 
     i.result = hive.attribute('str')
-    i.pull_result = hive.pull_out(i.result)
-    ex.result = hive.output(i.pull_result)
+    ex.result = i.result.pull_out
 
     i.do_replace = hive.modifier(do_replace)
-
-    hive.trigger(i.pull_result, i.pull_string, pretrigger=True)
-    hive.trigger(i.pull_string, i.pull_substring)
-    hive.trigger(i.pull_substring, i.pull_replacement)
-    hive.trigger(i.pull_replacement, i.do_replace)
+    i.result.pull_out.pre_triggered.connect(i.string.pull_in.trigger,
+                                               i.substring.pull_in.trigger,
+                                               i.replacement.pull_in.trigger,
+                                               i.do_replace.trigger)
 
 
 Replace = hive.hive("Replace", build_replace)

@@ -5,9 +5,9 @@ from ..private import (PushInBuilder, PushInImmediate, PullInBuilder, PullInImme
                        PullOutImmediate, PushOutImmediate, StatefulDescriptorBuilder, READ_WRITE, TriggerFuncBuilder,
                        TriggerFuncRuntime)
 
-
+from ..interfaces import Descriptor
 class AttributeImplementation(BeeBase, Stateful):
-    before_updated = None
+    pre_updated = None
     updated = None
 
     def __init__(self, data_type='', start_value=None):
@@ -21,7 +21,7 @@ class AttributeImplementation(BeeBase, Stateful):
         return self._value
 
     def _hive_stateful_setter(self, value):
-        self.before_updated()
+        self.pre_updated()
         self._value = value
         self.updated()
 
@@ -32,11 +32,11 @@ class AttributeImmediate(AttributeImplementation):
     def __init__(self, data_type='', start_value=None):
         super().__init__(data_type, start_value)
 
-        self.pull_in = PullInImmediate(self, data_type)
-        self.pull_out = PullOutImmediate(self, data_type)
-        self.push_in = PushInImmediate(self, data_type)
-        self.push_out = PushOutImmediate(self, data_type)
-        self.before_updated = TriggerFuncRuntime()
+        self.pull_in = PullInImmediate(self)
+        self.pull_out = PullOutImmediate(self)
+        self.push_in = PushInImmediate(self)
+        self.push_out = PushOutImmediate(self)
+        self.pre_updated = TriggerFuncRuntime()
         self.updated = TriggerFuncRuntime()
 
     def __repr__(self):
@@ -71,8 +71,8 @@ class AttributeBound(AttributeImplementation):
         return self._build_bee.updated.bind(self._run_hive)
 
     @memo_property
-    def before_updated(self):
-        return self._build_bee.before_updated.bind(self._run_hive)
+    def pre_updated(self):
+        return self._build_bee.pre_updated.bind(self._run_hive)
 
     def __repr__(self):
         return "AttributeBound({!r}, {!r}, {!r}, {!r})".format(self._build_bee, self._run_hive, self._data_type,
@@ -80,16 +80,6 @@ class AttributeBound(AttributeImplementation):
 
 
 builtin_property = property
-
-
-class BoundAttributePrimitives:
-    def __init__(self, pull_in, pull_out, push_in, push_out, before_updated, updated):
-        self.pull_in = pull_in
-        self.pull_out = pull_out
-        self.push_in = push_in
-        self.push_out = push_out
-        self.before_updated = before_updated
-        self.updated = updated
 
 
 class AttributeBuilder(BeeBase):
@@ -103,7 +93,7 @@ class AttributeBuilder(BeeBase):
         self.pull_out = PullOutBuilder(self)
         self.push_in = PushInBuilder(self)
         self.push_out = PushOutBuilder(self)
-        self.before_updated = TriggerFuncBuilder()
+        self.pre_updated = TriggerFuncBuilder()
         self.updated = TriggerFuncBuilder()
 
     def property(self, flags=READ_WRITE):

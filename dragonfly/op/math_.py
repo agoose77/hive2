@@ -20,24 +20,20 @@ def build_operator(i, ex, args, meta_args):
     i.a = hive.attribute(meta_args.data_type)
     i.b = hive.attribute(meta_args.data_type)
 
-    i.pull_a = hive.pull_in(i.a)
-    ex.a = hive.antenna(i.pull_a)
-
-    i.pull_b = hive.pull_in(i.b)
-    ex.b = hive.antenna(i.pull_b)
-    hive.trigger(i.pull_a, i.pull_b)
+    ex.a = i.a.pull_in
+    ex.b = i.b.pull_in
+    i.a.pull_in.triggered.connect(i.b.pull_in.trigger)
 
     i.result = hive.attribute(meta_args.data_type)
-    i.pull_result = hive.pull_out(i.result)
-    ex.result = hive.output(i.pull_result)
+    ex.result = i.result.pull_out
 
-    def calc(self):
-        self._result = op(self._a, self._b)
+    def run_operator(i, ex):
+        i.result.value = op(i.a.value, i.b.value)
 
-    i.run_operator = hive.modifier(calc)
-
-    hive.trigger(i.pull_a, i.run_operator)
-    hive.trigger(i.pull_result, i.pull_a, pretrigger=True)
+    i.run_operator = hive.modifier(run_operator)
+    i.a.pull_in.triggered.connect(i.run_operator.trigger)
+    i.a.pull_in.triggered.connect(i.run_operator.trigger)
+    i.result.pull_out.pre_triggered.connect(i.a.pull_in.trigger)
 
 
 MathOperator = hive.dyna_hive("MathOperator", build_operator, declare_operator)

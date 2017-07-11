@@ -1,11 +1,10 @@
-import hive
-
 from json import dumps
+
+import hive
 
 
 def do_dumps(i, ex):
-    i.result.property = dumps(i.object.property)
-
+    i.result.value = dumps(i.object.value)
 
 
 def build_dumps(i, ex, args):
@@ -18,7 +17,7 @@ def build_dumps(i, ex, args):
 
     i.do_dumps = hive.modifier(do_dumps)
 
-    i.pull_result.before_triggered.connect(i.object.pull_in.trigger)
+    i.pull_result.pre_triggered.connect(i.object.pull_in.trigger)
     i.pull_object.triggered.connect(i.do_dumps.trigger)
 
 

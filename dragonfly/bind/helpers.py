@@ -211,7 +211,7 @@ class BindClassFactory:
 
             else:
                 method = getattr(cls, attr_name)
-                socket = hive.socket(method, plugin_entry.identifier, policy=plugin_entry.socket_policy)
+                socket = method.socket(plugin_entry.identifier, policy=plugin_entry.socket_policy)
                 setattr(ex, attr_name, socket)
 
         get_plugins_plugin = hive.plugin(cls.get_plugins, identifier="bind.get_plugins")
@@ -237,7 +237,7 @@ class BindClassFactory:
 
             else:
                 method = getattr(cls, attr_name)
-                plugin = hive.plugin(method, plugin_entry.identifier, plugin_entry.plugin_policy)
+                plugin = method.plugin(plugin_entry.identifier, plugin_entry.plugin_policy)
                 setattr(ex, attr_name, plugin)
 
     def builds_external(self, func):

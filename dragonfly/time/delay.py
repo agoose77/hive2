@@ -3,7 +3,7 @@ import hive
 from dragonfly.event import EventHandler
 
 
-class _DelayCls:
+class DelayCls:
 
     def __init__(self):
         self.add_handler = None
@@ -11,18 +11,13 @@ class _DelayCls:
         self.delay = 0.0
         self.running = False
 
-        self._hive = hive.get_run_hive()
-
         self._listener = EventHandler(self.on_tick, ("tick",), mode="match")
 
         self._delay_ticks = 0
         self._elapsed_ticks = 0
+        self._awaiting_triggers = []
 
         self._tick_rate = 0
-
-    @hive.typed_property("float")
-    def elapsed(self):
-        return self._tick_rate * self._elapsed_ticks
 
     def set_add_handler(self, add_handler):
         self.add_handler = add_handler
@@ -39,44 +34,39 @@ class _DelayCls:
         if not self.running:
             self.add_handler(self._listener)
 
-        self._delay_ticks = round(self.delay * self._tick_rate)
-        self._elapsed_ticks = 0
+        delta_ticks = round(self.delay * self._tick_rate)
+        target_tick = delta_ticks + self._elapsed_ticks
+        self._awaiting_triggers.append(target_tick)
 
     def on_elapsed(self):
         self.remove_handler(self._listener)
 
         self.running = False
-        self._hive._on_elapsed()
+        hive.internal(self).on_elapsed()
 
     def on_tick(self):
         self._elapsed_ticks += 1
+        elapsed_ticks = self._elapsed_ticks
 
-        if self._elapsed_ticks == self._delay_ticks:
-            self.on_elapsed()
+        while self._awaiting_triggers:
+            if self._awaiting_triggers[0] <= elapsed_ticks:
+                del self._awaiting_triggers[0]
+                self.on_elapsed()
 
 
 def build_delay(cls, i, ex, args):
     """Delay input trigger by X ticks, where X is the value of delay_in (greater than zero)"""
-    i.on_elapsed = hive.triggerfunc()
-    ex.on_elapsed = hive.hook(i.on_elapsed)
+    i.on_elapsed = hive.modifier()
+    ex.on_elapsed = i.on_elapsed.triggered
 
-    i.trigger = hive.triggerfunc(cls.on_triggered)
-    i.do_trig = hive.triggerable(i.trigger)
-    ex.trig_in = hive.entry(i.do_trig)
+    ex.trig_in = cls.on_triggered.trigger
 
-    ex.delay = hive.property(cls, "delay", "float")
-    i.delay_in = hive.pull_in(ex.delay)
-    ex.delay_in = hive.antenna(i.delay_in)
+    i.delay = hive.property(cls, "delay", "float")
+    ex.delay_in = i.delay.push_in
 
-    i.elapsed = hive.pull_out(cls.elapsed)
-    ex.elapsed = hive.output(i.elapsed)
-
-    hive.trigger(i.trigger, i.delay_in, pretrigger=True)
-
-    ex.get_add_handler = hive.socket(cls.set_add_handler, "event.add_handler")
-    ex.get_remove_handler = hive.socket(cls.set_remove_handler, "event.remove_handler")
-
-    ex.get_get_tick_rate = hive.socket(cls.set_get_tick_rate, "app.get_tick_rate")
+    ex.get_add_handler = cls.set_add_handler.socket("event.add_handler")
+    ex.get_remove_handler = cls.set_remove_handler.socket("event.remove_handler")
+    ex.get_get_tick_rate = cls.set_get_tick_rate.socket("app.get_tick_rate")
 
 
-Delay = hive.hive("Delay", build_delay, drone_class=_DelayCls)
+Delay = hive.hive("Delay", build_delay, drone_class=DelayCls)
