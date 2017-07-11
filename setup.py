@@ -8,4 +8,5 @@ setup(name='hive2',
       url='https://github.com/agoose77/hive2',
       packages=['aphid', 'dragonfly', 'hive', 'testing', 'sparta'],
       include_package_data=True,
-      )
+      install_requires=['py_cfg_parsing']
+)
