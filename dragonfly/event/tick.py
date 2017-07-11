@@ -52,4 +52,4 @@ def build_tick(cls, i, ex, args):
     ex.disable = hive.entry(i.disable)
 
 
-OnTick = hive.hive("OnTick", build_tick, builder_cls=_TickCls)
+OnTick = hive.hive("OnTick", build_tick, drone_class=_TickCls)

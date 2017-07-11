@@ -1,1 +1,4 @@
-import spyder
+# import spyder
+
+class model:
+    pass

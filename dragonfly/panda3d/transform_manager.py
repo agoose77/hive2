@@ -91,4 +91,4 @@ def build_entity_transform(cls, i, ex, args):
     ex.on_entity_created = hive.plugin(cls.on_entity_created, "entity.on_created", policy=hive.SingleRequired)
 
 
-TransformManager = hive.hive("TransformManager", build_entity_transform, builder_cls=EntityTransformClass)
+TransformManager = hive.hive("TransformManager", build_entity_transform, drone_class=EntityTransformClass)

@@ -14,16 +14,16 @@ def evaluate_toggle(self):
 def build_toggle(i, ex, args):
     """Toggle between two triggers"""
     args.start_value = hive.parameter('bool', False)
-    i.toggle = hive.variable("bool", args.start_value)
+    i.toggle = hive.attribute("bool", args.start_value)
 
     i.modifier = hive.modifier(evaluate_toggle)
-    ex.trig_in = hive.entry(i.modifier)
+    ex.trig_in = i.modifier.trigger
 
     i.trig_a = hive.triggerfunc()
     i.trig_b = hive.triggerfunc()
 
-    ex.trig_a = hive.hook(i.trig_a)
-    ex.trig_b = hive.hook(i.trig_b)
+    ex.trig_a = i.trig_a.trigger
+    ex.trig_b = i.trig_b.trigger
 
 
 Toggle = hive.hive("Toggle", build_toggle)

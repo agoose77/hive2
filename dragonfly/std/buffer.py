@@ -15,7 +15,7 @@ def build_buffer(i, ex, args, meta_args):
     Can be used to cache changing values
     """
     args.start_value = hive.parameter(meta_args.data_type, None)
-    i.cached_value = hive.variable(meta_args.data_type, args.start_value)
+    i.cached_value = hive.attribute(meta_args.data_type, args.start_value)
 
 
     if meta_args.mode == "push":

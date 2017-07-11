@@ -4,8 +4,8 @@ import hive
 
 
 def build_and(i, ex, args):
-    ex.a_value = hive.variable(("bool",), False)
-    ex.b_value = hive.variable(("bool",), False)
+    ex.a_value = hive.attribute(("bool",), False)
+    ex.b_value = hive.attribute(("bool",), False)
 
     i.a = hive.pull_in(ex.a_value)
     i.b = hive.pull_in(ex.b_value)

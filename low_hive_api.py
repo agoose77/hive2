@@ -67,7 +67,7 @@ def build(cls, i, ex, args):
     # ex.sock = hive.socket(cls.set_plugin)
 
 
-H = hive.hive("build", build, drone_cls=DroneClass)
+H = hive.hive("build", build, drone_class=DroneClass)
 h = H()
 h2 = H()
 

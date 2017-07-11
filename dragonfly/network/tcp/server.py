@@ -217,4 +217,4 @@ def build_server(cls, i, ex, args):
     hive.connect(i.on_tick.on_tick, i.synchronise_data)
 
 
-TCPServer = hive.hive("TCPServer", build_server, builder_cls=TCPServerClass)
+TCPServer = hive.hive("TCPServer", build_server, drone_class=TCPServerClass)

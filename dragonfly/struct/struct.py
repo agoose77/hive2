@@ -8,7 +8,7 @@ def declare_io(meta_args):
 
 def build_io(i, ex, args, meta_args):
     if meta_args.mode == 'pull':
-        i.value = hive.variable()
+        i.value = hive.attribute()
         i.in_ = hive.pull_in(i.value)
         ex.in_ = hive.antenna(i.in_)
 
@@ -17,7 +17,7 @@ def build_io(i, ex, args, meta_args):
         i.out = meta_args.out(i.value)
         ex.out = hive.output(i.out)
     else:
-        i.value = hive.variable()
+        i.value = hive.attribute()
         i.in_ = meta_args.in_(i.value)
         ex.in_ = hive.antenna(i.in_)
 
@@ -30,11 +30,11 @@ IOMethod = hive.dyna_hive("IOMethd", build_io, declarator=declare_io)
 
 def build_struct(cls, i, ex, args):
     """Interface to Struct class"""
-    i.tuple = hive.variable("tuple")
+    i.tuple = hive.attribute("tuple")
     i.pack_in = hive.push_in(i.tuple)
     ex.pack = hive.antenna(i.pack_in)
 
-    i.bytes = hive.variable("bytes")
+    i.bytes = hive.attribute("bytes")
     i.unpack_out = hive.push_out(i.bytes)
     ex.unpack = hive.output(i.unpack_out)
 
@@ -48,4 +48,4 @@ class StructCls(_Struct):
         super().__init__(fmt)
 
 
-Struct = hive.hive("Struct", build_struct, builder_cls=StructCls)
+Struct = hive.hive("Struct", build_struct, drone_class=StructCls)

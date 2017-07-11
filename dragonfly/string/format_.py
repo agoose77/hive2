@@ -17,7 +17,7 @@ def build_format(i, ex, args, meta_args):
     kwarg_fields = []
     indexed_fields = []
 
-    i.result = hive.variable('str')
+    i.result = hive.attribute('str')
     i.result_out = hive.pull_out(i.result)
 
     for index, field in enumerate(fields):
@@ -35,7 +35,7 @@ def build_format(i, ex, args, meta_args):
             kwarg_fields.append(field_name)
 
         # Create IO
-        attr = hive.variable()
+        attr = hive.attribute()
         setattr(i, field_name, attr)
 
         in_attr = hive.pull_in(attr)

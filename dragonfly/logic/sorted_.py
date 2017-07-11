@@ -5,25 +5,23 @@ def declare_sorted(meta_args):
     meta_args.data_type = hive.parameter('str', 'list', {'list', 'dict', 'set', 'tuple'})
 
 
+def sort(i, ex):
+    i.result.property = sorted(i.value.property, reverse=i.reverse.property)
+
 def build_sorted(i, ex, args, meta_args):
     """Sort an iterable and output list"""
     args.reverse = hive.parameter('bool', False)
-    i.reverse = hive.variable('bool', args.reverse)
+    i.reverse = hive.attribute('bool', args.reverse)
 
-    i.result = hive.variable('list')
-    i.pull_result = hive.pull_out(i.result)
-    ex.result = hive.output(i.pull_result)
+    i.result = hive.attribute('list')
+    ex.result = i.result.pull_out
 
-    i.value = hive.variable(meta_args.data_type)
-    i.pull_value = hive.pull_in(i.value)
-    ex.value = hive.antenna(i.pull_value)
-
-    def sort(self):
-        self._result = sorted(self._value, reverse=self._reverse)
+    i.value = hive.attribute(meta_args.data_type)
+    ex.value = i.value.pull_in
 
     i.sort = hive.modifier(sort)
-    hive.trigger(i.pull_result, i.pull_value, pretrigger=True)
-    hive.trigger(i.pull_value, i.sort)
+    i.result.pull_out.before_triggered.connect(i.value.pull_in.trigger)
+    i.result.pull_out.triggered.connect(i.sort.trigger)
 
 
 Sorted = hive.dyna_hive("Sorted", build_sorted, declare_sorted)

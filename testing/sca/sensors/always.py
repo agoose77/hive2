@@ -2,8 +2,8 @@ import hive
 
 
 def build_always(i, ex, args):
-    ex.name = hive.variable(("str",), "<Sensor>")
-    ex.is_positive = hive.variable(("bool",), True)
+    ex.name = hive.attribute(("str",), "<Sensor>")
+    ex.is_positive = hive.attribute(("bool",), True)
 
     i.positive = hive.pull_out(ex.is_positive)
     ex.positive = hive.output(i.positive)

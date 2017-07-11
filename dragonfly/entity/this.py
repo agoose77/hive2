@@ -26,4 +26,4 @@ def build_this(cls, i, ex, args):
     hive.trigger(i.pull_entity_id, i.do_get_entity_id, pretrigger=True)
 
 
-This = hive.hive("This", build_this, builder_cls=ThisClass)
+This = hive.hive("This", build_this, drone_class=ThisClass)

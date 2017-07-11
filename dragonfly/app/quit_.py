@@ -15,10 +15,8 @@ class _Quit:
 
 def build_quit(cls, i, ex, args):
     """Quit the top-level Hive"""
-    ex.get_quit = hive.socket(cls.set_quit, "quit")
-
-    i.do_quit = hive.triggerable(cls.quit)
-    ex.do_quit = hive.entry(i.do_quit)
+    ex.get_quit = cls.set_quit.socket(identifier="quit")
+    ex.do_quit = cls.quit.trigger
 
 
-Quit = hive.hive("Quit", build_quit, builder_cls=_Quit)
+Quit = hive.hive("Quit", build_quit, drone_class=_Quit)

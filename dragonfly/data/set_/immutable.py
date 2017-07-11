@@ -7,15 +7,15 @@ SET_SET_OPERATIONS = {'intersection': set.intersection, 'union': set.union, 'dif
 
 def build_set(i, ex, args):
     """Perform set operation on two sets"""
-    i.a = hive.variable('set')
+    i.a = hive.attribute('set')
     i.pull_a = hive.pull_in(i.a)
     ex.a = hive.antenna(i.pull_a)
 
-    i.b = hive.variable('set')
+    i.b = hive.attribute('set')
     i.pull_b = hive.pull_in(i.b)
     ex.b = hive.antenna(i.pull_b)
 
-    i.result = hive.variable('set')
+    i.result = hive.attribute('set')
     for op_name, op in SET_SET_OPERATIONS.items():
         pull_op = hive.pull_out(i.result)
         setattr(i, "pull_{}".format(op_name), pull_op)

@@ -3,8 +3,8 @@ import hive
 
 def build_cycle(i, ex, args):
     """Emit trigger to trig_out when N triggers to trig_in are received, where N = period_in"""
-    ex.period = hive.variable("int", 0)
-    ex.counter = hive.variable("int", 0)
+    ex.period = hive.attribute("int", 0)
+    ex.counter = hive.attribute("int", 0)
 
     i.period_in = hive.pull_in(ex.period)
     i.counter_out = hive.pull_out(ex.counter)

@@ -45,4 +45,4 @@
 #     ex.get_add_startup_callback = hive.socket(cls.set_add_startup_callback, "callback.startup")
 #
 #
-# StartupBinder = hive.hive("StartupBinder", builder=build_startup_binder, builder_cls=_StartupBinderCls)
+# StartupBinder = hive.hive("StartupBinder", builder=build_startup_binder, drone_class=_StartupBinderCls)

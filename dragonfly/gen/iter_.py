@@ -7,11 +7,11 @@ def do_iter(self):
 
 def build_iter(i, ex, args, meta_args):
     """Create iterator for object"""
-    i.iterable = hive.variable()
+    i.iterable = hive.attribute()
     i.pull_iterable = hive.pull_in(i.iterable)
     ex.iterable = hive.antenna(i.pull_iterable)
 
-    i.iterator = hive.variable("iterator")
+    i.iterator = hive.attribute("iterator")
     i.pull_iterator = hive.pull_out(i.iterator)
     ex.iterator = hive.output(i.pull_iterator)
 

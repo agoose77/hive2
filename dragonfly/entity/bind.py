@@ -130,7 +130,7 @@ def build_entity_environment(cls, i, ex, args, meta_args):
 
 
 _EntityEnvironment = hive.meta_hive("EntityEnvironment", build_entity_environment, factory.environment_declarator,
-                                   builder_cls=EntityEnvironmentClass)
+                                   drone_class=EntityEnvironmentClass)
 
 
 class EntityCls(factory.create_external_class()):
@@ -159,7 +159,7 @@ def build_bind(cls, i, ex, args, meta_args):
         ex.entity_id = hive.antenna(i.pull_entity_id)
 
 
-_BindEntity = hive.dyna_hive("BindEntity", build_bind, declarator=factory.external_declarator, builder_cls=EntityCls)
+_BindEntity = hive.dyna_hive("BindEntity", build_bind, declarator=factory.external_declarator, drone_class=EntityCls)
 
 
 def get_environment(meta_args):

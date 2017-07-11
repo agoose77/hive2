@@ -27,7 +27,7 @@ def do_break(self):
 def build_foreach(i, ex, args, meta_args):
     """Iterate over iterable object"""
     # Set iterable
-    i.iterable = hive.variable("$iterable[int]")
+    i.iterable = hive.attribute("$iterable[int]")
     i.pull_iterable = hive.pull_in(i.iterable)
     ex.iterable = hive.antenna(i.pull_iterable)
 
@@ -35,13 +35,13 @@ def build_foreach(i, ex, args, meta_args):
     i.trig_in = hive.triggerable(i.do_trig)
     ex.start = hive.entry(i.trig_in)
 
-    i.break_ = hive.variable('bool', False)
+    i.break_ = hive.attribute('bool', False)
 
-    i.item = hive.variable(meta_args.data_type)
+    i.item = hive.attribute(meta_args.data_type)
     i.push_item = hive.push_out(i.item)
     ex.item = hive.output(i.push_item)
 
-    i.index = hive.variable('int', 0)
+    i.index = hive.attribute('int', 0)
     i.pull_index = hive.pull_out(i.index)
     ex.index = hive.output(i.pull_index)
 

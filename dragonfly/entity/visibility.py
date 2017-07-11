@@ -61,4 +61,4 @@ def build_visibility(cls, i, ex, args, meta_args):
         hive.trigger(i.push_in_visibility, i.do_get_entity_id, pretrigger=True)
 
 
-Visibility = hive.dyna_hive("Visibility", build_visibility, declare_visibility, builder_cls=VisibilityClass)
+Visibility = hive.dyna_hive("Visibility", build_visibility, declare_visibility, drone_class=VisibilityClass)

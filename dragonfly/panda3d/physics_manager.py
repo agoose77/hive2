@@ -67,4 +67,4 @@ def build_physics_manager(cls, i, ex, args):
     ex.set_linear_velocity = hive.plugin(cls.set_linear_velocity, "entity.angular_velocity.set", export_to_parent=True)
 
 
-PhysicsManager = hive.hive("PhysicsManager", build_physics_manager, builder_cls=_PhysicsManagerClass)
+PhysicsManager = hive.hive("PhysicsManager", build_physics_manager, drone_class=_PhysicsManagerClass)

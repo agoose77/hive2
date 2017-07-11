@@ -8,7 +8,7 @@ def declare_set(meta_args):
 def build_set(i, ex, args, meta_args):
     """Perform set operation on single sets"""
 
-    i.set_ = hive.variable('set', set())
+    i.set_ = hive.attribute('set', set())
     i.pull_set_ = hive.pull_out(i.set_)
     ex.set_out = hive.output(i.pull_set_)
 
@@ -16,7 +16,7 @@ def build_set(i, ex, args, meta_args):
     ex.set_ = hive.antenna(i.push_set_)
 
     # Pop item
-    i.popped_item = hive.variable(meta_args.data_type)
+    i.popped_item = hive.attribute(meta_args.data_type)
     i.pull_pop = hive.pull_out(i.popped_item)
     ex.pop = hive.output(i.pull_pop)
 
@@ -27,7 +27,7 @@ def build_set(i, ex, args, meta_args):
     hive.trigger(i.pull_pop, i.do_pop, pretrigger=True)
 
     # Add item
-    i.to_add = hive.variable(meta_args.data_type)
+    i.to_add = hive.attribute(meta_args.data_type)
     i.push_to_add = hive.push_in(i.to_add)
     ex.add = hive.antenna(i.push_to_add)
 
@@ -38,7 +38,7 @@ def build_set(i, ex, args, meta_args):
     hive.trigger(i.push_to_add, i.do_add)
 
     # Remove item
-    i.to_remove = hive.variable(meta_args.data_type)
+    i.to_remove = hive.attribute(meta_args.data_type)
     i.push_to_remove = hive.push_in(i.to_remove)
     ex.remove = hive.antenna(i.push_to_remove)
 

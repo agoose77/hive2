@@ -110,4 +110,4 @@ def build_angular(cls, i, ex, args, meta_args):
         hive.trigger(i.push_angular, i.do_set_angular)
 
 
-Angular = hive.dyna_hive("Angular", build_angular, declare_angular, builder_cls=AngularClass)
+Angular = hive.dyna_hive("Angular", build_angular, declare_angular, drone_class=AngularClass)

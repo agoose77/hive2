@@ -87,7 +87,7 @@ def build_myhive(cls, i, ex, args):
 
 class TestIO(TestCase):
     def test(self):
-        MyHive = hive.hive("MyHive", build_myhive, drone_cls=SomeClass)
+        MyHive = hive.hive("MyHive", build_myhive, drone_class=SomeClass)
 
         # Create runtime hive instances
         my_hive = MyHive()

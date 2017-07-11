@@ -5,7 +5,7 @@ import operator
 from string import punctuation
 
 import hive
-from hive.parameter import HiveParameter
+from hive.parameter import Parameter
 
 
 punctuation_no_underscore = punctuation.replace("_", "")
@@ -29,8 +29,8 @@ class BindClassDefinition:
         plugin_entry = PluginEntry(identifier, plugin_policy, socket_policy, declare_for_environment, condition_stack)
         self._plugin_entries.append(plugin_entry)
 
-    def parameter(self, name, data_type=None, start_value=HiveParameter.no_value, options=None):
-        self._parameters[name] = HiveParameter(data_type, start_value, options)
+    def parameter(self, name, data_type=None, start_value=Parameter.no_value, options=None):
+        self._parameters[name] = Parameter(data_type, start_value, options)
         return Variable(name)
 
     @contextmanager
@@ -188,12 +188,12 @@ class BindClassFactory:
     def build_external_hive(self):
         external_class = self.create_external_class()
         return hive.dyna_hive("{}External".format(self._name), self.external_builder,
-                              declarator=self.external_declarator, builder_cls=external_class)
+                              declarator=self.external_declarator, drone_class=external_class)
 
     def build_environment_hive(self):
         environment_class = self.create_environment_class()
         return hive.meta_hive("{}Environment".format(self._name), self.environment_builder,
-                              declarator=self.environment_declarator, builder_cls=environment_class)
+                              declarator=self.environment_declarator, drone_class=environment_class)
 
     def external_declarator(self, meta_args):
         """Adds bind parameters to meta args wrapper"""
@@ -317,9 +317,9 @@ with definition.condition(flag == "yes") as then:
 factory = definition.build("TestBinder")
 
 bind_hive = hive.dyna_hive("BindHive", factory.external_builder, declarator=factory.external_declarator,
-                             builder_cls=factory.external_class)
+                             drone_class=factory.external_class)
 bind_environment = hive.meta_hive("BindEnvironment", factory.environment_builder,
-                            declarator=factory.environment_declarator, builder_cls=factory.environment_class)
+                            declarator=factory.environment_declarator, drone_class=factory.environment_class)
 
 # Optionally inspect meta args to disable binding (optimisation)
 def get_environment(meta_args):

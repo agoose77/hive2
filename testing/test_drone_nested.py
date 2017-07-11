@@ -29,7 +29,7 @@ def build_drone(cls, i, ex, args):
     ex.plug = hive.plugin(cls.print_name, identifier="some_api.func", export_to_parent=True)
 
 
-Drone = hive.hive("Drone", build_drone, builder_cls=DroneCls)
+Drone = hive.hive("Drone", build_drone, drone_class=DroneCls)
 
 
 class InnerHiveCls:
@@ -42,7 +42,7 @@ def build_inner(cls, i, ex, args):
     ex.sock = hive.socket(cls.get_plugin, identifier="some_api.func")
 
 
-InnerHive = hive.hive("Hive", build_inner, builder_cls=InnerHiveCls)
+InnerHive = hive.hive("Hive", build_inner, drone_class=InnerHiveCls)
 
 
 def build_container(i, ex, args):

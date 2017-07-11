@@ -11,8 +11,8 @@ import hive
 
 def build_h(i, ex, args):
     # The following should raise AttributeErrors
-    ex.export = hive.variable()
-    i.hive_object = hive.variable()
+    ex.export = hive.attribute()
+    i.hive_object = hive.attribute()
 
 
 Hive = hive.hive("Hive", build_h)

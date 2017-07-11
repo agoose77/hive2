@@ -12,7 +12,7 @@ def do_while(self):
 
 def build_while(i, ex, args):
     """Trigger output while condition is True"""
-    ex.condition = hive.variable()
+    ex.condition = hive.attribute()
     i.condition_in = hive.pull_in(ex.condition)
     ex.condition_in = hive.antenna(i.condition_in)
 

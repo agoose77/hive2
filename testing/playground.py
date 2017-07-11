@@ -15,7 +15,7 @@
 #     i.main_hive = ExampleCalc()
 #
 #
-# MyHive = dragonfly.panda3d.Mainloop.extend("MyHive", build_my_hive, builder_cls=MyHiveClass)
+# MyHive = dragonfly.panda3d.Mainloop.extend("MyHive", build_my_hive, drone_class=MyHiveClass)
 #
 # DO_DEBUG = True
 #

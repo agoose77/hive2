@@ -75,4 +75,4 @@ def build_scene(cls, i, ex, args):
     hive.trigger(ex.on_tick, i.mod_tick)
 
 
-Scene = hive.hive("Scene", build_scene, builder_cls=SceneClass)
+Scene = hive.hive("Scene", build_scene, drone_class=SceneClass)

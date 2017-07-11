@@ -7,9 +7,9 @@ def declare_max(meta_args):
 
 def build_max(i, ex, args, meta_args):
     """Determine the maximum of two values"""
-    i.a_value = hive.variable(meta_args.data_type)
-    i.b_value = hive.variable(meta_args.data_type)
-    i.value = hive.variable(meta_args.data_type)
+    i.a_value = hive.attribute(meta_args.data_type)
+    i.b_value = hive.attribute(meta_args.data_type)
+    i.value = hive.attribute(meta_args.data_type)
 
     i.pull_a = hive.pull_in(i.a_value)
     i.pull_b = hive.pull_in(i.b_value)

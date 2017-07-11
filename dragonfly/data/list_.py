@@ -8,17 +8,17 @@ def declare_list(meta_args):
 def build_list(i, ex, args, meta_args):
     """Interface to list container"""
     data_type = "list[{}]".format(meta_args.data_type or '?')
-    i.list_ = hive.variable(data_type, list())
+    i.list_ = hive.attribute(data_type, list())
     i.pull_list_ = hive.pull_out(i.list_)
     ex.list_out = hive.output(i.pull_list_)
 
     i.push_list_ = hive.push_in(i.list_)
     ex.list_ = hive.antenna(i.push_list_)
 
-    i.item = hive.variable(meta_args.data_type)
+    i.item = hive.attribute(meta_args.data_type)
 
     # Pop item
-    i.popped_item = hive.variable(meta_args.data_type)
+    i.popped_item = hive.attribute(meta_args.data_type)
     i.pull_pop = hive.pull_out(i.popped_item)
     ex.pop = hive.output(i.pull_pop)
 
@@ -55,7 +55,7 @@ def build_list(i, ex, args, meta_args):
     ex.clear = hive.entry(i.do_clear)
 
     # Index
-    i.index = hive.variable('int')
+    i.index = hive.attribute('int')
 
     # Getitem
     i.pull_getitem_index = hive.pull_in(i.index)

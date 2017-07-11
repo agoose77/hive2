@@ -9,12 +9,11 @@ def declare_trigger(meta_args):
 def build_trigger(i, ex, args, meta_args):
     """Collapse multiple trigger inputs to single trigger output"""
     i.trigger = hive.triggerfunc()
-    i.on_triggered = hive.triggerable(i.trigger)
 
-    ex.trig_out = hive.hook(i.trigger)
+    ex.trigger = i.trigger.triggered
 
     for index, char in zip(range(meta_args.count), string.ascii_lowercase):
-        setattr(ex, char, hive.entry(i.on_triggered))
+        setattr(ex, char, i.trigger.trigger)
 
 
 Trigger = hive.dyna_hive("Trigger", build_trigger, declare_trigger)

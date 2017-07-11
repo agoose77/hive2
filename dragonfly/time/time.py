@@ -43,4 +43,4 @@ def time_builder(cls, i, ex, args):
     ex.get_get_tick_rate = hive.socket(cls.set_get_tick_rate, "app.get_tick_rate")
 
 
-Time = hive.hive("Time", builder=time_builder, builder_cls=TimeClass)
+Time = hive.hive("Time", builder=time_builder, drone_class=TimeClass)

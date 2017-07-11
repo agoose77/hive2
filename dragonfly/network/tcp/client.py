@@ -143,4 +143,4 @@ def build_server(cls, i, ex, args):
     hive.connect(i.on_tick.on_tick, i.synchronise_data)
 
 
-TCPClient = hive.hive("TCPClient", build_server, builder_cls=TCPClientClass)
+TCPClient = hive.hive("TCPClient", build_server, drone_class=TCPClientClass)

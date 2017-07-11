@@ -27,14 +27,14 @@ def declare_next(meta_args):
 
 def build_next(i, ex, args, meta_args):
     """Iterate over generator object, output new value when pulled"""
-    i.iterator = hive.variable("iterator")
+    i.iterator = hive.attribute("iterator")
     i.iterator_in = hive.pull_in(i.iterator)
     ex.iterator = hive.antenna(i.iterator_in)
 
     i.pull_iterator = hive.triggerfunc()
     hive.trigger(i.pull_iterator, i.iterator_in)
 
-    i.result = hive.variable(meta_args.data_type)
+    i.result = hive.attribute(meta_args.data_type)
     i.pull_value = hive.pull_out(i.result)
     ex.value = hive.output(i.pull_value)
 

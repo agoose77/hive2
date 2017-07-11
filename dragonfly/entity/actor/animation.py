@@ -45,4 +45,4 @@ def build_animation(cls, i, ex, args, meta_args):
     ex.end_frame = hive.antenna(i.pull_end_frame)
 
 
-Animation = hive.dyna_hive("Animation", build_animation, declarator=declare_animation, builder_cls=AnimationClass)
+Animation = hive.dyna_hive("Animation", build_animation, declarator=declare_animation, drone_class=AnimationClass)

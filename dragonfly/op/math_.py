@@ -17,8 +17,8 @@ def build_operator(i, ex, args, meta_args):
     assert meta_args.operator in operators
     op = operators[meta_args.operator]
 
-    i.a = hive.variable(meta_args.data_type)
-    i.b = hive.variable(meta_args.data_type)
+    i.a = hive.attribute(meta_args.data_type)
+    i.b = hive.attribute(meta_args.data_type)
 
     i.pull_a = hive.pull_in(i.a)
     ex.a = hive.antenna(i.pull_a)
@@ -27,7 +27,7 @@ def build_operator(i, ex, args, meta_args):
     ex.b = hive.antenna(i.pull_b)
     hive.trigger(i.pull_a, i.pull_b)
 
-    i.result = hive.variable(meta_args.data_type)
+    i.result = hive.attribute(meta_args.data_type)
     i.pull_result = hive.pull_out(i.result)
     ex.result = hive.output(i.pull_result)
 

@@ -7,12 +7,12 @@ def declare_pack_tuple(meta_args):
 
 def build_pack_tuple(i, ex, args, meta_args):
     """Pack a tuple from individual inputs"""
-    i.tuple_ = hive.variable('tuple')
+    i.tuple_ = hive.attribute('tuple')
     i.pull_tuple = hive.pull_out(i.tuple_)
     ex.tuple_ = hive.output(i.pull_tuple)
 
     for index, data_type in enumerate(meta_args.types):
-        attr = hive.variable(data_type)
+        attr = hive.attribute(data_type)
         setattr(i, "attr_{}".format(index), attr)
 
         pull_in = hive.pull_in(attr)

@@ -143,7 +143,7 @@ def build_func(i, ex, args, meta_args):
 
     # Create IO pins
     for arg, (type_name, default) in visitor.antennae.items():
-        attr = hive.variable(type_name, start_value=default)
+        attr = hive.attribute(type_name, start_value=default)
         setattr(i, arg, attr)
         pull_in = hive.pull_in(attr)
         setattr(ex, arg, hive.antenna(pull_in))
@@ -151,7 +151,7 @@ def build_func(i, ex, args, meta_args):
 
     if has_return:
         result_name = 'result'
-        attr = hive.variable(visitor.output_type_name)
+        attr = hive.attribute(visitor.output_type_name)
         setattr(i, result_name, attr)
         push_out = hive.push_out(attr)
         setattr(ex, result_name, hive.output(push_out))

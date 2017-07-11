@@ -14,45 +14,41 @@ def declare_convert(meta_args):
     meta_args.conversion = hive.parameter("str", "duck", {"duck", "cast"})
 
 
-def move_value(self):
-    self._value_out = self._value_in
+def move_value(i, ex):
+    i.converted.property = i.value.property
 
 
 def build_convert(i, ex, args, meta_args):
-    i.value_in = hive.variable(meta_args.from_data_type)
-    i.value_out = hive.variable(meta_args.to_data_type)
+    i.value = hive.attribute(meta_args.from_data_type)
+    if meta_args.conversion == "duck":
+        i.converted = i.value
+    else:
+        i.converted = hive.attribute(meta_args.to_data_type)
 
     # For push in, push out
     if meta_args.mode == "push":
-        i.ppin = hive.push_in(i.value_in)
-        i.ppout = hive.push_out(i.value_out)
-
-        hive.trigger(i.ppin, i.ppout)
+        i.value_in = i.value.push_in
+        i.converted_out = i.converted.push_out
+        i.value_in.triggered.connect(i.converted_out.trigger)
 
     else:
-        i.ppin = hive.pull_in(i.value_in)
-        i.ppout = hive.pull_out(i.value_out)
+        i.value_in = i.value.pull_in
+        i.converted_out = i.converted.pull_out
+        i.converted_out.before_triggered.connect(i.value_in.trigger)
 
-        hive.trigger(i.ppout, i.ppin, pretrigger=True)
-
-    ex.value_in = hive.antenna(i.ppin)
-    ex.value_out = hive.output(i.ppout)
+    ex.value = i.value_in
+    ex.converted = i.converted_out
 
     # For casting (explicit conversion)
     if meta_args.conversion == "cast":
         to_base_type_name = hive.get_base_data_type(meta_args.to_data_type)
         value_cls = _type_map[to_base_type_name]
 
-        def converter(self):
-            self._value_out = value_cls(self._value_in)
+        def converter(i, ex):
+            i.converted.property = value_cls(i.value.property)
 
         i.do_conversion = hive.modifier(converter)
-        hive.trigger(i.ppout, i.do_conversion, pretrigger=True)
-
-    # For duck typing, move value through
-    else:
-        i.move_value = hive.modifier(move_value)
-        hive.trigger(i.ppin, i.move_value)
+        i.converted_out.before_triggered.connect(i.do_conversion.trigger)
 
 
 Convert = hive.dyna_hive("Convert", builder=build_convert, declarator=declare_convert)

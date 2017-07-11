@@ -25,9 +25,9 @@ def build_keyboard(cls, i, ex, args):
     ex.on_event = hive.socket(cls.add_single_listener, identifier="event.add_handler")
     i.on_tick = hive.triggerfunc()
 
-    ex.name = hive.variable(("str",), "<Sensor>")
+    ex.name = hive.attribute(("str",), "<Sensor>")
     ex.key = hive.property(cls, "key", "str")
-    ex.is_positive = hive.variable(("bool",), False)
+    ex.is_positive = hive.attribute(("bool",), False)
 
     i.positive = hive.pull_out(ex.is_positive)
     ex.positive = hive.output(i.positive)
@@ -36,4 +36,4 @@ def build_keyboard(cls, i, ex, args):
     ex.trig_out = hive.hook(i.trig_out)
 
 
-Keyboard = hive.hive("Keyboard", build_keyboard, builder_cls=Keyboard_)
+Keyboard = hive.hive("Keyboard", build_keyboard, drone_class=Keyboard_)

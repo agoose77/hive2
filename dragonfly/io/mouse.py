@@ -64,39 +64,33 @@ def build_mouse(cls, i, ex, args):
     i.on_tick = hive.triggerfunc()
 
     args.button = hive.parameter("str", "left", options={"left", "middle", "right"})
-    i.button = hive.property(cls, "button", "str", args.button)
 
-    i.push_button = hive.push_in(i.button)
-    ex.button = hive.antenna(i.push_button)
+    i.button = hive.property(cls, "button", "str", args.button)
+    ex.button = i.button.push_in
 
     i.on_button_changed = hive.triggerable(cls.change_listener_buttons)
-    hive.trigger(i.push_button, i.on_button_changed)
+    i.push_button.triggered.connect(i.on_button_changed.trigger)
 
     i.on_pressed = hive.triggerfunc()
-    ex.on_pressed = hive.hook(i.on_pressed)
+    ex.on_pressed = i.on_pressed.trigger
 
     i.on_moved = hive.triggerfunc()
-    ex.on_moved = hive.hook(i.on_moved)
+    ex.on_moved = i.on_moved.trigger
 
     i.pos_x = hive.property(cls, "pos_x", "float")
-    i.pull_x = hive.pull_out(i.pos_x)
-    ex.x = hive.output(i.pull_x)
+    ex.x = i.pos_x.pull_out
 
     i.pos_y = hive.property(cls, "pos_y", "float")
-    i.pull_y = hive.pull_out(i.pos_y)
-    ex.y = hive.output(i.pull_y)
+    ex.y = i.pos_y.pull_out
 
     i.dx = hive.property(cls, "dx", "float")
-    i.pull_dx = hive.pull_out(i.dx)
-    ex.dx = hive.output(i.pull_dx)
+    ex.dx = i.dx.pull_out
 
     i.dy = hive.property(cls, "dy", "float")
-    i.pull_dy = hive.pull_out(i.dy)
-    ex.dy = hive.output(i.pull_dy)
+    ex.dy = i.dy.pull_out
 
     i.is_pressed = hive.property(cls, "is_pressed", "bool")
-    i.pull_is_pressed = hive.pull_out(i.is_pressed)
-    ex.is_pressed = hive.output(i.pull_is_pressed)
+    ex.is_pressed = i.is_pressed.pull_out
 
 
-Mouse = hive.hive("Mouse", build_mouse, builder_cls=Mouse_)
+Mouse = hive.hive("Mouse", build_mouse, drone_class=Mouse_)

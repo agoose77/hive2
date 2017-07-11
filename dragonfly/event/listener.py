@@ -53,4 +53,4 @@ def build_listener(cls, i, ex, args, meta_args):
         ex.after_leader = hive.output(i.pull_after_leader)
 
 
-Listener = hive.dyna_hive("Listener", build_listener, builder_cls=_ListenerCls, declarator=declare_listener)
+Listener = hive.dyna_hive("Listener", build_listener, drone_class=_ListenerCls, declarator=declare_listener)

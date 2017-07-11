@@ -11,7 +11,7 @@ def evaluate_switch(self, i):
 
 def build_switch(i, ex, args, meta_args):
     """Redirect input trigger to true / false outputs according to boolean evaluation of switch value"""
-    i.switch = hive.variable()
+    i.switch = hive.attribute()
     ex.input = i.switch.push_in
 
     i.on_true = hive.triggerfunc()

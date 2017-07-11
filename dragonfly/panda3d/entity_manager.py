@@ -102,4 +102,4 @@ def build_entity(cls, i, ex, args):
                                        export_to_parent=True)
 
 
-EntityManager = hive.hive("EntitySystem", build_entity, builder_cls=EntityManagerClass)
+EntityManager = hive.hive("EntitySystem", build_entity, drone_class=EntityManagerClass)

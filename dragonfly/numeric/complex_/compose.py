@@ -3,9 +3,9 @@ import hive
 
 def build_compose(i, ex, args):
     """Compose complex number from real and imaginary components"""
-    i.value = hive.variable('complex')
-    i.real = hive.variable('float')
-    i.imag = hive.variable('float')
+    i.value = hive.attribute('complex')
+    i.real = hive.attribute('float')
+    i.imag = hive.attribute('float')
 
     i.pull_imag = hive.pull_in(i.imag)
     i.pull_real = hive.pull_in(i.real)

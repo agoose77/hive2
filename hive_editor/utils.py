@@ -1,11 +1,8 @@
 import ast
 import hive
-
+from hive.interfaces import Antenna, Output, TriggerSource, TriggerTarget
 # IO public
-from hive.hook import Hook
-from hive.entry import Entry
-from hive.antenna import HiveAntenna
-from hive.output import HiveOutput
+
 
 from collections import OrderedDict, namedtuple
 from inspect import signature
@@ -133,23 +130,22 @@ def get_io_info(hive_object):
 
     for bee_name, bee in external_bees._items:
         # Find IO pins
-
-        if isinstance(bee, HiveAntenna):
+        if bee.implements(Antenna):
             storage_target = inputs
-            data_type = exported_bee.data_type
-            mode = exported_bee.mode
+            data_type = bee.data_type
+            mode = bee.mode
 
-        elif isinstance(bee, HiveOutput):
+        elif bee.implements(Output):
             storage_target = outputs
-            data_type = exported_bee.data_type
-            mode = exported_bee.mode
+            data_type = bee.data_type
+            mode = bee.mode
 
-        elif isinstance(bee, Hook):
+        elif isinstance(bee, TriggerSource):
             storage_target = outputs
             data_type = 'trigger'
             mode = "push"
 
-        elif isinstance(bee, Entry):
+        elif isinstance(bee, TriggerTarget):
             storage_target = inputs
             data_type = 'trigger'
             mode = "push"

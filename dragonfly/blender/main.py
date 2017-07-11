@@ -82,4 +82,4 @@
 #     hive.trigger(i.tick, i.on_tick)
 #
 #
-# Mainloop = _Mainloop.extend("Mainloop", build_mainloop, builder_ builder_cls=MainloopClass)
+# Mainloop = _Mainloop.extend("Mainloop", build_mainloop, builder_ drone_class=MainloopClass)

@@ -83,4 +83,4 @@ def build_random(cls, i, ex, args):
     hive.trigger(i.pull_uniform, i.uniform_max_in, pretrigger=True)
     hive.trigger(i.pull_uniform, i.uniform_min_in, pretrigger=True)
 
-Random = hive.hive("Random", build_random, builder_cls=_RandomCls)
+Random = hive.hive("Random", build_random, drone_class=_RandomCls)

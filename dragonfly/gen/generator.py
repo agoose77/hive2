@@ -23,8 +23,8 @@ def build_generator(i, ex, args):
     """Define and instantiate a new generator when pulled"""
     args.generator_body = hive.parameter(("str", "code"))
 
-    ex.generator = hive.variable()
-    ex.generator_body = hive.variable(("str", "code"), args.generator_body)
+    ex.generator = hive.attribute()
+    ex.generator_body = hive.attribute(("str", "code"), args.generator_body)
 
     i.create_generator = hive.modifier(on_new_generator)
 

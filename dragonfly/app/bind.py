@@ -10,7 +10,7 @@ definition.forward_plugin("app.get_tick_rate")
 factory = definition.build("BindApp")
 
 _AppEnvironment = hive.meta_hive("AppEnvironment", factory.environment_builder, factory.environment_declarator,
-                                 builder_cls=factory.create_environment_class())
+                                 drone_class=factory.create_environment_class())
 
 
 class AppBindClass(factory.create_external_class()):
@@ -23,7 +23,7 @@ class AppBindClass(factory.create_external_class()):
 
 
 _BindApp = hive.dyna_hive("BindApp", factory.external_builder, declarator=factory.external_declarator,
-                          builder_cls=AppBindClass)
+                          drone_class=AppBindClass)
 
 
 def get_environment(meta_args):

@@ -680,12 +680,12 @@ class HiveBuilder:
         return args, kwargs, cls._build(meta_args_items)
 
     @classmethod
-    def extend(cls, name, builder=None, drone_cls=None, declarator=None, is_dyna_hive=None, bases=(), module=None):
+    def extend(cls, name, builder=None, drone_class=None, declarator=None, is_dyna_hive=None, bases=(), module=None):
         """Extend HiveBuilder with an additional builder (and builder class)
     
         :param name: name of new hive class
         :param builder: optional function used to build hive
-        :param drone_cls: optional Python class to bind to hive
+        :param drone_class: optional Python class to bind to hive
         :param declarator: optional declarator to establish parameters
         :param is_dyna_hive: optional flag to use dyna-hive instantiation path. If omitted (None), inherit
         :param bases: optional tuple of base classes to use
@@ -711,19 +711,19 @@ class HiveBuilder:
         base_builders = tuple(builder for hive_cls in bases for builder in hive_cls._builders)
         base_is_dyna_hive = any(hive_cls._is_dyna_hive for hive_cls in bases)
 
-        if drone_cls is not None and not isclass(drone_cls):
+        if drone_class is not None and not isclass(drone_class):
             raise TypeError("cls must be a Python class, e.g. class SomeHive(object): ...")
 
         # Validate builders
         if builder is None:
             builders = base_builders
 
-            if drone_cls is not None:
+            if drone_class is not None:
                 raise ValueError("Hive cannot be given cls without defining a builder")
 
         else:
             # Add builder
-            builders = base_builders + ((builder, drone_cls),)
+            builders = base_builders + ((builder, drone_class),)
 
         # Add declarator
         if declarator is not None:
@@ -753,16 +753,16 @@ class HiveBuilder:
         return type(name, bases, class_dict)
 
 
-def hive(name, builder=None, drone_cls=None, bases=()):
-    return HiveBuilder.extend(name, builder, drone_cls, bases=bases)
+def hive(name, builder=None, drone_class=None, bases=()):
+    return HiveBuilder.extend(name, builder, drone_class, bases=bases)
 
 
-def dyna_hive(name, builder, declarator, drone_cls=None, bases=()):
-    return HiveBuilder.extend(name, builder, drone_cls, declarator=declarator, is_dyna_hive=True, bases=bases)
+def dyna_hive(name, builder, declarator, drone_class=None, bases=()):
+    return HiveBuilder.extend(name, builder, drone_class, declarator=declarator, is_dyna_hive=True, bases=bases)
 
 
-def meta_hive(name, builder, declarator, drone_cls=None, bases=()):
-    return HiveBuilder.extend(name, builder, drone_cls, declarator=declarator, is_dyna_hive=False, bases=bases)
+def meta_hive(name, builder, declarator, drone_class=None, bases=()):
+    return HiveBuilder.extend(name, builder, drone_class, declarator=declarator, is_dyna_hive=False, bases=bases)
 
 # ==========Hive construction path=========
 # 1. Take args and kwargs for construction call.

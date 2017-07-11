@@ -22,4 +22,4 @@ def build_on_stop(cls, i, ex, args):
     ex.on_stop = hive.hook(i.on_stop)
 
 
-OnStop = hive.hive("OnStop", build_on_stop, builder_cls=OnStopClass)
+OnStop = hive.hive("OnStop", build_on_stop, drone_class=OnStopClass)

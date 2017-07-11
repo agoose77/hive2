@@ -48,4 +48,4 @@ def build_destroy(cls, i, ex, args, meta_args):
     ex.get_destroy_entity = hive.socket(cls.set_destroy_entity, identifier="entity.destroy")
 
 
-Destroy = hive.dyna_hive("Destroy", build_destroy, declare_destroy, builder_cls=DestroyClass)
+Destroy = hive.dyna_hive("Destroy", build_destroy, declare_destroy, drone_class=DestroyClass)

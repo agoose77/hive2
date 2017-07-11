@@ -111,4 +111,4 @@ def build_position(cls, i, ex, args, meta_args):
         hive.trigger(i.push_position, i.do_set_position)
 
 
-Position = hive.dyna_hive("Position", build_position, declare_position, builder_cls=PositionClass)
+Position = hive.dyna_hive("Position", build_position, declare_position, drone_class=PositionClass)

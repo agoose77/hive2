@@ -112,4 +112,4 @@ def build_orientation(cls, i, ex, args, meta_args):
         hive.trigger(i.push_orientation, i.do_set_orientation)
 
 
-Orientation = hive.dyna_hive("Orientation", build_orientation, declare_orientation, builder_cls=OrientationClass)
+Orientation = hive.dyna_hive("Orientation", build_orientation, declare_orientation, drone_class=OrientationClass)

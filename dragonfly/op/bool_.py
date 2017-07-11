@@ -19,12 +19,12 @@ def build_operator(i, ex, args, meta_args):
     op = operators[meta_args.operator]
 
     is_single_arg = op in single_arg_operators
-    i.a = hive.variable(meta_args.data_type)
+    i.a = hive.attribute(meta_args.data_type)
 
     if not is_single_arg:
-        i.b = hive.variable(meta_args.data_type)
+        i.b = hive.attribute(meta_args.data_type)
 
-    i.result = hive.variable('bool')
+    i.result = hive.attribute('bool')
 
     i.pull_a = hive.pull_in(i.a)
 

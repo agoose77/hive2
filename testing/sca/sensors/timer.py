@@ -4,8 +4,8 @@ import hive
 
 
 def build_timer(i, ex, args):
-    i.dt = hive.variable("float", 0.0)
-    ex.step = hive.variable("float", 1 / 60)
+    i.dt = hive.attribute("float", 0.0)
+    ex.step = hive.attribute("float", 1 / 60)
 
     def start(self):
         last = clock()

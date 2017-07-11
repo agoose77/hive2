@@ -84,4 +84,4 @@ def build_spawn(cls, i, ex, args, meta_args):
     ex.spawn = hive.entry(i.on_triggered)
 
 
-Spawn = hive.dyna_hive("Spawn", build_spawn, declarator=declare_spawn, builder_cls=SpawnClass)
+Spawn = hive.dyna_hive("Spawn", build_spawn, declarator=declare_spawn, drone_class=SpawnClass)

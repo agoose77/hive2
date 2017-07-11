@@ -79,4 +79,4 @@ def build_delay(cls, i, ex, args):
     ex.get_get_tick_rate = hive.socket(cls.set_get_tick_rate, "app.get_tick_rate")
 
 
-Delay = hive.hive("Delay", build_delay, builder_cls=_DelayCls)
+Delay = hive.hive("Delay", build_delay, drone_class=_DelayCls)

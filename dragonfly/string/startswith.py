@@ -10,8 +10,8 @@ def do_startswith(self):
 
 def build_startswith(i, ex, args):
     """Check if string starts with a substring"""
-    i.string = hive.variable('str')
-    i.substring = hive.variable('str')
+    i.string = hive.attribute('str')
+    i.substring = hive.attribute('str')
 
     i.pull_string = hive.pull_in(i.string)
     i.pull_substring = hive.pull_in(i.substring)
@@ -19,7 +19,7 @@ def build_startswith(i, ex, args):
     ex.string = hive.antenna(i.pull_string)
     ex.substring = hive.antenna(i.pull_substring)
 
-    i.startswith = hive.variable('bool')
+    i.startswith = hive.attribute('bool')
     i.pull_startswith = hive.pull_out(i.startswith)
     ex.startswith = hive.output(i.pull_startswith)
 

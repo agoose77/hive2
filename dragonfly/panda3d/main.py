@@ -65,4 +65,4 @@ def build_mainloop(cls, i, ex, args):
     ex.main_on_started = hive.plugin(cls.on_started, identifier="on_started")
 
 
-Mainloop = _Mainloop.extend("Mainloop", build_mainloop, builder_cls=MainloopClass)
+Mainloop = _Mainloop.extend("Mainloop", build_mainloop, drone_class=MainloopClass)

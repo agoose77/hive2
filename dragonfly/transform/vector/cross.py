@@ -14,8 +14,8 @@ def cross_modifier(self):
 
 def build_cross(i, ex, args):
     """Calculate the cross product between two vectors"""
-    i.a = hive.variable("vector")
-    i.b = hive.variable("vector")
+    i.a = hive.attribute("vector")
+    i.b = hive.attribute("vector")
 
     pull_a = hive.pull_in(i.a)
     pull_b = hive.pull_in(i.b)
@@ -23,7 +23,7 @@ def build_cross(i, ex, args):
     ex.a = hive.antenna(pull_a)
     ex.b = hive.antenna(pull_b)
 
-    i.result = hive.variable("vector")
+    i.result = hive.attribute("vector")
     i.pull_result = hive.pull_out(i.result)
     ex.result = hive.output(i.pull_result)
 

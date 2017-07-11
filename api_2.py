@@ -21,5 +21,5 @@ def build(cls, i, ex, args):
 
 
 
-H = hive.hive("build", build, drone_cls=DroneClass)
+H = hive.hive("build", build, drone_class=DroneClass)
 h = H()

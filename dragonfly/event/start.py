@@ -22,4 +22,4 @@ def build_on_start(cls, i, ex, args):
     ex.on_started = hive.hook(i.on_started)
 
 
-OnStart = hive.hive("OnStart", build_on_start, builder_cls=_OnStart)
+OnStart = hive.hive("OnStart", build_on_start, drone_class=_OnStart)

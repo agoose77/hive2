@@ -15,7 +15,7 @@ def triggered(self):
     self._triggered = True
 
 def build_triggerable(i, ex, args):
-    i.triggered = hive.variable('bool', False)
+    i.triggered = hive.attribute('bool', False)
     i.get_triggered = hive.pull_out(i.triggered)
     ex.get_triggered = hive.output(i.get_triggered)
 

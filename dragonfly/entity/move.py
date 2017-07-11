@@ -88,4 +88,4 @@ def build_move(cls, i, ex, args, meta_args):
     ex.trig = hive.entry(i.pull_displacement)
 
 
-Move = hive.dyna_hive("Move", build_move, declare_move, builder_cls=MoveClass)
+Move = hive.dyna_hive("Move", build_move, declare_move, drone_class=MoveClass)

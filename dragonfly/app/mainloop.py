@@ -51,20 +51,17 @@ class _Mainloop(object):
 
 def build_mainloop(cls, i, ex, args):
     """Blocking fixed-timestep trigger generator"""
-    i.tick = hive.triggerfunc()
-    i.stop = hive.triggerable(cls.stop)
-    i.run = hive.triggerable(cls.run)
+    i.tick = hive.function() # todo
 
-    ex.tick = hive.hook(i.tick)
-    ex.run = hive.entry(i.run)
-    ex.stop = hive.entry(i.stop)
+    ex.tick = i.tick.trigger
+    ex.stop = cls.stop.trigger
+    ex.run = cls.run.trigger
 
     i.tick_rate = hive.property(cls, "tick_rate", 'int')
-    i.pull_tick_rate = hive.pull_out(i.tick_rate)
-    ex.tick_rate = hive.output(i.pull_tick_rate)
+    ex.tick_rate = i.tick_rate.pull_out
 
-    ex.get_tick_rate = hive.plugin(cls.get_tick_rate, identifier="app.get_tick_rate")
-    ex.quit = hive.plugin(cls.stop, identifier="app.quit")
+    ex.get_tick_rate = cls.get_tick_rate.plugin(identifier="app.get_tick_rate")
+    ex.quit = cls.stop.plugin(identifier="app.quit")
 
 
 Mainloop = _Process.extend("Mainloop", build_mainloop, _Mainloop)

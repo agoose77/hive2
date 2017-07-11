@@ -109,4 +109,4 @@ def build_velocity(cls, i, ex, args, meta_args):
         hive.trigger(i.push_velocity, i.do_set_velocity)
 
 
-Velocity = hive.dyna_hive("Velocity", build_velocity, declare_velocity, builder_cls=VelocityClass)
+Velocity = hive.dyna_hive("Velocity", build_velocity, declare_velocity, drone_class=VelocityClass)

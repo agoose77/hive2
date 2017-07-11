@@ -35,4 +35,4 @@ def build_process(cls, i, ex, args):
     ex.on_stopped = hive.entry(i.on_stopped)
 
 
-Process = hive.hive("Process", build_process, builder_cls=ProcessClass)
+Process = hive.hive("Process", build_process, drone_class=ProcessClass)

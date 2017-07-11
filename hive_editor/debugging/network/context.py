@@ -8,7 +8,7 @@ from struct import pack, unpack_from, calcsize
 from threading import Event
 from weakref import WeakKeyDictionary
 
-from hive.debug import ReportedDebugContextBase
+# from hive.debug import ReportedDebugContextBase
 from hive.interfaces import Nameable
 
 from .utils import pack_pascal_string, unpack_pascal_string
@@ -37,6 +37,7 @@ ContainerCandidates = namedtuple("ContainerCandidates", "containers paths")
 ContainerPairInfo = namedtuple("PairInfo", "source_container_name target_container_name hivemap_path")
 ContainerBeeReference = namedtuple("ContainerBeeReference", "container_id bee_container_name")
 
+ReportedDebugContextBase = object
 
 class NetworkDebugContext(ReportedDebugContextBase):
     """Context manager to communicate debug information with remote debugger (server)"""

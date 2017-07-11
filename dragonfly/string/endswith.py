@@ -10,8 +10,8 @@ def do_endswith(self):
 
 def build_endswith(i, ex, args):
     """Check if string ends with a substring"""
-    i.string = hive.variable('str')
-    i.substring = hive.variable('str')
+    i.string = hive.attribute('str')
+    i.substring = hive.attribute('str')
 
     i.pull_string = hive.pull_in(i.string)
     i.pull_substring = hive.pull_in(i.substring)
@@ -19,7 +19,7 @@ def build_endswith(i, ex, args):
     ex.string = hive.antenna(i.pull_string)
     ex.substring = hive.antenna(i.pull_substring)
 
-    i.endswith = hive.variable('bool')
+    i.endswith = hive.attribute('bool')
     i.pull_endswith = hive.pull_out(i.endswith)
     ex.endswith = hive.output(i.pull_endswith)
 

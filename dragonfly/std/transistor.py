@@ -7,7 +7,7 @@ def declare_transistor(meta_args):
 
 def build_transistor(i, ex, args, meta_args):
     """Convert a pull output into a push output, using a trigger input"""
-    i.value = hive.variable(meta_args.data_type)
+    i.value = hive.attribute(meta_args.data_type)
     i.pull_value = hive.pull_in(i.value)
     ex.value = hive.antenna(i.pull_value)
 

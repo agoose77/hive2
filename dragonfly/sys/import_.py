@@ -10,11 +10,11 @@ def build_import(i, ex, args):
     """Interface to python import mechanism"""
     i.do_import = hive.modifier(do_import_from_path)
 
-    i.import_path = hive.variable("str")
+    i.import_path = hive.attribute("str")
     i.pull_import_path = hive.pull_in(i.import_path)
     ex.import_path = hive.antenna(i.pull_import_path)
 
-    i.module = hive.variable("module")
+    i.module = hive.attribute("module")
     i.pull_module = hive.pull_out(i.module)
     ex.module = hive.output(i.pull_module)
 

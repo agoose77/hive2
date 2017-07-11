@@ -1,15 +1,17 @@
 import hive
 
 
+def do_print(i, ex):
+    print(i.value.property)
+
+
 def build_print(i, ex, args):
     """Output object to Python stdout"""
-    ex.value = hive.variable()
-    i.value_in = hive.push_in(ex.value)
-    ex.value_in = hive.antenna(i.value_in)
+    i.value = hive.attribute()
+    ex.value = i.value.push_in
 
-    i.func = hive.modifier(lambda self: print(self.value))
-
-    hive.trigger(i.value_in, i.func)
+    i.func = hive.modifier(do_print)
+    i.value.push_in.triggered.connect(i.func.trigger)
 
 
 Print = hive.hive("Print", build_print)

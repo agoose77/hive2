@@ -41,22 +41,21 @@ def build_watch(cls, i, ex, args, meta_args):
     i.value = hive.property(cls, "current_value", meta_args.data_type, args.start_value)
 
     if meta_args.mode == 'pull':
-        i.value_in = hive.pull_in(i.value)
+        i.value_in = i.value.pull_in
 
     else:
-        i.value_in = hive.push_in(i.value)
+        i.value_in = i.value.push_in
 
-    ex.value = hive.antenna(i.value_in)
+    ex.value = i.value_in
 
     i.on_changed = hive.triggerfunc()
-    ex.on_changed = hive.hook(i.on_changed)
+    ex.on_changed = i.on_changed.trigger
 
     if meta_args.mode == 'pull':
         ex.get_add_handler = hive.socket(cls.set_add_handler, identifier="event.add_handler")
 
     else:
-        i.compare_values = hive.triggerable(cls.compare_values)
-        hive.trigger(i.value_in, i.compare_values)
+        hive.trigger(i.value_in.triggered, cls.compare_values.trigger)
 
 
-Watch = hive.dyna_hive("Watch", build_watch, declare_watch, builder_cls=WatchClass)
+Watch = hive.dyna_hive("Watch", build_watch, declare_watch, drone_class=WatchClass)

@@ -28,4 +28,4 @@ def build_dispatch(cls, i, ex, args):
     ex.trig = hive.entry(i.dispatch)
 
 
-Dispatch = hive.hive("Dispatch", build_dispatch, builder_cls=DispatchClass)
+Dispatch = hive.hive("Dispatch", build_dispatch, drone_class=DispatchClass)
