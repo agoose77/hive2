@@ -1,10 +1,10 @@
-from ..exception import HiveConnectionError
-from ..identifier import is_valid_identifier
-from ..interfaces import Plugin, Socket, ConnectSource, Exportable, Bee
-from ..manager import memoize, ModeFactory
-from ..policies import MultipleOptional
-from ..private.mixins import ConnectableMixin
-from ..typing import is_valid_data_type
+from hive.exception import HiveConnectionError
+from hive.identifier import is_valid_identifier
+from hive.interfaces import Plugin, Socket, ConnectSource, Exportable, Bee
+from hive.manager import memoize, ModeFactory
+from hive.policies import MultipleOptional
+from hive.private.mixins import ConnectableMixin
+from hive.typing import is_valid_data_type
 
 
 class HivePluginRuntime(Plugin, ConnectSource, ConnectableMixin):

@@ -1,9 +1,9 @@
-from ..exception import HiveConnectionError
-from ..identifier import is_valid_identifier
-from ..interfaces import ConnectTarget, Plugin, Socket, Exportable, Bee
-from ..manager import memoize, ModeFactory
-from ..policies import SingleRequired
-from ..typing import is_valid_data_type
+from hive.exception import HiveConnectionError
+from hive.identifier import is_valid_identifier
+from hive.interfaces import ConnectTarget, Plugin, Socket, Exportable, Bee
+from hive.manager import memoize, ModeFactory
+from hive.policies import SingleRequired
+from hive.typing import is_valid_data_type
 
 
 class HiveSocketRuntime(Socket, ConnectTarget):

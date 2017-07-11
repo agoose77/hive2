@@ -1,7 +1,7 @@
+from .plugin import HivePluginBuilder
 from ..exception import HiveConnectionError
 from ..interfaces import TriggerTarget, ConnectTarget, TriggerSource, Callable, Bee, Exportable
 from ..manager import ModeFactory, memoize
-from ..public.plugin import HivePluginBuilder
 
 
 class TriggerableRuntime(TriggerTarget, ConnectTarget, Callable, Bee):
