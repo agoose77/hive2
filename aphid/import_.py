@@ -3,7 +3,7 @@ from importlib import import_module
 
 
 import hive
-import hive_editor
+import hive2_gui
 
 
 class ImportClass:
@@ -25,7 +25,7 @@ class ImportClass:
         parent = first_runtime_info.parent_ref()
         container_parent_class = parent._hive_object._hive_parent_class
 
-        hook = hive_editor.get_hook()
+        hook = hive2_gui.get_hook()
 
         # Find the loader result of the hive in which this hive is embedded (to find the __package__)
         try:
