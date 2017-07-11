@@ -39,7 +39,7 @@ from .public import attribute, modifier, method, property
 from .private import READ_WRITE, READ, WRITE, connect, trigger, plugin, socket
 from .policies import SingleOptional, SingleRequired, MultipleOptional, MultipleRequired
 from .parameter import parameter
-from .super import public, private, register_drone
+from .super import external, internal, register_drone
 from .exception import HiveException
 from .annotations import (types, options, return_type, get_argument_options, get_argument_types, get_return_type,
                           update_wrapper, typed_property)
