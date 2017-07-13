@@ -1,7 +1,7 @@
 import hive
 
 
-def declare_constrain(meta_args):
+def configure_constrain(meta_args):
     meta_args.data_type = hive.parameter('str', 'float', options={'complex', 'int', 'float'})
 
 
@@ -29,4 +29,4 @@ def build_constrain(i, ex, args, meta_args):
     ex.value = i.value.pull_in
 
 
-Constrain = hive.dyna_hive("Constrain", build_constrain, declare_constrain)
+Constrain = hive.dyna_hive("Constrain", build_constrain, configure_constrain)

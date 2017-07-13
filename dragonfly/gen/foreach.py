@@ -1,7 +1,7 @@
 import hive
 
 
-def declare_foreach(meta_args):
+def configure_foreach(meta_args):
     meta_args.data_type = hive.parameter("str", "int")
 
 
@@ -56,4 +56,4 @@ def build_foreach(i, ex, args, meta_args):
     hive.trigger(i.do_trig, i.iter)
 
 
-ForEach = hive.dyna_hive("ForEach", build_foreach, declare_foreach)
+ForEach = hive.dyna_hive("ForEach", build_foreach, configure_foreach)

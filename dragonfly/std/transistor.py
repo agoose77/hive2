@@ -1,7 +1,7 @@
 import hive
 
 
-def declare_transistor(meta_args):
+def configure_transistor(meta_args):
     meta_args.data_type = hive.parameter("str", "int")
 
 
@@ -16,4 +16,4 @@ def build_transistor(i, ex, args, meta_args):
     i.value.pull_in.triggered.connect(i.value.push_out.trigger)
 
 
-Transistor = hive.dyna_hive("Transistor", build_transistor, declare_transistor)
+Transistor = hive.dyna_hive("Transistor", build_transistor, configure_transistor)

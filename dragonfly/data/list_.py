@@ -1,7 +1,7 @@
 import hive
 
 
-def declare_list(meta_args):
+def configure_list(meta_args):
     meta_args.data_type = hive.parameter('str', 'int')
 
 
@@ -88,4 +88,4 @@ def build_list(i, ex, args, meta_args):
     hive.trigger(i.pull_setitem_index, i.do_setitem)
 
 
-List = hive.dyna_hive("List", build_list, declare_list)
+List = hive.dyna_hive("List", build_list, configure_list)

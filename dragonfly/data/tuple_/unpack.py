@@ -1,7 +1,7 @@
 import hive
 
 
-def declare_unpack_tuple(meta_args):
+def configure_unpack_tuple(meta_args):
     meta_args.types = hive.parameter('tuple')
 
 
@@ -33,4 +33,4 @@ def build_unpack_tuple(i, ex, args, meta_args):
     hive.trigger(i.push_tuple, i.do_unpack_tuple)
 
 
-UnpackTuple = hive.dyna_hive("UnpackTuple", build_unpack_tuple, declare_unpack_tuple)
+UnpackTuple = hive.dyna_hive("UnpackTuple", build_unpack_tuple, configure_unpack_tuple)

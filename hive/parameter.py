@@ -1,4 +1,4 @@
-from .manager import ModeFactory
+from .manager import HiveModeFactory
 from .typing import is_valid_data_type
 
 from collections.abc import Collection
@@ -30,7 +30,7 @@ class Parameter:
             assert start_value in options
 
     @property
-    def data_type(self):
+    def data_type(self) -> str:
         return self._data_type
 
     @property
@@ -45,4 +45,4 @@ class Parameter:
         return "HiveParameter({!r}, {!r}, {!r})".format(self._data_type, self._start_value, self._options)
 
 
-parameter = ModeFactory("hive.parameter", declare=Parameter, build=Parameter)
+parameter = HiveModeFactory("hive.parameter", DECLARE=Parameter, BUILD=Parameter)

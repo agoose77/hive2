@@ -32,7 +32,7 @@ def build_dog(cls, i, ex, args):
 DogHive = hive.hive("DogHive", build_dog, Dog)
 
 
-def declare_filler(meta_args):
+def configure_filler(meta_args):
     meta_args.i = hive.parameter("int", 2)
 
 
@@ -47,7 +47,7 @@ def build_filler(i, ex, args, meta_args):
         ex.inner = hive.hook(i.inner)
 
 
-FillerHive = hive.dyna_hive("FillerHive", build_filler, declarator=declare_filler)
+FillerHive = hive.dyna_hive("FillerHive", build_filler, configurer=configure_filler)
 
 
 class House(object):

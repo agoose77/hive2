@@ -15,10 +15,6 @@ class Descriptor(ABC):
         pass
 
 
-class Connectable:
-    pass
-
-
 RuntimeAlias = namedtuple("RuntimeAlias", "parent_ref name")
 
 
@@ -43,6 +39,7 @@ class Callable(ABC):
         pass
 
 
+
 class Plugin:
     pass
 
@@ -50,11 +47,10 @@ class Plugin:
 class Socket:
     pass
 
-
 from .bees import Exportable, Bee, BeeBase
-from .io import IO, Antenna, Output, IOModes
+from .io import Antenna, Output, IOModes
 from .stateful import Stateful
-from .trigger_source import TriggerSourceBase, TriggerSource, TriggerSourceDerived
-from .trigger_target import TriggerTargetBase, TriggerTarget, TriggerTargetDerived
-from .connect_source import ConnectSource, ConnectSourceBase, ConnectSourceDerived
-from .connect_target import ConnectTarget, ConnectTargetBase, ConnectTargetDerived
+from .trigger import TriggerSourceBase, TriggerSource, TriggerSourceDerived, TriggerTargetBase, TriggerTarget, \
+    TriggerTargetDerived
+from .connect import ConnectSource, ConnectSourceBase, ConnectSourceDerived, ConnectTarget, ConnectTargetBase, \
+    ConnectTargetDerived, ConnectCandidate

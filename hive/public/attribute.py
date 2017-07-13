@@ -1,5 +1,5 @@
 from ..interfaces import Stateful, BeeBase
-from ..manager import ModeFactory, memoize, memo_property
+from ..manager import HiveModeFactory, memoize, memo_property
 from ..parameter import Parameter
 from ..private import (PushInBuilder, PushInImmediate, PullInBuilder, PullInImmediate, PushOutBuilder, PullOutBuilder,
                        PullOutImmediate, PushOutImmediate, StatefulDescriptorBuilder, READ_WRITE, TriggerFuncBuilder,
@@ -124,4 +124,4 @@ class AttributeBuilder(BeeBase):
         return "AttributeBuilder({!r}, {!r})".format(self._data_type, self._start_value)
 
 
-attribute = ModeFactory("hive.attribute", build=AttributeBuilder, immediate=AttributeImmediate)
+attribute = HiveModeFactory("hive.attribute", BUILD=AttributeBuilder, IMMEDIATE=AttributeImmediate)

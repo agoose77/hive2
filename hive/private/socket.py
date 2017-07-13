@@ -1,9 +1,9 @@
-from hive.exception import HiveConnectionError
-from hive.identifier import is_valid_identifier
-from hive.interfaces import ConnectTarget, Plugin, Socket, Exportable, BeeBase
-from hive.manager import memoize, ModeFactory
-from hive.policies import SingleRequired
-from hive.typing import is_valid_data_type
+from ..exception import HiveConnectionError
+from ..identifier import is_valid_identifier
+from ..interfaces import ConnectTarget, Plugin, Socket, Exportable, BeeBase, Bee
+from ..manager import memoize, HiveModeFactory
+from ..policies import SingleRequired
+from ..typing import is_valid_data_type
 
 
 class HiveSocketRuntime(Socket, ConnectTarget):
@@ -83,4 +83,4 @@ class HiveSocketBuilder(BeeBase, Exportable, Socket, ConnectTarget):
                                                                         self._policy, self._export_to_parent)
 
 
-socket = ModeFactory("hive.socket", immediate=HiveSocketRuntime, build=HiveSocketBuilder)
+socket = HiveModeFactory("hive.socket", IMMEDIATE=HiveSocketRuntime, BUILD=HiveSocketBuilder)

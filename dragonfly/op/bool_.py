@@ -7,7 +7,7 @@ single_arg_operators = {not_, }
 operator_names = set(operators)
 
 
-def declare_operator(meta_args):
+def configure_operator(meta_args):
     meta_args.data_type = hive.parameter("str", "int")
     meta_args.operator = hive.parameter("str", "=", options=operator_names)
 
@@ -52,4 +52,4 @@ def build_operator(i, ex, args, meta_args):
     hive.trigger(i.pull_result, i.pull_a, pretrigger=True)
 
 
-BoolOperator = hive.dyna_hive("BoolOperator", build_operator, declare_operator)
+BoolOperator = hive.dyna_hive("BoolOperator", build_operator, configure_operator)

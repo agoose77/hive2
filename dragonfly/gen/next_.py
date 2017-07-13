@@ -21,7 +21,7 @@ def next_modifier(self):
         next_modifier(self)
 
 
-def declare_next(meta_args):
+def configure_next(meta_args):
     meta_args.data_type = hive.parameter("str", "int")
 
 
@@ -43,4 +43,4 @@ def build_next(i, ex, args, meta_args):
     hive.trigger(i.pull_value, i.do_next, pretrigger=True)
 
 
-Next = hive.dyna_hive("Next", build_next, declarator=declare_next)
+Next = hive.dyna_hive("Next", build_next, configurer=configure_next)

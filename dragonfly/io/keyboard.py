@@ -65,7 +65,7 @@ class Keyboard_:
         self._released_listener.pattern = self._get_pattern("released")
 
 
-def declare_keyboard(meta_args):
+def configure_keyboard(meta_args):
     meta_args.mode = hive.parameter("str", 'single key', options={'single key', 'any key'})
 
 
@@ -105,4 +105,4 @@ def build_keyboard(cls, i, ex, args, meta_args):
         ex.key_released = hive.output(i.pull_key_released)
 
 
-Keyboard = hive.dyna_hive("Keyboard", build_keyboard, declarator=declare_keyboard, drone_class=Keyboard_)
+Keyboard = hive.dyna_hive("Keyboard", build_keyboard, configurer=configure_keyboard, drone_class=Keyboard_)

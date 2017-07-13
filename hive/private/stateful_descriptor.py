@@ -1,4 +1,4 @@
-from ..manager import ModeFactory, memoize
+from ..manager import HiveModeFactory, memoize
 from ..interfaces import Stateful, Descriptor, Exportable, BeeBase
 
 from enum import auto, IntFlag
@@ -66,4 +66,4 @@ class StatefulDescriptorBuilder(BeeBase, Exportable):
         return "BuilderStatefulDescriptor({!r}, {!r})".format(self._target, self._flags)
 
 
-stateful_descriptor = ModeFactory("stateful_descriptor", build=StatefulDescriptorBuilder)
+stateful_descriptor = HiveModeFactory("stateful_descriptor", BUILD=StatefulDescriptorBuilder)

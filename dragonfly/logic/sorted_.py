@@ -1,7 +1,7 @@
 import hive
 
 
-def declare_sorted(meta_args):
+def configure_sorted(meta_args):
     meta_args.data_type = hive.parameter('str', 'list', {'list', 'dict', 'set', 'tuple'})
 
 
@@ -25,4 +25,4 @@ def build_sorted(i, ex, args, meta_args):
                                                 i.sort.trigger)
 
 
-Sorted = hive.dyna_hive("Sorted", build_sorted, declare_sorted)
+Sorted = hive.dyna_hive("Sorted", build_sorted, configure_sorted)

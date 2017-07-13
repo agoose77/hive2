@@ -7,7 +7,7 @@ _type_map = OrderedDict((("str", str), ("bool", bool), ("int", int), ("float", f
                          ("set", set), ("tuple", tuple), ("bytes", bytes)))
 
 
-def declare_convert(meta_args):
+def configure_convert(meta_args):
     meta_args.from_data_type = hive.parameter("str", "int")
     meta_args.to_data_type = hive.parameter("str", "int")
     meta_args.mode = hive.parameter("str", "pull", {"push", "pull"})
@@ -51,4 +51,4 @@ def build_convert(i, ex, args, meta_args):
         i.converted_out.pre_triggered.connect(i.do_conversion.trigger)
 
 
-Convert = hive.dyna_hive("Convert", builder=build_convert, declarator=declare_convert)
+Convert = hive.dyna_hive("Convert", builder=build_convert, configurer=configure_convert)

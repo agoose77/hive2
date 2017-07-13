@@ -3,7 +3,7 @@ from .triggerable import TriggerableBuilder, TriggerableRuntime
 from .triggerfunc import TriggerFuncBuilder, TriggerFuncRuntime
 from ..exception import HiveConnectionError
 from ..interfaces import Antenna, Output, Stateful, Callable, ConnectSource, Exportable, BeeBase, IOModes
-from ..manager import ModeFactory, memoize, memo_property
+from ..manager import HiveModeFactory, memoize, memo_property
 from ..typing import data_types_match, MatchFlags
 
 
@@ -115,4 +115,4 @@ class PushOutBuilder(BeeBase, Output, Exportable, ConnectableMixin):
         return "PushOutBuilder({!r})".format(self._target)
 
 
-push_out = ModeFactory("hive.push_out", immediate=PushOutImmediate, build=PushOutBuilder)
+push_out = HiveModeFactory("hive.push_out", IMMEDIATE=PushOutImmediate, BUILD=PushOutBuilder)

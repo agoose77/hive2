@@ -12,7 +12,7 @@ punctuation_no_underscore = punctuation.replace("_", "")
 
 ForwardedIO = namedtuple("ForwardedIO", "identifier plugin_policy socket_policy")
 BindParameterPair = namedtuple("BindParameterPair", "condition parameter")
-PluginEntry = namedtuple("PluginEntry", "identifier plugin_policy socket_policy declare_for_environment condition_stack")
+PluginEntry = namedtuple("PluginEntry", "identifier plugin_policy socket_policy configure_for_environment condition_stack")
 
 
 class BindClassDefinition:
@@ -24,9 +24,9 @@ class BindClassDefinition:
         self._parameters = {}
 
     def forward_plugin(self, identifier, plugin_policy=hive.MultipleOptional, socket_policy=hive.SingleRequired,
-                       declare_for_environment=True):
+                       configure_for_environment=True):
         condition_stack = self._condition_stack.copy()
-        plugin_entry = PluginEntry(identifier, plugin_policy, socket_policy, declare_for_environment, condition_stack)
+        plugin_entry = PluginEntry(identifier, plugin_policy, socket_policy, configure_for_environment, condition_stack)
         self._plugin_entries.append(plugin_entry)
 
     def parameter(self, name, data_type=None, start_value=Parameter.no_value, options=None):
@@ -188,14 +188,14 @@ class BindClassFactory:
     def build_external_hive(self):
         external_class = self.create_external_class()
         return hive.dyna_hive("{}External".format(self._name), self.external_builder,
-                              declarator=self.external_declarator, drone_class=external_class)
+                              configurer=self.external_configurer, drone_class=external_class)
 
     def build_environment_hive(self):
         environment_class = self.create_environment_class()
         return hive.meta_hive("{}Environment".format(self._name), self.environment_builder,
-                              declarator=self.environment_declarator, drone_class=environment_class)
+                              configurer=self.environment_configurer, drone_class=environment_class)
 
-    def external_declarator(self, meta_args):
+    def external_configurer(self, meta_args):
         """Adds bind parameters to meta args wrapper"""
         for name, parameter in self._parameters.items():
             setattr(meta_args, name, parameter)
@@ -220,7 +220,7 @@ class BindClassFactory:
         setattr(ex, '{}_get_plugins'.format(self._name), get_plugins_plugin)
         setattr(ex, '{}_get_config'.format(self._name), get_config_plugin)
 
-    def environment_declarator(self, meta_args):
+    def environment_configurer(self, meta_args):
         """Inactive function to provide consistent API"""
 
     def environment_builder(self, cls, i, ex, args, meta_args):
@@ -228,7 +228,7 @@ class BindClassFactory:
         meta_args_dict = meta_args.bind_meta_args.to_ordered_dict()
 
         for attr_name, plugin_entry in self._plugins.items():
-            if not plugin_entry.declare_for_environment:
+            if not plugin_entry.configure_for_environment:
                 continue
 
             for condition in plugin_entry.condition_stack:
@@ -269,34 +269,34 @@ class BindClassFactory:
         return builder
 
     def declares_external(self, func):
-        """External declarator decorator.
+        """External configurer decorator.
 
         Adds bind parameters to external meta args wrapper
 
-        :param func: subsequent declarator
+        :param func: subsequent configurer
         """
 
         @wraps(func)
-        def declarator(meta_args):
-            self.external_declarator(meta_args)
+        def configurer(meta_args):
+            self.external_configurer(meta_args)
             func(meta_args)
 
-        return declarator
+        return configurer
 
     def declares_environment(self, func):
-        """Environment declarator decorator.
+        """Environment configurer decorator.
 
         Adds bind parameters to environment meta args wrapper
 
-        :param func: subsequent declarator
+        :param func: subsequent configurer
         """
 
         @wraps(func)
-        def declarator(meta_args):
-            self.environment_declarator(meta_args)
+        def configurer(meta_args):
+            self.environment_configurer(meta_args)
             func(meta_args)
 
-        return declarator
+        return configurer
 
 
 # Example usage
@@ -316,10 +316,10 @@ with definition.condition(flag == "yes") as then:
 
 factory = definition.build("TestBinder")
 
-bind_hive = hive.dyna_hive("BindHive", factory.external_builder, declarator=factory.external_declarator,
+bind_hive = hive.dyna_hive("BindHive", factory.external_builder, configurer=factory.external_configurer,
                              drone_class=factory.external_class)
 bind_environment = hive.meta_hive("BindEnvironment", factory.environment_builder,
-                            declarator=factory.environment_declarator, drone_class=factory.environment_class)
+                            configurer=factory.environment_configurer, drone_class=factory.environment_class)
 
 # Optionally inspect meta args to disable binding (optimisation)
 def get_environment(meta_args):
@@ -330,7 +330,7 @@ bind_info = BindInfo(factory.name, bind_hive, get_environment)
 
 # The above generates a builder like this
 """
-def declare_bind_hive(meta_args):
+def configure_bind_hive(meta_args):
     meta_args.bind_some_plugin = hive.parameter("str", options={"yes", "no"})
     meta_args.bind_some_other_plugin = hive.parameter("str", options={"yes", "no"})
 

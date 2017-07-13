@@ -24,7 +24,7 @@ class Dog(object):
         self.name = None
 
 
-def declare_dog(meta_args):
+def configure_dog(meta_args):
     meta_args.puppies = hive.parameter("int", 1)
 
 
@@ -39,11 +39,11 @@ def build_dog(cls, i, ex, args, meta_args):
         setattr(ex, "bark_{}".format(ix), mod.trigger)
 
 
-DogHive = hive.dyna_hive("Dog", build_dog, declare_dog, Dog)
+DogHive = hive.dyna_hive("Dog", build_dog, configure_dog, Dog)
 
 class TestDeclarator(TestCase):
 
-    def test_declarator(self):
+    def test_configurer(self):
         d = DogHive(2, "Jack")
 
         with redirect_string() as io:

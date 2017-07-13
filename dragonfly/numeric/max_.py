@@ -1,7 +1,7 @@
 import hive
 
 
-def declare_max(meta_args):
+def configure_max(meta_args):
     meta_args.data_type = hive.parameter('str', 'float', options={'complex', 'int', 'float'})
 
 
@@ -26,4 +26,4 @@ def build_max(i, ex, args, meta_args):
                                               i.do_max.trigger)
 
 
-Max = hive.dyna_hive("Max", build_max, declare_max)
+Max = hive.dyna_hive("Max", build_max, configure_max)

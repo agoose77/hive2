@@ -1,7 +1,7 @@
 from .mixins import TriggerableMixin
 from ..exception import HiveConnectionError
 from ..interfaces import TriggerSource, TriggerTarget, ConnectSource, Callable, BeeBase, Exportable
-from ..manager import ModeFactory, memoize
+from ..manager import HiveModeFactory, memoize
 
 
 class TriggerFuncRuntime(BeeBase, TriggerSource, ConnectSource, Callable, TriggerableMixin):
@@ -50,4 +50,4 @@ class TriggerFuncBuilder(BeeBase, TriggerSource, ConnectSource, Exportable, Trig
         return "TriggerFuncBuilder()".format()
 
 
-triggerfunc = ModeFactory("hive.triggerfunc", immediate=TriggerFuncRuntime, build=TriggerFuncBuilder)
+triggerfunc = HiveModeFactory("hive.triggerfunc", IMMEDIATE=TriggerFuncRuntime, BUILD=TriggerFuncBuilder)

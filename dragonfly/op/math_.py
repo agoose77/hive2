@@ -7,7 +7,7 @@ operators = {'+': add, '-': sub, '*': mul, '/': truediv, '%': mod}
 operator_names = set(operators)
 
 
-def declare_operator(meta_args):
+def configure_operator(meta_args):
     meta_args.data_type = hive.parameter("str", "int")
     meta_args.operator = hive.parameter("str", "+", options=operator_names)
 
@@ -36,4 +36,4 @@ def build_operator(i, ex, args, meta_args):
     i.result.pull_out.pre_triggered.connect(i.a.pull_in.trigger)
 
 
-MathOperator = hive.dyna_hive("MathOperator", build_operator, declare_operator)
+MathOperator = hive.dyna_hive("MathOperator", build_operator, configure_operator)

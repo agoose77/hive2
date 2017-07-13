@@ -2,7 +2,7 @@ from .mixins import ConnectableMixin
 from .triggerfunc import TriggerFuncBuilder
 from ..exception import HiveConnectionError
 from ..interfaces import Antenna, Output, Stateful, ConnectTarget, Callable, Exportable, BeeBase, IOModes
-from ..manager import memoize, ModeFactory, memo_property
+from ..manager import memoize, HiveModeFactory, memo_property
 from ..typing import data_types_match, MatchFlags
 
 
@@ -94,4 +94,4 @@ class PushInBuilder(BeeBase, Antenna, Exportable, ConnectableMixin):
         return "PushInBuilder({!r})".format(self._target)
 
 
-push_in = ModeFactory("hive.push_in", immediate=PushInImmediate, build=PushInBuilder)
+push_in = HiveModeFactory("hive.push_in", IMMEDIATE=PushInImmediate, BUILD=PushInBuilder)

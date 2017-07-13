@@ -1,7 +1,7 @@
 from functools import partial
 
 from ..interfaces import Stateful, BeeBase
-from ..manager import ModeFactory, memoize, memo_property
+from ..manager import HiveModeFactory, memoize, memo_property
 from ..parameter import Parameter
 from ..private import (PushInBuilder, PullInBuilder, PushOutBuilder, PullOutBuilder, StatefulDescriptorBuilder,
                        READ_WRITE, TriggerFuncBuilder)
@@ -113,4 +113,4 @@ class PropertyBuilder(BeeBase):
         return "PropertyBuilder({!r}, {!r})".format(self._data_type, self._start_value)
 
 
-property = ModeFactory("hive.property", build=PropertyBuilder)
+property = HiveModeFactory("hive.property", BUILD=PropertyBuilder)

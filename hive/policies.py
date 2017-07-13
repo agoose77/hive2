@@ -12,7 +12,7 @@ ConnectionLimits = namedtuple("ConnectionLimits", "min max")
 
 
 class MatchmakingPolicy(ABC):
-    limits = abstractproperty()
+    limits: ConnectionLimits = abstractproperty()
 
     def __init__(self):
         self._connections = 0
@@ -21,7 +21,7 @@ class MatchmakingPolicy(ABC):
         self._connections += 1
 
     @property
-    def is_valid(self):
+    def is_valid(self) -> bool:
         lower, upper = self.limits
         count = self._connections
 
@@ -36,7 +36,7 @@ class MatchmakingPolicy(ABC):
         return valid
 
     def pre_connected(self):
-        if self._connections == self.limits[-1]:
+        if self._connections == self.limits.max:
             raise MatchmakingPolicyError("Policy {!r} forbids further connections".format(self.__class__.__name__))
 
     def validate(self):

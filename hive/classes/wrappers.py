@@ -101,7 +101,7 @@ class BaseBeeValidator(ValidatorBase):
 
         # TODO should permit ResolveBees here
         if value._hive_parent_hive_object_class is not self._hive_object_class:
-            raise ValueError("Bees cannot be built by a different hive")
+            raise ValueError("Bees cannot be built by a different hive {} // {}".format(value._hive_parent_hive_object_class,self._hive_object_class))
 
 
 class InternalValidator(BaseBeeValidator):
@@ -185,7 +185,7 @@ class ArgWrapper(AttributeMapping):
             found_param_values[name] = remaining_kwargs.pop(name)
 
         # Build defaults
-        all_param_values = {}
+        all_param_values = OrderedDict()
         for name, parameter in self._ordered_mapping.items():
             try:
                 value = found_param_values[name]

@@ -1,7 +1,7 @@
 import hive
 
 
-def declare_abs(meta_args):
+def configure_abs(meta_args):
     meta_args.data_type = hive.parameter('str', 'int', options={'int', 'complex', 'float'})
 
 
@@ -22,4 +22,4 @@ def build_abs(i, ex, args, meta_args):
                                                i.do_abs.trigger)
 
 
-Abs = hive.dyna_hive("Abs", build_abs, declarator=declare_abs)
+Abs = hive.dyna_hive("Abs", build_abs, configurer=configure_abs)

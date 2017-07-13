@@ -16,7 +16,7 @@ class DictCls:
         self.value = self.dict[self.key]
 
 
-def declare_dictionary(meta_args):
+def configure_dictionary(meta_args):
     meta_args.key_data_type = hive.parameter('str', "str.id")
     meta_args.data_type = hive.parameter("str", "int")
 
@@ -59,4 +59,4 @@ def build_dictionary(cls, i, ex, args, meta_args):
     hive.trigger(i.get_key_in, i.get_value)
 
 
-Dictionary = hive.dyna_hive("Dictionary", build_dictionary, declare_dictionary, DictCls)
+Dictionary = hive.dyna_hive("Dictionary", build_dictionary, configure_dictionary, DictCls)

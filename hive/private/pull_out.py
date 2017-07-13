@@ -2,7 +2,7 @@ from .mixins import ConnectableMixin
 from .triggerfunc import TriggerFuncBuilder, TriggerFuncRuntime
 from ..exception import HiveConnectionError
 from ..interfaces import Antenna, Output, Stateful, Callable, ConnectSource, IOModes, Exportable, BeeBase
-from ..manager import ModeFactory, memoize, memo_property
+from ..manager import HiveModeFactory, memoize, memo_property
 from ..typing import data_types_match, MatchFlags
 
 
@@ -102,4 +102,4 @@ class PullOutBuilder(BeeBase, Output, Exportable, ConnectableMixin):
         return "PullOutBuilder({!r})".format(self._target)
 
 
-pull_out = ModeFactory("hive.pull_out", immediate=PullOutImmediate, build=PullOutBuilder)
+pull_out = HiveModeFactory("hive.pull_out", IMMEDIATE=PullOutImmediate, BUILD=PullOutBuilder)

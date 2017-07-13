@@ -43,11 +43,11 @@ def build_h(cls, i, ex, args, meta_args):
         ex.sock = hive.socket(cls.get_plug, identifier="some_api.func")
 
 
-def declare_h(meta_args):
+def configure_h(meta_args):
     meta_args.i = hive.parameter("int", 2)
     meta_args.root = hive.parameter("bool", True)
 
-SomeHive = hive.dyna_hive("H1", build_h, drone_class=C, declarator=declare_h)
+SomeHive = hive.dyna_hive("H1", build_h, drone_class=C, configurer=configure_h)
 
 # This works
 h_2 = SomeHive(name="OtherHive")

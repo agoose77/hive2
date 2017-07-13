@@ -3,7 +3,7 @@ from .triggerable import TriggerableBuilder, TriggerableRuntime
 from .triggerfunc import TriggerFuncBuilder, TriggerFuncRuntime
 from ..exception import HiveConnectionError
 from ..interfaces import Antenna, Output, Stateful, ConnectTarget, Callable, Exportable, BeeBase, IOModes
-from ..manager import memoize, ModeFactory, memo_property
+from ..manager import memoize, HiveModeFactory, memo_property
 from ..typing import data_types_match, MatchFlags
 
 
@@ -114,4 +114,4 @@ class PullInBuilder(BeeBase, Antenna, Exportable, ConnectableMixin):
         return "PullInBuilder({!r})".format(self.__class__.__name__, self._target)
 
 
-pull_in = ModeFactory("hive.pull_in", immediate=PullInImmediate, build=PullInBuilder)
+pull_in = HiveModeFactory("hive.pull_in", IMMEDIATE=PullInImmediate, BUILD=PullInBuilder)

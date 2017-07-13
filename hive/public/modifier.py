@@ -1,7 +1,7 @@
 from functools import partial
 
 from .function import FunctionBuilder, FunctionBound
-from ..manager import ModeFactory, memoize
+from ..manager import HiveModeFactory, memoize
 
 
 class ModifierBuilder(FunctionBuilder):
@@ -18,4 +18,4 @@ class ModifierBuilder(FunctionBuilder):
         return FunctionBound(self, run_hive, func)
 
 
-modifier = ModeFactory("hive.modifier", build=ModifierBuilder)
+modifier = HiveModeFactory("hive.modifier", BUILD=ModifierBuilder)

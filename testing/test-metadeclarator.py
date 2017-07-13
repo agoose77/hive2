@@ -11,7 +11,7 @@ import hive
 # End Boilerplate
 
 
-def declare_dog(meta_args):
+def configure_dog(meta_args):
     print("Invoked Declarator")
     meta_args.puppies = hive.parameter("int", 1)
     
@@ -30,7 +30,7 @@ def build_dog(i, ex, args, meta_args):
 
 
 def test_dyna():
-    DynaDogHive = hive.dyna_hive("Dog", build_dog, declare_dog)
+    DynaDogHive = hive.dyna_hive("Dog", build_dog, configure_dog)
 
     print("\n#1: MetaArg=2, Arg='Jack'")
     d = DynaDogHive(2, "Jack")
@@ -47,7 +47,7 @@ def test_dyna():
 
 
 def test_meta():
-    MetaDogHive = hive.meta_hive("Dog", build_dog, declare_dog)
+    MetaDogHive = hive.meta_hive("Dog", build_dog, configure_dog)
 
     d = MetaDogHive(2)("Jack")
 

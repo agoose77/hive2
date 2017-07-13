@@ -1,26 +1,22 @@
 from enum import auto, Enum
-from .connect_source import ConnectSource
-from .connect_target import ConnectTarget
+
+from .connect import ConnectSource, ConnectTarget
+
 
 class IOModes(Enum):
     PUSH = auto()
     PULL = auto()
 
 
+class Antenna(ConnectTarget):
+    mode = None  # must be push or pull
 
-class IO:
-    pass
-
-
-class Antenna(IO, ConnectTarget):
-    mode = None #must be push or pull
-
-    def push(self, value): #only needs to be defined if mode is "push"
+    def push(self, value):  # only needs to be defined if mode is "push"
         raise NotImplementedError
 
 
-class Output(IO, ConnectSource):
-    mode = None #must be push or pull
+class Output(ConnectSource):
+    mode = None  # must be push or pull
 
-    def pull(self): #only needs to be defined if mode is "pull"
+    def pull(self):  # only needs to be defined if mode is "pull"
         raise NotImplementedError

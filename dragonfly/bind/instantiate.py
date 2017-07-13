@@ -47,7 +47,7 @@ class BindEnvironmentClass:
             callback()
 
 
-def declare_build_environment(meta_args):
+def configure_build_environment(meta_args):
     meta_args.bind_meta_args = hive.parameter("object")
     meta_args.hive_class = hive.parameter("class")
 
@@ -161,14 +161,14 @@ class InstantiatorClass:
         environment_hive.on_started()
 
 
-def declare_instantiator(meta_args):
+def configure_instantiator(meta_args):
     meta_args.bind_process = hive.parameter("str", 'child', {'child', 'independent'})
 
 
 def build_instantiator(cls, i, ex, args, meta_args):
     """Instantiates a Hive class at runtime"""
     # If this is built now, then it won't perform matchmaking, so use meta hive
-    bind_meta_class = hive.meta_hive("BindEnvironment", build_bind_environment, declare_build_environment,
+    bind_meta_class = hive.meta_hive("BindEnvironment", build_bind_environment, configure_build_environment,
                                      drone_class=BindEnvironmentClass)
     #assert bind_meta_class._hive_object_class
     i.bind_meta_class = hive.property(cls, "bind_meta_class", "class", bind_meta_class)
@@ -198,7 +198,7 @@ def build_instantiator(cls, i, ex, args, meta_args):
         ex.on_stopped = hive.plugin(cls.stop_all_processes, identifier="on_stopped")
 
 
-Instantiator = hive.dyna_hive("Instantiator", build_instantiator, declare_instantiator, drone_class=InstantiatorClass)
+Instantiator = hive.dyna_hive("Instantiator", build_instantiator, configure_instantiator, drone_class=InstantiatorClass)
 
 
 def create_instantiator(*bind_infos, docstring=""):

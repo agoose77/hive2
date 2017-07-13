@@ -1,7 +1,7 @@
 import hive
 
 
-def declare_pack_tuple(meta_args):
+def configure_pack_tuple(meta_args):
     meta_args.types = hive.parameter('tuple')
 
 
@@ -29,4 +29,4 @@ def build_pack_tuple(i, ex, args, meta_args):
     hive.trigger(i.pull_tuple, i.do_pack_tuple, pretrigger=True)
 
 
-PackTuple = hive.dyna_hive("PackTuple", build_pack_tuple, declare_pack_tuple)
+PackTuple = hive.dyna_hive("PackTuple", build_pack_tuple, configure_pack_tuple)

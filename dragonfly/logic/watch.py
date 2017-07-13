@@ -24,7 +24,7 @@ class WatchClass:
         add_handler(handler)
 
 
-def declare_watch(meta_args):
+def configure_watch(meta_args):
     meta_args.data_type = hive.parameter("str", "int")
     meta_args.mode = hive.parameter("str", "pull", {"push", "pull"})
 
@@ -55,4 +55,4 @@ def build_watch(cls, i, ex, args, meta_args):
         i.value_in.triggered.connect(cls.compare_values.trigger)
 
 
-Watch = hive.dyna_hive("Watch", build_watch, declare_watch, drone_class=WatchClass)
+Watch = hive.dyna_hive("Watch", build_watch, configure_watch, drone_class=WatchClass)

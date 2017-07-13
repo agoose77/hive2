@@ -4,7 +4,7 @@ from collections import OrderedDict
 import hive
 
 
-def declare_func(meta_args):
+def configure_func(meta_args):
     meta_args.definition = hive.parameter("str.code")
 
 
@@ -151,4 +151,4 @@ def build_func(i, ex, args, meta_args):
         i.modifier.triggered.connect(attr.push_out.trigger)
 
 
-Function = hive.dyna_hive("Function", build_func, declarator=declare_func)
+Function = hive.dyna_hive("Function", build_func, configurer=configure_func)

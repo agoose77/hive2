@@ -1,7 +1,7 @@
 import hive
 
 
-def declare_variable(meta_args):
+def configure_variable(meta_args):
     meta_args.data_type = hive.parameter("str", "int")
     meta_args.advanced = hive.parameter("bool", False)
 
@@ -21,7 +21,7 @@ def build_variable(i, ex, args, meta_args):
 
         ex.pre_output = i.pre_output.triggered
 
-Variable = hive.dyna_hive("BuilderVariable", build_variable, declarator=declare_variable)
+Variable = hive.dyna_hive("BuilderVariable", build_variable, configurer=configure_variable)
 
 # Helpers
 _MetaVariable = Variable.extend("MetaVariable", is_dyna_hive=False)

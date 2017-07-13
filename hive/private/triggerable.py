@@ -1,7 +1,7 @@
 from .plugin import HivePluginBuilder
 from ..exception import HiveConnectionError
 from ..interfaces import TriggerTarget, ConnectTarget, TriggerSource, Callable, BeeBase, Exportable, Bee
-from ..manager import ModeFactory, memoize
+from ..manager import HiveModeFactory, memoize
 
 
 class TriggerableRuntime(TriggerTarget, ConnectTarget, Callable, BeeBase):
@@ -62,4 +62,4 @@ class TriggerableBuilder(BeeBase, TriggerTarget, ConnectTarget, Exportable):
         return "TriggerableBuilder({!r})".format(self._target)
 
 
-triggerable = ModeFactory("hive.triggerable", immediate=TriggerableRuntime, build=TriggerableBuilder)
+triggerable = HiveModeFactory("hive.triggerable", IMMEDIATE=TriggerableRuntime, BUILD=TriggerableBuilder)

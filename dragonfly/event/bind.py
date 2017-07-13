@@ -9,8 +9,8 @@ definition = BindClassDefinition()
 forward_events = definition.parameter("forward_events", "str", 'by_leader', {'none', 'by_leader', 'all'})
 
 with definition.condition(forward_events != "none"):
-    definition.forward_plugin("event.add_handler", declare_for_environment=False)
-    definition.forward_plugin("event.remove_handler", declare_for_environment=False)
+    definition.forward_plugin("event.add_handler", configure_for_environment=False)
+    definition.forward_plugin("event.remove_handler", configure_for_environment=False)
 
 
 factory = definition.build("BindEvent")
@@ -65,7 +65,7 @@ def build_bind(cls, i, ex, args, meta_args):
     ex.on_created = hive.plugin(cls.on_created, "bind.on_created")
 
 
-_BindEvent = hive.dyna_hive("BindEvent", build_bind, declarator=factory.external_declarator, drone_class=EventBindClass)
+_BindEvent = hive.dyna_hive("BindEvent", build_bind, configurer=factory.external_configurer, drone_class=EventBindClass)
 
 
 class EventEnvironmentClass(factory.create_environment_class()):
@@ -129,7 +129,7 @@ class EventEnvironmentClass(factory.create_environment_class()):
         self._update_listener_state()
 
 
-def declare_event_environment(meta_args):
+def configure_event_environment(meta_args):
     pass
 
 
@@ -152,7 +152,7 @@ def build_event_environment(cls, i, ex, args, meta_args):
     ex.resume_events = hive.entry(i.resume_events)
 
 
-_EventEnvironment = hive.meta_hive("EventEnvironment", build_event_environment, declare_event_environment,
+_EventEnvironment = hive.meta_hive("EventEnvironment", build_event_environment, configure_event_environment,
                                   drone_class=EventEnvironmentClass)
 
 

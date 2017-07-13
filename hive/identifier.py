@@ -1,4 +1,4 @@
-def is_valid_identifier(identifier):
+def is_valid_identifier(identifier) -> bool:
     if identifier is None:
         return True
 

@@ -1,27 +1,31 @@
 from contextlib import contextmanager
+from enum import auto, Enum
 
 
-hive_modes = {'immediate', 'build', 'declare'}
+class HiveMode(Enum):
+    IMMEDIATE = auto()
+    BUILD = auto()
+    DECLARE = auto()
 
 
-_mode = "immediate"
+_mode = HiveMode.IMMEDIATE
 _building_hive = None
 _run_hive = None
 _bees = []
 _validation_enabled = True
 
 
-def get_matchmaker_validation_enabled():
+def get_matchmaker_validation_enabled() -> bool:
     return _validation_enabled
 
 
-def set_matchmaker_validation_enabled(validate):
+def set_matchmaker_validation_enabled(validate: bool):
     global _validation_enabled
     _validation_enabled = validate
 
 
 @contextmanager
-def matchmaker_validation_enabled_as(validate):
+def matchmaker_validation_enabled_as(validate: bool):
     previous_validation_state = get_matchmaker_validation_enabled()
     try:
         set_matchmaker_validation_enabled(validate)
@@ -31,18 +35,18 @@ def matchmaker_validation_enabled_as(validate):
         set_matchmaker_validation_enabled(previous_validation_state)
 
 
-def get_mode():
+def get_mode() -> HiveMode:
     return _mode
 
 
-def set_mode(mode):
+def set_mode(mode: HiveMode):
     global _mode
-    assert mode in hive_modes, mode
+    assert mode in HiveMode, mode
     _mode = mode
 
 
 @contextmanager
-def hive_mode_as(mode):
+def hive_mode_as(mode: HiveMode):
     previous_mode = get_mode()
     try:
         set_mode(mode)
@@ -52,47 +56,47 @@ def hive_mode_as(mode):
         set_mode(previous_mode)
 
 
-def get_building_hive():
+def get_building_hive() -> object:
     """Return the current hive being built"""
     return _building_hive
 
 
-def set_building_hive(building_hive):
+def set_building_hive(building_hive: object):
     global _building_hive
     _building_hive = building_hive
 
 
 @contextmanager
-def building_hive_as(building_hive):
+def building_hive_as(building_hive: object):
     previous_building_hive = get_building_hive()
     set_building_hive(building_hive)
     yield
     set_building_hive(previous_building_hive)
 
 
-def get_run_hive():
+def get_run_hive() -> object:
     return _run_hive
 
 
-def set_run_hive(run_hive):
+def set_run_hive(run_hive: object):
     global _run_hive
     _run_hive = run_hive
 
 
 @contextmanager
-def run_hive_as(run_hive):
+def run_hive_as(run_hive: object):
     previous_run_hive = get_run_hive()
     set_run_hive(run_hive)
     yield
     set_run_hive(previous_run_hive)
 
 
-def register_bee(bee):
+def register_bee(bee: object):
     assert _bees, "No valid state exists registering public, call register_bee_push()"
     _bees[-1].append(bee)
 
 
-def register_bee_pop():
+def register_bee_pop() -> list:
     assert _bees, "No valid state exists registering public"
     return _bees.pop()
 

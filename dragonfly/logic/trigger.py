@@ -2,7 +2,7 @@ import hive
 import string
 
 
-def declare_trigger(meta_args):
+def configure_trigger(meta_args):
     meta_args.count = hive.parameter("int", 1, options={x + 1 for x in range(26)})
 
 
@@ -16,4 +16,4 @@ def build_trigger(i, ex, args, meta_args):
         setattr(ex, char, i.trigger.trigger)
 
 
-Trigger = hive.dyna_hive("Trigger", build_trigger, declare_trigger)
+Trigger = hive.dyna_hive("Trigger", build_trigger, configure_trigger)

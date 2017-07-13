@@ -3,7 +3,7 @@ import string
 import hive
 
 
-def declare_format(meta_args):
+def configure_format(meta_args):
     meta_args.format_string = hive.parameter("str", "{}")
 
 
@@ -49,4 +49,4 @@ def build_format(i, ex, args, meta_args):
     i.result.pull_out.pre_triggered.connect(i.do_format.trigger)
 
 
-Format = hive.dyna_hive("Format", build_format, declarator=declare_format)
+Format = hive.dyna_hive("Format", build_format, configurer=configure_format)

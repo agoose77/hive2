@@ -1,10 +1,10 @@
-from hive.exception import HiveConnectionError
-from hive.identifier import is_valid_identifier
-from hive.interfaces import Plugin, Socket, ConnectSource, Exportable, BeeBase
-from hive.manager import memoize, ModeFactory
-from hive.policies import MultipleOptional
-from hive.private.mixins import ConnectableMixin
-from hive.typing import is_valid_data_type
+from .mixins import ConnectableMixin
+from ..exception import HiveConnectionError
+from ..identifier import is_valid_identifier
+from ..interfaces import ConnectSource, Exportable, BeeBase, Bee, Plugin, Socket
+from ..manager import memoize, HiveModeFactory
+from ..policies import MultipleOptional
+from ..typing import is_valid_data_type
 
 
 class HivePluginRuntime(Plugin, ConnectSource, ConnectableMixin):
@@ -86,4 +86,4 @@ class HivePluginBuilder(BeeBase, Exportable, Plugin, ConnectSource, ConnectableM
                                                                         self._policy, self.export_to_parent)
 
 
-plugin = ModeFactory("hive.plugin", immediate=HivePluginRuntime, build=HivePluginBuilder)
+plugin = HiveModeFactory("hive.plugin", IMMEDIATE=HivePluginRuntime, BUILD=HivePluginBuilder)

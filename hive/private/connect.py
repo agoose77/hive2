@@ -1,32 +1,38 @@
-from collections import namedtuple
 from itertools import product
 from operator import itemgetter
+from typing import List, Tuple, NamedTuple
 
-from ..contexts import get_mode, register_bee
+from ..contexts import register_bee
 from ..exception import MatchFailedError, HiveConnectionError
-from ..interfaces import ConnectSourceBase, ConnectSourceDerived, ConnectTargetBase, ConnectTargetDerived, BeeBase, Bee
-from ..manager import memoize
+from ..interfaces import (ConnectSourceBase, ConnectSourceDerived, ConnectTargetBase, ConnectTargetDerived, BeeBase,
+                          Bee, ConnectTarget, ConnectSource, ConnectCandidate)
+from ..manager import memoize, HiveModeFactory
 from ..typing import get_match_score, find_matching_ast, MatchFlags, parse_type_string
 
-ConnectionCandidate = namedtuple("ConnectionCandidate", ("bee_name", "data_type"))
+
+class ScoredConnectPair(NamedTuple):
+    score: int
+    candidate: ConnectCandidate
+
+
+TypedCandidates = Tuple[Tuple[ConnectCandidate, ConnectCandidate], ...]
 
 _first_item = itemgetter(0)
 
 
-def sorted_candidates_from_scored(scored_candidates):
-    """Return sorted list of candidate pairs from list of scored candidates
+def sorted_candidates_from_scored(scored_candidates: List[ScoredConnectPair]) -> TypedCandidates:
+    """Return sorted tuple of candidate pairs from list of scored candidates
     
     :param scored_candidates: sequence of (score, source, target) items
     """
-    return tuple(x[1:] for x in sorted(scored_candidates, key=_first_item, reverse=True))
+    return tuple(x.candidate for x in sorted(scored_candidates, key=_first_item, reverse=True))
 
 
-def find_connection_candidates(source_hive, target_hive):
+def find_connection_candidates(source_hive: ConnectSourceDerived, target_hive: ConnectTargetDerived):
     """Finds appropriate connections between ConnectionSources and ConnectionTargets
 
-    :param sources: connection sources
-    :param targets: connection targets
-    :param support_untyped_target: require target type definitions to be declared
+    :param source_hive: ConnectSourceDerived instance
+    :param target_hive: ConnectTargetDerived instance
     """
     scored_typed_candidates = []
     scored_untyped_candidates = []
@@ -64,11 +70,13 @@ def find_connection_candidates(source_hive, target_hive):
                 continue
 
             untyped_score = get_match_score(match)
-            scored_untyped_candidates.append((untyped_score, source_candidate, target_candidate))
+            candidate = ScoredConnectPair(untyped_score, ConnectCandidate(source_candidate, target_candidate))
+            scored_untyped_candidates.append(candidate)
 
         else:
             typed_score = get_match_score(match)
-            scored_typed_candidates.append((typed_score, source_candidate, target_candidate))
+            candidate = ScoredConnectPair(typed_score, ConnectCandidate(source_candidate, target_candidate))
+            scored_typed_candidates.append(candidate)
 
     # Sort candidates according to length of match (largest first)
     typed_candidates = sorted_candidates_from_scored(scored_typed_candidates)
@@ -88,9 +96,6 @@ def find_connection_between_hives(source_hive, target_hive):
     For each legal connection, first attempt to find typed target connection between source and target.
     If a typed target connection cannot be made, attempt a typed source untyped target connection
     """
-    if not source_hive._hive_can_connect_hive(target_hive):
-        raise ValueError("Both hives must be either Hive runtimes or Hive objects")
-
     candidates = find_connection_candidates(source_hive, target_hive)
     if not candidates:
         raise ValueError("No matching connections found")
@@ -110,13 +115,13 @@ def find_connection_between_hives(source_hive, target_hive):
     return source, target
 
 
-def resolve_endpoints(source, target):
+def resolve_endpoints(source: [ConnectSource, ConnectSourceDerived], target: ConnectTargetBase) -> Tuple[
+    ConnectSource, ConnectTarget]:
     """Find resolved endpoints for source/targets which are dervived connection sources/targets (Hives)"""
-    # TODO: register connection, or insert a listener function in between
     hive_source = isinstance(source, ConnectSourceDerived)
     hive_target = isinstance(target, ConnectTargetDerived)
 
-    # Find appropriate public to connect within respective hives
+    # TODO: register connection, or insert a listener function in between
     if hive_source and hive_target:
         source, target = find_connection_between_hives(source, target)
 
@@ -130,24 +135,29 @@ def resolve_endpoints(source, target):
     return source, target
 
 
-def build_connection(source, target):
+def build_connection(source: ConnectSourceBase, target: ConnectTargetBase):
     """Runtime connection builder between source and target"""
-    source, target = resolve_endpoints(source, target)
+    validate_endpoints(source, target)
+    source_resolved, target_resolved = resolve_endpoints(source, target)
 
     # raises an Exception if incompatible
-    source._hive_is_connectable_source(target)
-    target._hive_is_connectable_target(source)
+    source_resolved._hive_is_connectable_source(target_resolved)
+    target_resolved._hive_is_connectable_target(source_resolved)
 
-    target._hive_connect_target(source)
-    source._hive_connect_source(target)
+    target_resolved._hive_connect_target(source_resolved)
+    source_resolved._hive_connect_source(target_resolved)
 
 
 class ConnectionBuilder(BeeBase):
-    def __init__(self, source, target):
+    def __init__(self, source: ConnectSourceBase, target: ConnectTargetBase):
+        validate_endpoints(source, target)
+
         self._source = source
         self._target = target
 
         super().__init__()
+
+        register_bee(self)
 
     @memoize
     def bind(self, run_hive):
@@ -160,7 +170,7 @@ class ConnectionBuilder(BeeBase):
         return "ConnectionBuilder({!r}, {!r})".format(self._source, self._target)
 
 
-def connect(source, target):
+def validate_endpoints(source, target):
     if isinstance(source, Bee):
         assert source.implements(ConnectSourceBase), source
         assert target.implements(ConnectTargetBase), target
@@ -169,10 +179,5 @@ def connect(source, target):
         assert isinstance(source, ConnectSourceBase), source
         assert isinstance(target, ConnectTargetBase), target
 
-    if get_mode() == "immediate":
-        build_connection(source, target)
 
-    else:
-        connection_bee = ConnectionBuilder(source, target)
-        register_bee(connection_bee)
-        return connection_bee
+connect = HiveModeFactory("hive.connect", IMMEDIATE=build_connection, BUILD=ConnectionBuilder)

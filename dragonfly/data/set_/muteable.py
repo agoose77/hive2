@@ -1,7 +1,7 @@
 import hive
 
 
-def declare_set(meta_args):
+def configure_set(meta_args):
     meta_args.data_type = hive.parameter('str', 'int')
 
 
@@ -55,4 +55,4 @@ def build_set(i, ex, args, meta_args):
     ex.clear = hive.entry(i.do_clear)
 
 
-Set = hive.dyna_hive("Set", build_set, declare_set)
+Set = hive.dyna_hive("Set", build_set, configure_set)

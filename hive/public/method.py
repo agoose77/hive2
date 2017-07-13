@@ -1,5 +1,5 @@
 from .function import FunctionBound, FunctionBuilder
-from ..manager import ModeFactory, memoize
+from ..manager import HiveModeFactory, memoize
 
 
 class MethodBuilder(FunctionBuilder):
@@ -16,4 +16,4 @@ class MethodBuilder(FunctionBuilder):
         return FunctionBound(self, run_hive, method)
 
 
-method = ModeFactory("hive.method", build=MethodBuilder)
+method = HiveModeFactory("hive.method", BUILD=MethodBuilder)

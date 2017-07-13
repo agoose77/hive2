@@ -13,25 +13,27 @@ Hence, Bindable and Exportable must be Bees
 
 from abc import ABC, abstractmethod
 from logging import getLogger
-from ..contexts import get_building_hive
+from typing import Type
 
+from ..contexts import get_building_hive
 
 logger = getLogger(__name__)
 
 
 class Bee(ABC):
     # TODO: resolve method for arguments that are public (returns a new HiveBee class?)
+
     @property
     @abstractmethod
-    def _hive_parent_hive_object_class(self):
+    def _hive_parent_hive_object_class(self) -> Type:
         pass
 
-    def implements(self, cls):
+    def implements(self, cls: Type) -> bool:
         """Return True if the BeeBase returned by getinstance will implement a given class.
         
         Required to support inspection of runtime-public
         
-        :param cls: class
+        :param cls: class to test against
         """
         return isinstance(self, cls)
 
@@ -40,7 +42,6 @@ class Bee(ABC):
 
 
 class BeeBase(Bee):
-
     _hive_parent_hive_object_class = None
 
     def __init__(self):

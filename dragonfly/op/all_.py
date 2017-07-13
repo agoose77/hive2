@@ -14,7 +14,7 @@ def func(i, ex):
 """
 
 
-def declare_all(meta_args):
+def configure_all(meta_args):
     meta_args.count = hive.parameter("int", 1, options=set(range(1, 27)))
     meta_args.data_type = hive.parameter("str", "bool")
 
@@ -46,4 +46,4 @@ def build_all(i, ex, args, meta_args):
     ex.output = i.result.pull_out
 
 
-All = hive.dyna_hive("All", build_all, declare_all)
+All = hive.dyna_hive("All", build_all, configure_all)

@@ -1,7 +1,7 @@
 import hive
 
 
-def declare_buffer(meta_args):
+def configure_buffer(meta_args):
     meta_args.data_type = hive.parameter("str", "int")
     meta_args.mode = hive.parameter("str", "push", options={'push', 'pull'})
 
@@ -28,4 +28,4 @@ def build_buffer(i, ex, args, meta_args):
         ex.pull_in = i.cached_value.pull_out.trigger
 
 
-Buffer = hive.dyna_hive("Buffer", build_buffer, declarator=declare_buffer)
+Buffer = hive.dyna_hive("Buffer", build_buffer, configurer=configure_buffer)

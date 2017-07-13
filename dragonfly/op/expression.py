@@ -23,17 +23,17 @@ def func(i, ex):
     i.result.value = ({})"""
 
     declarations = "\n    ".join(["{0}=i.{0}.property".format(name) for name in names])
-    declare_func = declaration.format(declarations, expression)
+    configure_func = declaration.format(declarations, expression)
 
     namespace = {}
-    print(declare_func)
-    exec(declare_func, namespace)
+    print(configure_func)
+    exec(configure_func, namespace)
     func = namespace['func']
 
     return func
 
 
-def declare_expression(meta_args):
+def configure_expression(meta_args):
     meta_args.expression = hive.parameter("str", "")
     meta_args.result_type = hive.parameter('str', "int")
 
@@ -62,4 +62,4 @@ def build_expression(i, ex, args, meta_args):
     i.result.pull_out.pre_triggered.connect(i.modifier.trigger)
 
 
-Expression = hive.dyna_hive("Expression", build_expression, declarator=declare_expression)
+Expression = hive.dyna_hive("Expression", build_expression, configurer=configure_expression)

@@ -1,4 +1,4 @@
-from .connect import connect, ConnectionCandidate
+from .connect import connect, ConnectCandidate
 from .plugin import HivePluginBuilder, HivePluginRuntime
 from .pull_in import PullInBuilder, PullInImmediate
 from .pull_out import PullOutBuilder, PullOutImmediate

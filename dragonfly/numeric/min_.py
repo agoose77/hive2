@@ -1,7 +1,7 @@
 import hive
 
 
-def declare_min(meta_args):
+def configure_min(meta_args):
     meta_args.data_type = hive.parameter('str', 'float', options={'complex', 'int', 'float'})
 
 
@@ -26,4 +26,4 @@ def build_min(i, ex, args, meta_args):
                                               i.do_min.trigger)
 
 
-Min = hive.dyna_hive("Min", build_min, declare_min)
+Min = hive.dyna_hive("Min", build_min, configure_min)

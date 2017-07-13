@@ -36,7 +36,7 @@ class _ListenerCls:
         add_handler(handler)
 
 
-def declare_listener(meta_args):
+def configure_listener(meta_args):
     meta_args.mode = hive.parameter("str", 'leader', options={'leader', 'match', 'trigger'})
 
 
@@ -53,4 +53,4 @@ def build_listener(cls, i, ex, args, meta_args):
         ex.after_leader = hive.output(i.pull_after_leader)
 
 
-Listener = hive.dyna_hive("Listener", build_listener, drone_class=_ListenerCls, declarator=declare_listener)
+Listener = hive.dyna_hive("Listener", build_listener, drone_class=_ListenerCls, configurer=configure_listener)
