@@ -17,7 +17,7 @@ def build_while(i, ex, args):
     ex.condition_in = i.condition.pull_in
 
     i.do_trig = hive.modifier()
-    ex.trig_out = i.do_trig.triggered
+    ex.trig_out = i.do_trig.pushed
 
     i.trig_in = hive.modifier(do_while)
     ex.trig_in = i.trig_in.trigger

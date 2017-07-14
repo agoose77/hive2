@@ -81,6 +81,3 @@ class HiveSocketBuilder(BeeBase, Exportable, Socket, ConnectTarget):
     def __repr__(self):
         return "HiveSocketBuilder({!r}, {!r}, {!r}, {!r}, {!r})".format(self._target, self._identifier, self._data_type,
                                                                         self._policy, self._export_to_parent)
-
-
-socket = HiveModeFactory("hive.socket", IMMEDIATE=HiveSocketRuntime, BUILD=HiveSocketBuilder)

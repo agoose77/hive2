@@ -65,13 +65,13 @@ h=H()
 #     i.attr.updated.connect(i.updated.trigger)
 #
 #     i.on_attr_pulled_out = hive.modifier(on_attr_pulled_out)
-#     i.attr.pull_out.triggered.connect(i.on_attr_pulled_out.trigger)
+#     i.attr.pull_out.after.connect(i.on_attr_pulled_out.trigger)
 #
 #     i.on_attr_pulled_in = hive.modifier(on_attr_pulled_in)
-#     i.attr.pull_in.triggered.connect(i.on_attr_pulled_in.trigger)
+#     i.attr.pull_in.after.connect(i.on_attr_pulled_in.trigger)
 #
 #     i.do_pull = hive.modifier(do_pull)
-#     i.do_pull.triggered.connect(i.attr.pull_in.trigger)
+#     i.do_pull.after.connect(i.attr.pull_in.trigger)
 #
 #     ex.foo = cls.foo.property()
 #

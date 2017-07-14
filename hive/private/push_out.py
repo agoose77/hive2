@@ -34,13 +34,13 @@ class PushOutBase(BeeBase, Output, ConnectableMixin, Callable):
 
     def push(self):
         # TODO: exception handling hooks
-        self.pre_triggered()
+        self.before()
 
         value = self._target._hive_stateful_getter()
         for target in self._targets:
             target(value)
 
-        self.triggered()
+        self.after()
 
     def socket(self):
         return self.push
@@ -55,8 +55,8 @@ class PushOutImmediate(PushOutBase):
     def __init__(self, target):
         super().__init__(target)
 
-        self.pre_triggered = TriggerFuncRuntime()
-        self.triggered = TriggerFuncRuntime()
+        self.before = TriggerFuncRuntime()
+        self.after = TriggerFuncRuntime()
         self.trigger = TriggerableRuntime(self)
 
     def __repr__(self):
@@ -71,12 +71,12 @@ class PushOutBound(PushOutBase):
         super().__init__(target)
 
     @memo_property
-    def triggered(self):
-        return self._build_bee.triggered.bind(self._run_hive)
+    def after(self):
+        return self._build_bee.after.bind(self._run_hive)
 
     @memo_property
-    def pre_triggered(self):
-        return self._build_bee.pre_triggered.bind(self._run_hive)
+    def before(self):
+        return self._build_bee.before.bind(self._run_hive)
 
     @memo_property
     def trigger(self):
@@ -94,8 +94,8 @@ class PushOutBuilder(BeeBase, Output, Exportable, ConnectableMixin):
 
         self._target = target
 
-        self.triggered = TriggerFuncBuilder()
-        self.pre_triggered = TriggerFuncBuilder()
+        self.after = TriggerFuncBuilder()
+        self.before = TriggerFuncBuilder()
         self.trigger = TriggerableBuilder(self)
 
         super().__init__()
@@ -113,6 +113,3 @@ class PushOutBuilder(BeeBase, Output, Exportable, ConnectableMixin):
 
     def __repr__(self):
         return "PushOutBuilder({!r})".format(self._target)
-
-
-push_out = HiveModeFactory("hive.push_out", IMMEDIATE=PushOutImmediate, BUILD=PushOutBuilder)

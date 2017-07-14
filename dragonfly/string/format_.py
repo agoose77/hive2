@@ -38,7 +38,7 @@ def build_format(i, ex, args, meta_args):
         attr = hive.attribute()
         setattr(i, field_name, attr)
         setattr(ex, field_name, attr.pull_in)
-        i.result_out.pre_triggered.connect(attr.pull_in.trigger)
+        i.result_out.pre_pushed.connect(attr.pull_in.trigger)
 
     def do_format(i, ex):
         args = [getattr(i, "{}.property".format(attr_name)) for attr_name in indexed_fields]
@@ -46,7 +46,7 @@ def build_format(i, ex, args, meta_args):
         i.result.value = formatter.format(format_string, *args, **kwargs)
 
     i.do_format = hive.modifier(do_format)
-    i.result.pull_out.pre_triggered.connect(i.do_format.trigger)
+    i.result.pull_out.pre_pushed.connect(i.do_format.trigger)
 
 
 Format = hive.dyna_hive("Format", build_format, configurer=configure_format)

@@ -1,15 +1,24 @@
 from abc import ABC, abstractmethod
-from collections import OrderedDict, namedtuple
+from collections import OrderedDict
+from typing import MutableMapping, KT, VT, Any, Callable, Dict, Type, NamedTuple
 
 from ..compatability import next
 from ..interfaces import Bee, Exportable
 from ..parameter import Parameter
 
-ExtractedArguments = namedtuple("ExtractedArguments", "args kwargs parameter_values")
+
+class OrderedDictType(OrderedDict, MutableMapping[KT, VT]):
+    pass
+
+
+class ExtractedArguments(NamedTuple):
+    args: tuple
+    kwargs: dict
+    parameter_values: OrderedDictType[str, Any]
 
 
 class ImmutableAttributeMapping:
-    def __init__(self, name: str, ordered_mapping: OrderedDict):
+    def __init__(self, name: str, ordered_mapping: OrderedDictType[str, Any]):
         """ImmutableAttributeMapping initialiser"""
         if not isinstance(ordered_mapping, OrderedDict):
             raise ValueError("Expected OrderedDict")
@@ -45,8 +54,11 @@ class ImmutableAttributeMapping:
             return self._name
 
 
+ValidatorType = Callable[[str, Any], None]
+
+
 class AttributeMapping(ImmutableAttributeMapping):
-    def __init__(self, name: str, ordered_mapping: OrderedDict = None, validator=None):
+    def __init__(self, name: str, ordered_mapping: OrderedDictType[str, Any] = None, validator: ValidatorType = None):
         """MutableMaping initialiser
 
         :param ordered_mapping: default values for attributes
@@ -59,10 +71,10 @@ class AttributeMapping(ImmutableAttributeMapping):
 
         super().__init__(name, ordered_mapping)
 
-    def _validate_attribute(self, name: str, value):
+    def _validate_attribute(self, name: str, value: Any):
         if self._validator is not None:
             try:
-                self._validator(self, name, value)
+                self._validator(name, value)
             except ValueError as err:
                 raise AttributeError("Error setting attribute {}.{}".format(self._name, name)) from err
 
@@ -79,45 +91,47 @@ class AttributeMapping(ImmutableAttributeMapping):
 
 class ValidatorBase(ABC):
     @abstractmethod
-    def __call__(self, wrapper: AttributeMapping, name: str, value):
+    def __call__(self, name: str, value: Any):
         pass
 
 
-class BaseBeeValidator(ValidatorBase):
+class BeeValidatorBase(ValidatorBase):
     """Validator for Bees which are associated with a HiveObject builder hive"""
 
-    def __init__(self, hive_object_class):
+    def __init__(self, hive_object_class: Type['HiveObject']):
         self._hive_object_class = hive_object_class
 
-    def __call__(self, wrapper: AttributeMapping, name: str, value):
+    def __call__(self, name: str, value: Any):
         if name.startswith("_"):
-            raise ValueError("BeeBase names cannot start with underscores")
+            raise ValueError("Bee names cannot start with underscores")
 
         if not isinstance(value, Bee):
-            raise ValueError("Invalid attribute data type {}, expected a BeeBase instance".format(type(value)))
+            raise ValueError("Invalid data type {}, expected a BeeBase instance".format(type(value)))
 
         if value._hive_parent_hive_object_class is None:
             raise ValueError("Bees must be defined inside the builder function")
 
         # TODO should permit ResolveBees here
         if value._hive_parent_hive_object_class is not self._hive_object_class:
-            raise ValueError("Bees cannot be built by a different hive {} // {}".format(value._hive_parent_hive_object_class,self._hive_object_class))
+            raise ValueError(
+                "Bees cannot be built by a different hive {} // {}".format(value._hive_parent_hive_object_class,
+                                                                           self._hive_object_class))
 
 
-class InternalValidator(BaseBeeValidator):
-    def __call__(self, wrapper, name: str, value):
-        super().__call__(wrapper, name, value)
+class InternalValidator(BeeValidatorBase):
+    def __call__(self, name: str, value: Any):
+        super().__call__(name, value)
 
         if not isinstance(value, Bee):
             raise ValueError("Attribute must be Bees not {}".format(type(value)))
 
 
-class ExternalValidator(BaseBeeValidator):
-    def __call__(self, wrapper, name: str, value):
-        super().__call__(wrapper, name, value)
+class ExternalValidator(BeeValidatorBase):
+    def __call__(self, name: str, value: Any):
+        super().__call__(name, value)
 
         if not isinstance(value, Bee):
-            raise ValueError("Attribute must be BeeBase, not {}".format(type(value)))
+            raise ValueError("Attribute must be Bee, not {}".format(type(value)))
 
         if not isinstance(value, Exportable):
             raise ValueError("Attribute must be Exportable")
@@ -148,7 +162,7 @@ class ArgWrapper(AttributeMapping):
         name = "{}(resolved)".format(self._name)
         return ResolvedArgWrapper(name, name_to_param, parameter_dict)
 
-    def extract_from_arguments(self, args: tuple, kwargs: dict) -> ExtractedArguments:
+    def extract_from_arguments(self, args: tuple, kwargs: Dict[str, Any]) -> ExtractedArguments:
         """Extract parameter values from arguments and keyword arguments provided to the building hive.
 
         Return the new args and kwargs wrappers, and an dict of extracted parameter values
@@ -180,7 +194,7 @@ class ArgWrapper(AttributeMapping):
             if name not in self._ordered_mapping:
                 continue
             if name in found_param_values:
-                raise ValueError("Multiple values for {}".format(name))
+                raise ValueError("Multiple values for parameter {}".format(name))
 
             found_param_values[name] = remaining_kwargs.pop(name)
 
@@ -192,7 +206,7 @@ class ArgWrapper(AttributeMapping):
             except KeyError:
                 # Check if we can omit the value
                 if parameter.start_value is Parameter.no_value:
-                    raise ValueError(self._format_message("No value for '{}' can be resolved".format(name)))
+                    raise ValueError("No value for parameter '{}' can be resolved".format(name))
                 else:
                     value = parameter.start_value
 
@@ -201,9 +215,9 @@ class ArgWrapper(AttributeMapping):
         return ExtractedArguments(remaining_args, remaining_kwargs, all_param_values)
 
 
-def validate_args(wrapper: ArgWrapper, name: str, value):
+def validate_args(name: str, value):
     if not isinstance(value, Parameter):
-        raise ValueError("AttributeMapping must be a Parameters, not '{}'".format(name, value.__class__))
+        raise ValueError("Invalid data type {}, expected a Parameter instance".format(type(value)))
 
 
 class ResolvedArgWrapper(ImmutableAttributeMapping):
@@ -215,10 +229,9 @@ class ResolvedArgWrapper(ImmutableAttributeMapping):
         :param wrapper: name of args wrapper 
         :param resolved_mapping: OrderedDict mapping """
         object.__setattr__(self, '_param_to_name', {p: n for n, p in name_to_param.items()})
-        ordered_name_to_value = OrderedDict(((n, name_to_value[n]) for n, p in name_to_param.items()))
-        super().__init__(name, ordered_name_to_value)
+        super().__init__(name, OrderedDict(((n, name_to_value[n]) for n, p in name_to_param.items())))
 
-    def resolve_parameter(self, parameter):
+    def resolve_parameter(self, parameter: Parameter) -> Any:
         """Retrieve the value associated with the given parameter
 
         :param parameter: HiveParameter instance

@@ -53,9 +53,9 @@ def build_random(cls, i, ex, args):
     ex.int_step = i.randint_step.pull_in
     ex.int = cls.rand_range.pull_out
 
-    cls.rand_range.pull_out.pre_triggered.connect(i.pull_randint_max.trigger,
-                                                     i.pull_randint_min.trigger,
-                                                     i.pull_randint_step.trigger)
+    cls.rand_range.pull_out.pre_pushed.connect(i.pull_randint_max.trigger,
+                                               i.pull_randint_min.trigger,
+                                               i.pull_randint_step.trigger)
 
     # Randrange
     i.uniform_min = hive.property(cls, "uniform_min", "float")
@@ -65,8 +65,8 @@ def build_random(cls, i, ex, args):
     ex.uniform_max = i.uniform_max.pull_in
 
     ex.uniform = cls.rand_uniform.pull_out
-    cls.rand_uniform.pull_out.pre_triggered.connect(i.uniform_max.pull_in.trigger,
-                                                       i.uniform_min.pull_in.trigger)
+    cls.rand_uniform.pull_out.pre_pushed.connect(i.uniform_max.pull_in.trigger,
+                                                 i.uniform_min.pull_in.trigger)
 
 
 Random = hive.hive("Random", build_random, drone_class=_RandomCls)

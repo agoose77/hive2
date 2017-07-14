@@ -64,6 +64,3 @@ class StatefulDescriptorBuilder(BeeBase, Exportable):
 
     def __repr__(self):
         return "BuilderStatefulDescriptor({!r}, {!r})".format(self._target, self._flags)
-
-
-stateful_descriptor = HiveModeFactory("stateful_descriptor", BUILD=StatefulDescriptorBuilder)

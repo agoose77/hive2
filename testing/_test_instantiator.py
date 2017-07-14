@@ -12,10 +12,10 @@ def build_some_instance(i, ex, args):
     i.mod = hive.modifier(lambda self: print(self, self._some_var))
     hive.connect(ex.on_tick, i.mod)
 
-    def on_stopped():
+    def on_stopped(i, ex):
         print("I am closed!")
 
-    ex.on_closed = hive.plugin(on_stopped, "on_stopped")
+    ex.on_closed = hive.modifier(on_stopped).plugin("on_stopped")
 
 
 Instantiator = create_instantiator(bind_info)

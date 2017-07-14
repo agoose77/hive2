@@ -48,8 +48,8 @@ def build_import(cls, i, ex, args):
     i.module = hive.property(cls, "module", "module")
     ex.module = i.module.pull_out
 
-    i.module.pull_in.pre_triggered.connect(i.import_path.pull_in.trigger)
-    i.module.pull_in.pre_triggered.connect(i.do_import.trigger)
+    i.module.pull_in.pre_pushed.connect(i.import_path.pull_in.trigger)
+    i.module.pull_in.pre_pushed.connect(i.do_import.trigger)
 
 
 Import = hive.hive("Import", build_import, drone_class=ImportClass)

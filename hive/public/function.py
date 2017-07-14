@@ -7,6 +7,7 @@ from ..private import TriggerableBuilder, TriggerableRuntime, TriggerFuncBuilder
 
 
 class FunctionBase(BeeBase, Callable):
+
     def __call__(self, *args, **kwargs):
         self.pre_triggered()
         if self._func is not None:

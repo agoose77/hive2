@@ -1,5 +1,5 @@
 from .mixins import ConnectableMixin
-from .triggerfunc import TriggerFuncBuilder
+from .triggerfunc import TriggerFuncBuilder, TriggerFuncRuntime
 from ..exception import HiveConnectionError
 from ..interfaces import Antenna, Output, Stateful, ConnectTarget, Callable, Exportable, BeeBase, IOModes
 from ..manager import memoize, HiveModeFactory, memo_property
@@ -22,9 +22,9 @@ class PushInBase(BeeBase, Antenna, ConnectableMixin, Callable):
 
     def push(self, value):
         # TODO: exception handling hooks
-        self.pre_triggered()
+        self.before()
         self._target._hive_stateful_setter(value)
-        self.triggered()
+        self.after()
 
     def _hive_is_connectable_target(self, source):
         if not isinstance(source, Output):
@@ -43,6 +43,12 @@ class PushInBase(BeeBase, Antenna, ConnectableMixin, Callable):
 
 
 class PushInImmediate(PushInBase):
+    def __init__(self, target):
+        super().__init__(target)
+
+        self.before = TriggerFuncRuntime()
+        self.after = TriggerFuncRuntime()
+
     def __repr__(self):
         return "PushInImmediate({!r})".format(self._target)
 
@@ -55,15 +61,15 @@ class PushInBound(PushInBase):
         super().__init__(target)
 
     @memo_property
-    def triggered(self):
-        return self._build_bee.triggered.bind(self._run_hive)
-
-    @memo_property
-    def pre_triggered(self):
-        return self._build_bee.pre_triggered.bind(self._run_hive)
+    def after(self):
+        return self._build_bee.after.bind(self._run_hive)
 
     def __repr__(self):
         return "PushInBound({!r}, {!r}, {!r})".format(self._build_bee, self._run_hive, self._target)
+
+    @memo_property
+    def before(self):
+        return self._build_bee.after.bind(self._run_hive)
 
 
 class PushInBuilder(BeeBase, Antenna, Exportable, ConnectableMixin):
@@ -74,8 +80,8 @@ class PushInBuilder(BeeBase, Antenna, Exportable, ConnectableMixin):
 
         self._target = target
 
-        self.triggered = TriggerFuncBuilder()
-        self.pre_triggered = TriggerFuncBuilder()
+        self.after = TriggerFuncBuilder()
+        self.before = TriggerFuncBuilder()
 
         super().__init__()
 

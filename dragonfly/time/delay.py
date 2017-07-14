@@ -57,7 +57,7 @@ class DelayCls:
 def build_delay(cls, i, ex, args):
     """Delay input trigger by X ticks, where X is the value of delay_in (greater than zero)"""
     i.on_elapsed = hive.modifier()
-    ex.on_elapsed = i.on_elapsed.triggered
+    ex.on_elapsed = i.on_elapsed.pushed
 
     ex.trig_in = cls.on_triggered.trigger
 

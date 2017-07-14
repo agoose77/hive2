@@ -6,6 +6,10 @@ class HiveConnectionError(HiveException):
     pass
 
 
+class HiveBuilderError(HiveException):
+    pass
+
+
 # Matchmaking
 class MatchmakingPolicyError(HiveException):
     pass

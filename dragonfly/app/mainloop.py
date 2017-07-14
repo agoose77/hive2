@@ -49,7 +49,7 @@ def build_mainloop(cls, i, ex, args):
     """Blocking fixed-timestep trigger generator"""
     i.tick = hive.modifier()
 
-    ex.on_tick = i.tick.triggered
+    ex.on_tick = i.tick.pushed
     ex.stop = cls.stop.trigger
     ex.run = cls.run.trigger
 

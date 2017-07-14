@@ -17,9 +17,9 @@ def build_startswith(i, ex, args):
     ex.result = i.result.pull_out
 
     i.do_startswith = hive.modifier(do_startswith)
-    i.result.pull_out.pre_triggered.connect(i.string.pull_in.trigger,
-                                               i.substring.pull_in.trigger,
-                                               i.do_startswith.trigger)
+    i.result.pull_out.pre_pushed.connect(i.string.pull_in.trigger,
+                                         i.substring.pull_in.trigger,
+                                         i.do_startswith.trigger)
 
 
 StartsWith = hive.hive("StartsWith", build_startswith)

@@ -13,7 +13,7 @@ def build_transistor(i, ex, args, meta_args):
     ex.result = i.value.push_out
     ex.trigger = i.value.push_out.trigger
 
-    i.value.pull_in.triggered.connect(i.value.push_out.trigger)
+    i.value.pull_in.pushed.connect(i.value.push_out.trigger)
 
 
 Transistor = hive.dyna_hive("Transistor", build_transistor, configure_transistor)

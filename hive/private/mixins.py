@@ -14,3 +14,4 @@ class TriggerableMixin:
     def connect(self, *targets):
         for target in targets:
             trigger(self, target)
+

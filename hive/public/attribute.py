@@ -5,8 +5,7 @@ from ..private import (PushInBuilder, PushInImmediate, PullInBuilder, PullInImme
                        PullOutImmediate, PushOutImmediate, StatefulDescriptorBuilder, READ_WRITE, TriggerFuncBuilder,
                        TriggerFuncRuntime)
 
-from ..interfaces import Descriptor
-class AttributeImplementation(BeeBase, Stateful):
+class AttributeBase(BeeBase, Stateful):
     pre_updated = None
     updated = None
 
@@ -28,7 +27,7 @@ class AttributeImplementation(BeeBase, Stateful):
     value = property(_hive_stateful_getter, _hive_stateful_setter)
 
 
-class AttributeImmediate(AttributeImplementation):
+class AttributeImmediate(AttributeBase):
     def __init__(self, data_type='', start_value=None):
         super().__init__(data_type, start_value)
 
@@ -43,12 +42,16 @@ class AttributeImmediate(AttributeImplementation):
         return "AttributeImmediate({!r}, {!r})".format(self._data_type, self._start_value)
 
 
-class AttributeBound(AttributeImplementation):
+class AttributeBound(AttributeBase):
     def __init__(self, build_bee, run_hive, data_type='', start_value=None):
         self._build_bee = build_bee
         self._run_hive = run_hive
 
         super().__init__(data_type, start_value)
+
+    def __repr__(self):
+        return "AttributeBound({!r}, {!r}, {!r}, {!r})".format(self._build_bee, self._run_hive, self._data_type,
+                                                               self._start_value)
 
     @memo_property
     def pull_out(self):
@@ -74,10 +77,6 @@ class AttributeBound(AttributeImplementation):
     def pre_updated(self):
         return self._build_bee.pre_updated.bind(self._run_hive)
 
-    def __repr__(self):
-        return "AttributeBound({!r}, {!r}, {!r}, {!r})".format(self._build_bee, self._run_hive, self._data_type,
-                                                               self._start_value)
-
 
 builtin_property = property
 
@@ -96,8 +95,8 @@ class AttributeBuilder(BeeBase):
         self.pre_updated = TriggerFuncBuilder()
         self.updated = TriggerFuncBuilder()
 
-    def property(self, flags=READ_WRITE):
-        return StatefulDescriptorBuilder(self, flags=flags)
+    def __repr__(self):
+        return "AttributeBuilder({!r}, {!r})".format(self._data_type, self._start_value)
 
     @builtin_property
     def data_type(self):
@@ -106,9 +105,6 @@ class AttributeBuilder(BeeBase):
     @builtin_property
     def start_value(self):
         return self._start_value
-
-    def implements(self, cls):
-        return issubclass(AttributeBound, cls) or super().implements(cls)
 
     @memoize
     def bind(self, run_hive):
@@ -120,8 +116,11 @@ class AttributeBuilder(BeeBase):
 
         return AttributeBound(self, run_hive, self._data_type, start_value)
 
-    def __repr__(self):
-        return "AttributeBuilder({!r}, {!r})".format(self._data_type, self._start_value)
+    def implements(self, cls):
+        return issubclass(AttributeBound, cls) or super().implements(cls)
+
+    def property(self, flags=READ_WRITE):
+        return StatefulDescriptorBuilder(self, flags=flags)
 
 
 attribute = HiveModeFactory("hive.attribute", BUILD=AttributeBuilder, IMMEDIATE=AttributeImmediate)

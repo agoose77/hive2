@@ -20,10 +20,10 @@ def build_constrain(i, ex, args, meta_args):
     i.value = hive.attribute(meta_args.data_type)
     i.result = hive.attribute(meta_args.data_type)
 
-    i.pull_result.pre_triggered.connect(i.pull_value.trigger)
+    i.pull_result.pre_pushed.connect(i.pull_value.trigger)
 
     i.do_constrain = hive.modifier(do_constrain)
-    i.pull_value.triggered.connect(i.do_constrain.trigger)
+    i.pull_value.pushed.connect(i.do_constrain.trigger)
 
     ex.result = i.result.pull_out
     ex.value = i.value.pull_in

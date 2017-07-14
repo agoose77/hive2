@@ -14,8 +14,8 @@ def build_conjugate(i, ex, args):
     ex.value = i.value.pull_in
 
     i.do_conjugate = hive.modifier(do_conjugate)
-    i.conjugate.pull_out.pre_triggered.connect(i.value.pull_in.trigger,
-                                                  i.do_conjugate.trigger)
+    i.conjugate.pull_out.pre_pushed.connect(i.value.pull_in.trigger,
+                                            i.do_conjugate.trigger)
 
 
 Conjugate = hive.hive("Conjugate", build_conjugate)

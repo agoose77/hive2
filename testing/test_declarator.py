@@ -11,6 +11,9 @@ import hive
 from io import StringIO
 from contextlib import contextmanager, redirect_stdout
 
+bark_template = "Woof ... {}'s puppy ({})"
+
+
 @contextmanager
 def redirect_string():
     io = StringIO(newline='')
@@ -19,47 +22,43 @@ def redirect_string():
     io.seek(0)
 
 
-class Dog(object):
-    def __init__(self):
-        self.name = None
-
-
 def configure_dog(meta_args):
     meta_args.puppies = hive.parameter("int", 1)
 
 
-def build_dog(cls, i, ex, args, meta_args):
+def build_dog(i, ex, args, meta_args):
     args.name = hive.parameter("str")
-    i.name = hive.property(cls, "name", "str", args.name)
+    i.name = hive.attribute("str", args.name)
     ex.name = i.name.property(hive.READ)
 
-    for ix in range(meta_args.puppies):
-        mod = hive.modifier(lambda i, ex,ix=ix: print("{}'s puppy ({}) barked".format(ex.name, ix)))
-        setattr(i, "mod_{}".format(ix), mod)
-        setattr(ex, "bark_{}".format(ix), mod.trigger)
+    for n in range(meta_args.puppies):
+        def bark(i, ex, n=n):
+            print(bark_template.format(ex.name, n))
+
+        mod = hive.modifier(bark)
+        setattr(i, "mod_{}".format(n), mod)
+        setattr(ex, "bark_{}".format(n), mod.trigger)
 
 
-DogHive = hive.dyna_hive("Dog", build_dog, configure_dog, Dog)
+DogHive = hive.dyna_hive("Dog", build_dog, configure_dog)
+
 
 class TestDeclarator(TestCase):
-
     def test_configurer(self):
         d = DogHive(2, "Jack")
 
         with redirect_string() as io:
             d.bark_0()
-        self.assertEqual(io.read(), "Jack's puppy (0) barked\n")
+        self.assertEqual(io.read(), bark_template.format("Jack", 0) + "\n")
 
         with redirect_string() as io:
             d.bark_1()
-        self.assertEqual(io.read(), "Jack's puppy (1) barked\n")
-
+        self.assertEqual(io.read(), bark_template.format("Jack", 1) + "\n")
 
         d = DogHive(1, "Jill")
-
         with redirect_string() as io:
             d.bark_0()
-        self.assertEqual(io.read(), "Jill's puppy (0) barked\n")
+        self.assertEqual(io.read(), bark_template.format("Jill", 0) + "\n")
 
 
 if __name__ == "__main__":

@@ -20,10 +20,10 @@ def build_interpolate(i, ex, args):
 
     i.do_interpolate = hive.modifier(do_interpolation)
 
-    i.pull_result.pre_triggered.connect(i.pull_min.pull_in.trigger,
-                                           i.pull_max.pull_in.trigger,
-                                           i.pull_factor.pull_in.trigger,
-                                           i.do_interpolate.trigger)
+    i.pull_result.pre_pushed.connect(i.pull_min.pull_in.trigger,
+                                     i.pull_max.pull_in.trigger,
+                                     i.pull_factor.pull_in.trigger,
+                                     i.do_interpolate.trigger)
 
 
 Interpolate = hive.hive("Interpolate", build_interpolate)

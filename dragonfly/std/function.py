@@ -141,14 +141,14 @@ def build_func(i, ex, args, meta_args):
         attr = hive.attribute(type_name, start_value=default)
         setattr(i, arg, attr)
         setattr(ex, arg, attr.pull_in)
-        i.modifier.pre_triggered.connect(attr.pull_in.trigger)
+        i.modifier.pre_pushed.connect(attr.pull_in.trigger)
 
     if has_return:
         result_name = 'result'
         attr = hive.attribute(visitor.output_type_name)
         setattr(i, result_name, attr)
         setattr(ex, result_name, attr.push_out)
-        i.modifier.triggered.connect(attr.push_out.trigger)
+        i.modifier.pushed.connect(attr.push_out.trigger)
 
 
 Function = hive.dyna_hive("Function", build_func, configurer=configure_func)

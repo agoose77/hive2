@@ -11,7 +11,7 @@ def build_print(i, ex, args):
     ex.value = i.value.push_in
 
     i.func = hive.modifier(do_print)
-    i.value.push_in.triggered.connect(i.func.trigger)
+    i.value.push_in.pushed.connect(i.func.trigger)
 
 
 Print = hive.hive("Print", build_print)

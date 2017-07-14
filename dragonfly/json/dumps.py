@@ -17,8 +17,8 @@ def build_dumps(i, ex, args):
 
     i.do_dumps = hive.modifier(do_dumps)
 
-    i.pull_result.pre_triggered.connect(i.object.pull_in.trigger)
-    i.pull_object.triggered.connect(i.do_dumps.trigger)
+    i.pull_result.pre_pushed.connect(i.object.pull_in.trigger)
+    i.pull_object.pushed.connect(i.do_dumps.trigger)
 
 
 Dumps = hive.hive("Dumps", build_dumps)

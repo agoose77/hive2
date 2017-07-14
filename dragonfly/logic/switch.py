@@ -15,10 +15,10 @@ def build_switch(i, ex, args):
     ex.input = i.switch.push_in
 
     i.on_true = hive.modifier()
-    ex.true = i.true.triggered
+    ex.true = i.true.pushed
 
     i.on_false = hive.modifier()
-    ex.false = i.false.triggered
+    ex.false = i.false.pushed
 
     i.evaluate_input = hive.modifier(evaluate_switch)
     ex.input.push_in.trigger(i.evaluate_input.trigger)

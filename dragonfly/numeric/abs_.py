@@ -18,8 +18,8 @@ def build_abs(i, ex, args, meta_args):
     ex.result = i.value.pull_out
 
     i.do_abs = hive.modifier(do_abs)
-    i.result.pull_out.pre_triggered.connect(i.value.pull_in.trigger,
-                                               i.do_abs.trigger)
+    i.result.pull_out.pre_pushed.connect(i.value.pull_in.trigger,
+                                         i.do_abs.trigger)
 
 
 Abs = hive.dyna_hive("Abs", build_abs, configurer=configure_abs)

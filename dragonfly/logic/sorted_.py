@@ -21,8 +21,8 @@ def build_sorted(i, ex, args, meta_args):
     ex.value = i.value.pull_in
 
     i.sort = hive.modifier(sort)
-    i.result.pull_out.pre_triggered.connects(i.value.pull_in.trigger,
-                                                i.sort.trigger)
+    i.result.pull_out.pre_pushed.connects(i.value.pull_in.trigger,
+                                          i.sort.trigger)
 
 
 Sorted = hive.dyna_hive("Sorted", build_sorted, configure_sorted)

@@ -184,7 +184,7 @@ def build_instantiator(cls, i, ex, args, meta_args):
     ex.last_process_id = i.last_created_process_id.pull_out
 
     i.stop_process_id = hive.property(cls, "stop_process_id", "int.process_id")
-    i.stop_process_id.push_in.triggered.connect(cls.stop_hive.trigger)
+    i.stop_process_id.push_in.pushed.connect(cls.stop_hive.trigger)
     ex.stop_process = i.stop_process_id.push_in
 
     # Bind class plugin

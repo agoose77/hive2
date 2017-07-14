@@ -18,8 +18,8 @@ def build_decode(i, ex, args):
     ex.bytes = i.bytes.pull_in
 
     i.decode = hive.modifier(decode)
-    i.string.pull_out.pre_triggered.connect(i.bytes.pull_in.trigger)
-    i.bytes.pull_in.triggered.connect(i.decode.trigger)
+    i.string.pull_out.pre_pushed.connect(i.bytes.pull_in.trigger)
+    i.bytes.pull_in.pushed.connect(i.decode.trigger)
 
 
 Decode = hive.hive("Decode", build_decode)

@@ -18,9 +18,9 @@ def build_decompose(i, ex, args):
     ex.value = i.value.pull_in
 
     i.do_decomposition = hive.modifier(do_decomposition)
-    i.imag.pull_in.pre_triggered.connect(i.value.pull_in.trigger)
-    i.real.pull_in.pre_triggered.connect(i.value.pull_in.trigger)
-    i.value.pull_in.triggered.connect(i.do_decomposition.trigger)
+    i.imag.pull_in.pre_pushed.connect(i.value.pull_in.trigger)
+    i.real.pull_in.pre_pushed.connect(i.value.pull_in.trigger)
+    i.value.pull_in.pushed.connect(i.do_decomposition.trigger)
     hive.trigger(i.pull_value, i.do_decomposition)
 
 

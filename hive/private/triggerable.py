@@ -14,23 +14,24 @@ class TriggerableRuntime(TriggerTarget, ConnectTarget, Callable, BeeBase):
 
         super().__init__()
 
-    def _trigger(self):
+    def __call__(self):
         self._func()
 
-    def _hive_trigger_target(self):
-        return self._trigger
+    def __repr__(self):
+        return "TriggerableRuntime({!r})".format(self._func)
+
+    def _hive_connect_target(self, source):
+        pass
 
     def _hive_is_connectable_target(self, source):
         if not isinstance(source, TriggerSource):
             raise HiveConnectionError("Connect target {} is not a TriggerSource".format(source))
 
-    def _hive_connect_target(self, source):
-        pass
+    def _hive_trigger_target(self):
+        return self._trigger
 
-    __call__ = _trigger
-
-    def __repr__(self):
-        return "TriggerableRuntime({!r})".format(self._func)
+    def _trigger(self):
+        self._func()
 
 
 class TriggerableBuilder(BeeBase, TriggerTarget, ConnectTarget, Exportable):
@@ -41,6 +42,9 @@ class TriggerableBuilder(BeeBase, TriggerTarget, ConnectTarget, Exportable):
         self._target = target
 
         super().__init__()
+
+    def __repr__(self):
+        return "TriggerableBuilder({!r})".format(self._target)
 
     @memoize
     def bind(self, run_hive):
@@ -57,9 +61,3 @@ class TriggerableBuilder(BeeBase, TriggerTarget, ConnectTarget, Exportable):
 
     def plugin(self, *args, **kwargs):
         return HivePluginBuilder(self, *args, **kwargs)
-
-    def __repr__(self):
-        return "TriggerableBuilder({!r})".format(self._target)
-
-
-triggerable = HiveModeFactory("hive.triggerable", IMMEDIATE=TriggerableRuntime, BUILD=TriggerableBuilder)

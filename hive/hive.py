@@ -1,4 +1,5 @@
 from abc import ABC, abstractproperty
+from collections import OrderedDict
 from inspect import currentframe, getmodule, isclass
 from itertools import count, chain
 from typing import List, Generator, NamedTuple, Callable, Type, Dict, Union, Tuple, Any, Optional
@@ -8,7 +9,7 @@ from .classes import (AttributeMapping, InternalValidator, ExternalValidator, Ar
 from .compatability import next, validate_signature
 from .contexts import (bee_register_context, get_mode, hive_mode_as, building_hive_as, run_hive_as,
                        get_building_hive, get_matchmaker_validation_enabled, HiveMode)
-from .exception import MatchmakingPolicyError
+from .exception import MatchmakingPolicyError, HiveBuilderError
 from .interfaces import (BeeBase, ConnectTargetDerived, ConnectSourceDerived, TriggerSource, TriggerTarget, Nameable,
                          ConnectSource, ConnectTarget, Descriptor, Plugin, Socket)
 from .manager import memoize
@@ -110,13 +111,14 @@ class RuntimeHive(BeeBase, ConnectSourceDerived, ConnectTargetDerived, TriggerSo
                 if drone_cls is None:
                     continue
 
-                assert drone_cls not in self._drone_class_to_instance, drone_cls
-
                 # Do not initialise instance yet
-                drone = drone_cls.__new__(drone_cls)
-                self._drone_class_to_instance[drone_cls] = drone
+                assert drone_cls not in self._drone_class_to_instance, drone_cls
+                self._drone_class_to_instance[drone_cls] = drone = drone_cls.__new__(drone_cls)
+
                 # Register drone with global lookup
                 register_drone(drone, self)
+
+                # Now call init method to run initialisation routines
                 drone.__init__(*args, **kwargs)
 
             with building_hive_as(hive_object.__class__), hive_mode_as(HiveMode.BUILD):
@@ -148,12 +150,12 @@ class RuntimeHive(BeeBase, ConnectSourceDerived, ConnectTargetDerived, TriggerSo
     def _hive_find_connect_targets(self) -> List[ConnectCandidate]:
         return self._hive_object._hive_find_connect_targets()
 
-    def _hive_trigger_source(self, target_func):
+    def _hive_trigger_source(self, target_func: Callable[[], None]):
         source_name = self._hive_object._hive_find_trigger_source()
         instance = self._name_to_runtime_bee[source_name]
         return instance._hive_trigger_source(target_func)
 
-    def _hive_trigger_target(self):
+    def _hive_trigger_target(self) -> Callable[[], None]:
         target_name = self._hive_object._hive_find_trigger_target()
         instance = self._name_to_runtime_bee[target_name]
         return instance._hive_trigger_target()
@@ -218,12 +220,13 @@ class HiveObject(BeeBase, ConnectSourceDerived, ConnectTargetDerived, TriggerSou
                 resolve_bee = ResolveBee(bee, self)
                 setattr(self, bee_name, resolve_bee)
 
-    def instantiate(self) -> RuntimeHive:
+    def instantiate(self, run_hive=None) -> RuntimeHive:
         """Return an instance of the runtime Hive for this Hive object."""
         return self._hive_runtime_class(self, self._hive_parent_class._builders)
 
     @memoize
-    def bind(self, run_hive: RuntimeHive):
+    def bind(self, run_hive: RuntimeHive) -> RuntimeHive:
+        print("BIND {} for {}".format(self, run_hive))
         return self.instantiate()
 
     @classmethod
@@ -297,7 +300,7 @@ class HiveObject(BeeBase, ConnectSourceDerived, ConnectTargetDerived, TriggerSou
         return connect_targets
 
     @classmethod
-    def _hive_find_connect_source(cls, target: ConnectTarget):
+    def _hive_find_connect_source(cls, target: ConnectTarget) -> str:
         """Find and return the name of a suitable connect source within this hive
 
         :param target: target to connect to
@@ -319,7 +322,7 @@ class HiveObject(BeeBase, ConnectSourceDerived, ConnectTargetDerived, TriggerSou
         return connect_sources[0].bee_name
 
     @classmethod
-    def _hive_find_connect_target(cls, source: ConnectSource):
+    def _hive_find_connect_target(cls, source: ConnectSource) -> str:
         """Find and return the name of a suitable connect target within this hive
 F
         :param source: source to connect to
@@ -365,9 +368,9 @@ F
 class MetaHivePrimitive(ABC):
     """Primitive container to instantiate Hive with particular meta arguments"""
 
-    _hive_object_class = abstractproperty()
+    _hive_object_class: Type[HiveObject] = abstractproperty()
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *args, **kwargs) -> Union[HiveObject, RuntimeHive]:
         hive_object = cls._hive_object_class(*args, **kwargs)
 
         if get_mode() == HiveMode.IMMEDIATE:
@@ -394,7 +397,7 @@ class HiveBuilder:
     _is_dyna_hive: bool = False
     _hive_meta_args: ArgWrapper = None
 
-    def __new__(cls, *new_args, **new_kwargs):
+    def __new__(cls, *new_args, **new_kwargs) -> Union[MetaHivePrimitive, HiveObject, RuntimeHive]:
         # Meta hives receive their meta args, and normal args in two separate calls (so don't try and parse args yet)
         if cls._configurers and not cls._is_dyna_hive:
             return cls._create_meta_primitive(*new_args, **new_kwargs)
@@ -404,6 +407,7 @@ class HiveBuilder:
 
         if get_mode() == HiveMode.IMMEDIATE:
             return hive_object.instantiate()
+
         return hive_object
 
     @classmethod
@@ -481,7 +485,8 @@ class HiveBuilder:
 
     @classmethod
     @memoize
-    def _new(cls, hive_object_class: Type[HiveObject], args: tuple, kwarg_items: Tuple[str, Any]) -> HiveObject:
+    def _new(cls, hive_object_class: Type[HiveObject], args: tuple,
+             kwarg_items: Tuple[Tuple[str, Any], ...]) -> HiveObject:
         kwargs = dict(kwarg_items)
         return hive_object_class(*args, **kwargs)
 
@@ -494,7 +499,7 @@ class HiveBuilder:
 
     @classmethod
     @memoize
-    def _build(cls, meta_arg_values: tuple) -> Type[HiveObject]:
+    def _build(cls, meta_arg_items: Tuple[Tuple[str, Any], ...]) -> Type[HiveObject]:
         """Build a HiveObject for this Hive, with appropriate Args instance
 
         :param meta_arg_values: ordered tuple of meta arg parameter values
@@ -512,7 +517,7 @@ class HiveBuilder:
         hive_object_class._hive_ex = externals = AttributeMapping("{}._hive_ex".format(hive_name),
                                                                   validator=validate_external)
         hive_object_class._hive_args = args = ArgWrapper("{}._hive_args".format(hive_name), validator=validate_args)
-        hive_object_class._hive_meta_args_frozen = meta_args_frozen = cls._hive_meta_args.freeze(dict(meta_arg_values))
+        hive_object_class._hive_meta_args_frozen = meta_args_frozen = cls._hive_meta_args.freeze(dict(meta_arg_items))
 
         is_root = get_building_hive() is None
         is_meta_hive = bool(cls._configurers)
@@ -535,9 +540,8 @@ class HiveBuilder:
                 try:
                     builder(*builder_args)
 
-                except Exception:
-                    print("Unable to invoke builder '{}'".format(builder))
-                    raise
+                except Exception as err:
+                    raise HiveBuilderError("Unable to invoke builder {!r}".format(builder)) from err
 
             cls._build_namespace(hive_object_class)
 
@@ -636,7 +640,8 @@ class HiveBuilder:
             sockets = {}
             connectivity_state = MatchmakerConnectivityState(active_policies, plugins, sockets)
             resolved_child_hive_objects = get_unique_child_hive_objects(internals)
-            bees = ((n, b) for n, b in resolved_hive_object_or_class._hive_ex if b.implements(Plugin) or b.implements(Socket))
+            bees = ((n, b) for n, b in resolved_hive_object_or_class._hive_ex if
+                    b.implements(Plugin) or b.implements(Socket))
 
         # Otherwise method call applies to a HiveObject instance (resolved_bee_source)
         else:
@@ -652,13 +657,6 @@ class HiveBuilder:
             bees = [(n, getattr(resolved_hive_object_or_class, n)) for n, b in resolved_hive_object_or_class._hive_ex
                     if (b.implements(Plugin) or b.implements(Socket)) and not n in handled_by_parent]
 
-        #######################
-
-        """Build the matchmaking connections for a ResolveBee referring to a HiveObject instance
-
-        :param resolved_hive_object: ResolveBee instance referring to a HiveObject instance bee
-        :param connectivity_state: MatchmakingConnectivityState instance
-        """
         # These public will have already been handled by parent (as this method is called top-down)
         cls._perform_matchmaking(bees, connectivity_state)
 
@@ -700,12 +698,10 @@ class HiveBuilder:
 
         # Map keyword arguments to parameters, return remaining argumentss
         args, kwargs, meta_args = cls._hive_meta_args.extract_from_arguments(args, kwargs)
-        return args, kwargs, cls._build(tuple(meta_args))
-
+        return args, kwargs, cls._build(tuple(meta_args.items()))
 
     @staticmethod
-    def _perform_matchmaking(bees: List[Tuple[str, Any]],
-                             connectivity_state: MatchmakerConnectivityState, ):
+    def _perform_matchmaking(bees: List[Tuple[str, Any]], connectivity_state: MatchmakerConnectivityState):
         """Build the matchmaking connections for a ResolveBee referring to a HiveObject instance
 
         :param resolved_hive_object: ResolveBee instance referring to a HiveObject instance bee

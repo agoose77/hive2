@@ -33,9 +33,9 @@ class PullOutBase(BeeBase, Output, ConnectableMixin, Callable):
 
     def pull(self):
         # TODO: exception handling hooks
-        self.pre_triggered()
+        self.before()
         value = self._target._hive_stateful_getter()
-        self.triggered()
+        self.after()
 
         return value
 
@@ -49,8 +49,8 @@ class PullOutImmediate(PullOutBase):
     def __init__(self, target):
         super().__init__(target)
 
-        self.pre_triggered = TriggerFuncRuntime()
-        self.triggered = TriggerFuncRuntime()
+        self.before = TriggerFuncRuntime()
+        self.after = TriggerFuncRuntime()
 
     def __repr__(self):
         return "PullOutImmediate({!r})".format(self._target)
@@ -64,12 +64,12 @@ class PullOutBound(PullOutBase):
         super().__init__(target)
 
     @memo_property
-    def triggered(self):
-        return self._build_bee.triggered.bind(self._run_hive)
+    def after(self):
+        return self._build_bee.after.bind(self._run_hive)
 
     @memo_property
-    def pre_triggered(self):
-        return self._build_bee.pre_triggered.bind(self._run_hive)
+    def before(self):
+        return self._build_bee.before.bind(self._run_hive)
 
     def __repr__(self):
         return "PullOutBound({!r}, {!r}, {!r})".format(self._build_bee, self._run_hive, self._target)
@@ -82,8 +82,8 @@ class PullOutBuilder(BeeBase, Output, Exportable, ConnectableMixin):
         assert target.implements(Stateful)
 
         self._target = target
-        self.triggered = TriggerFuncBuilder()
-        self.pre_triggered = TriggerFuncBuilder()
+        self.after = TriggerFuncBuilder()
+        self.before = TriggerFuncBuilder()
 
         super().__init__()
 
@@ -100,6 +100,3 @@ class PullOutBuilder(BeeBase, Output, Exportable, ConnectableMixin):
 
     def __repr__(self):
         return "PullOutBuilder({!r})".format(self._target)
-
-
-pull_out = HiveModeFactory("hive.pull_out", IMMEDIATE=PullOutImmediate, BUILD=PullOutBuilder)

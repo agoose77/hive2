@@ -15,7 +15,7 @@ def build_input(i, ex, args):
     ex.value = i.value.pull_out
 
     i.get_input = hive.modifier(get_input)
-    i.value.pull_out.pre_triggered.connect(i.get_input.trigger)
+    i.value.pull_out.pre_pushed.connect(i.get_input.trigger)
 
 
 Input = hive.hive("Input", build_input)

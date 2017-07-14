@@ -10,7 +10,7 @@ def build_trigger(i, ex, args, meta_args):
     """Collapse multiple trigger inputs to single trigger output"""
     i.trigger = hive.modifier()
 
-    ex.trigger = i.trigger.triggered
+    ex.trigger = i.trigger.pushed
 
     for index, char in zip(range(meta_args.count), string.ascii_lowercase):
         setattr(ex, char, i.trigger.trigger)

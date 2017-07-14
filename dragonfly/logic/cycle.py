@@ -15,14 +15,14 @@ def build_cycle(i, ex, args):
     i.counter = hive.attribute("int", 0)
 
     i.cycle = hive.modifier(cycle)
-    i.period.pull_in.triggered.connect(i.cycle.trigger)
+    i.period.pull_in.pushed.connect(i.cycle.trigger)
 
     i.output = hive.modifier()
 
     ex.index = i.counter.pull_out
     ex.period_in = i.period.pull_in
     ex.trig_in = i.period.pull_in.trigger
-    ex.trig_out = i.output.triggered
+    ex.trig_out = i.output.pushed
 
 
 Cycle = hive.hive("Cycle", build_cycle)

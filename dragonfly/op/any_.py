@@ -40,7 +40,7 @@ def build_any(i, ex, args, meta_args):
         setattr(i, char, variable)
         setattr(ex, char, variable.pull_in)
 
-    i.result.pull_out.pre_triggered.connect(i.do_test_all.trigger)
+    i.result.pull_out.pre_pushed.connect(i.do_test_all.trigger)
     ex.output = i.result.pull_out
 
 

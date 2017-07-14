@@ -52,7 +52,7 @@ def build_watch(cls, i, ex, args, meta_args):
         ex.get_add_handler = cls.set_add_handler.socket(identifier="event.add_handler")
 
     else:
-        i.value_in.triggered.connect(cls.compare_values.trigger)
+        i.value_in.pushed.connect(cls.compare_values.trigger)
 
 
 Watch = hive.dyna_hive("Watch", build_watch, configure_watch, drone_class=WatchClass)

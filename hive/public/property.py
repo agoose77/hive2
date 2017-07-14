@@ -28,11 +28,15 @@ class PropertyBound(BeeBase, Stateful):
 
         super().__init__()
 
+    def __repr__(self):
+        return "PropertyBound({!r}, {!r}, {!r}, {!r})".format(self._build_bee, self._run_hive, self._data_type,
+                                                              self._start_value)
+
     def _hive_stateful_getter(self):
         return self._getter()
 
     def _hive_stateful_setter(self, value):
-        self.before_updated()
+        self.pre_updated()
         self._setter(value)
         self.updated()
 
@@ -59,12 +63,8 @@ class PropertyBound(BeeBase, Stateful):
         return self._build_bee.updated.bind(self._run_hive)
 
     @memo_property
-    def before_updated(self):
+    def pre_updated(self):
         return self._build_bee.pre_updated.bind(self._run_hive)
-
-    def __repr__(self):
-        return "PropertyBound({!r}, {!r}, {!r}, {!r})".format(self._build_bee, self._run_hive, self._data_type,
-                                                              self._start_value)
 
 
 class PropertyBuilder(BeeBase):
@@ -80,11 +80,11 @@ class PropertyBuilder(BeeBase):
         self.pull_out = PullOutBuilder(self)
         self.push_in = PushInBuilder(self)
         self.push_out = PushOutBuilder(self)
-        self.before_updated = TriggerFuncBuilder()
+        self.pre_updated = TriggerFuncBuilder()
         self.updated = TriggerFuncBuilder()
 
-    def property(self, flags=READ_WRITE):
-        return StatefulDescriptorBuilder(self, flags=flags)
+    def __repr__(self):
+        return "PropertyBuilder({!r}, {!r})".format(self._data_type, self._start_value)
 
     @builtin_property
     def data_type(self):
@@ -100,6 +100,9 @@ class PropertyBuilder(BeeBase):
 
         return super().implements(cls)
 
+    def property(self, flags=READ_WRITE):
+        return StatefulDescriptorBuilder(self, flags=flags)
+
     @memoize
     def bind(self, run_hive):
         start_value = self._start_value
@@ -108,9 +111,6 @@ class PropertyBuilder(BeeBase):
             start_value = run_hive._hive_object._hive_args_frozen.resolve_parameter(start_value)
 
         return PropertyBound(self, run_hive, self._drone_cls, self._name, self._data_type, start_value)
-
-    def __repr__(self):
-        return "PropertyBuilder({!r}, {!r})".format(self._data_type, self._start_value)
 
 
 property = HiveModeFactory("hive.property", BUILD=PropertyBuilder)

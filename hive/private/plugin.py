@@ -1,13 +1,13 @@
-from .mixins import ConnectableMixin
 from ..exception import HiveConnectionError
 from ..identifier import is_valid_identifier
 from ..interfaces import ConnectSource, Exportable, BeeBase, Bee, Plugin, Socket
 from ..manager import memoize, HiveModeFactory
 from ..policies import MultipleOptional
 from ..typing import is_valid_data_type
+from .mixins import ConnectableMixin
 
 
-class HivePluginRuntime(Plugin, ConnectSource, ConnectableMixin):
+class HivePluginRuntime(Plugin, ConnectSource):
     def __init__(self, func, data_type=''):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
@@ -56,6 +56,7 @@ class HivePluginBuilder(BeeBase, Exportable, Plugin, ConnectSource, ConnectableM
         self._policy = policy
 
         super().__init__()
+        assert self._hive_parent_hive_object_class
 
     @property
     def data_type(self):
@@ -84,6 +85,3 @@ class HivePluginBuilder(BeeBase, Exportable, Plugin, ConnectSource, ConnectableM
     def __repr__(self):
         return "HivePluginBuilder({!r}, {!r}, {!r}, {!r}, {!r})".format(self._target, self._identifier, self._data_type,
                                                                         self._policy, self.export_to_parent)
-
-
-plugin = HiveModeFactory("hive.plugin", IMMEDIATE=HivePluginRuntime, BUILD=HivePluginBuilder)

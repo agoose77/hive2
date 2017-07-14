@@ -16,8 +16,8 @@ def build_import(i, ex, args):
     i.module = hive.attribute("module")
     ex.module = i.module.pull_out
 
-    i.module.pull_out.pre_triggered.connect(i.import_path.pull_in.trigger,
-                                               i.do_import.trigger)
+    i.module.pull_out.pre_pushed.connect(i.import_path.pull_in.trigger,
+                                         i.do_import.trigger)
 
 
 Import = hive.hive("Import", build_import)

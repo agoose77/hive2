@@ -17,8 +17,8 @@ def build_loads(i, ex, args):
     ex.object = i.object.pull_in
 
     i.do_loads = hive.modifier(do_loads)
-    i.result.pull_out.pre_triggered.connect(i.pull_object.trigger)
-    i.object.pull_in.triggered.connect(i.do_loads.trigger)
+    i.result.pull_out.pre_pushed.connect(i.pull_object.trigger)
+    i.object.pull_in.pushed.connect(i.do_loads.trigger)
 
 
 Loads = hive.hive("Loads", build_loads)

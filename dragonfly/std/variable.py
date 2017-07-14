@@ -17,9 +17,9 @@ def build_variable(i, ex, args, meta_args):
 
     if meta_args.advanced:
         i.pre_output = hive.modifier()
-        i.value.pull_out.pre_triggered.connect(i.pre_output.triggered)
+        i.value.pull_out.pre_pushed.connect(i.pre_output.pushed)
 
-        ex.pre_output = i.pre_output.triggered
+        ex.pre_output = i.pre_output.pushed
 
 Variable = hive.dyna_hive("BuilderVariable", build_variable, configurer=configure_variable)
 

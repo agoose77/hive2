@@ -1,33 +1,10 @@
-from hive.interfaces import Exportable, Nameable, Bee
+from hive.interfaces import Exportable, BeeBase
 
 
-class BindableResolveBee(Nameable):
-    def __init__(self, unbound_run_hive, bee):
-        super().__init__()
-
-        self._bee = bee
-        self._unbound_run_hive = unbound_run_hive
-
-        # Support ResolveBees used for hive_objects
-        self._hive_object = getattr(bee, '_hive_object', None)
-
-    @property
-    def _hive_runtime_aliases(self):
-        # TODO why raise runtime error?
-        raise RuntimeError
-
-    def bind(self, run_hive):
-        hive_instance = self._unbound_run_hive.bind(run_hive)
-        return self._bee.bind(hive_instance)
-
-
-class ResolveBee(Bee, Exportable):
+class ResolveBee(BeeBase, Exportable):
     """Implements support for connecting between public of different HiveObjects 
     (resolving the getinstance & bind methods)
     """
-
-    _hive_parent_hive_object_class = None
-
     def __init__(self, bee, defining_hive_object):
         self._bee = bee
         self._defining_hive_object = defining_hive_object

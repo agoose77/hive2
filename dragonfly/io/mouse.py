@@ -68,7 +68,7 @@ def build_mouse(cls, i, ex, args):
     ex.button = i.button.push_in
 
     i.on_button_changed = cls.change_listener_buttons
-    i.push_button.triggered.connect(i.on_button_changed.trigger)
+    i.push_button.pushed.connect(i.on_button_changed.trigger)
 
     i.on_pressed = hive.modifier()
     ex.on_pressed = i.on_pressed.trigger

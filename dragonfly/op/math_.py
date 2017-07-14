@@ -22,7 +22,7 @@ def build_operator(i, ex, args, meta_args):
 
     ex.a = i.a.pull_in
     ex.b = i.b.pull_in
-    i.a.pull_in.triggered.connect(i.b.pull_in.trigger)
+    i.a.pull_in.pushed.connect(i.b.pull_in.trigger)
 
     i.result = hive.attribute(meta_args.data_type)
     ex.result = i.result.pull_out
@@ -31,9 +31,9 @@ def build_operator(i, ex, args, meta_args):
         i.result.value = op(i.a.value, i.b.value)
 
     i.run_operator = hive.modifier(run_operator)
-    i.a.pull_in.triggered.connect(i.run_operator.trigger)
-    i.a.pull_in.triggered.connect(i.run_operator.trigger)
-    i.result.pull_out.pre_triggered.connect(i.a.pull_in.trigger)
+    i.a.pull_in.pushed.connect(i.run_operator.trigger)
+    i.a.pull_in.pushed.connect(i.run_operator.trigger)
+    i.result.pull_out.pre_pushed.connect(i.a.pull_in.trigger)
 
 
 MathOperator = hive.dyna_hive("MathOperator", build_operator, configure_operator)

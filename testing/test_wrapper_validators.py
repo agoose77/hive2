@@ -1,20 +1,58 @@
-from __future__ import print_function
-
-import os
-import sys
-
-current_directory = os.path.split(os.path.abspath(__file__))[0]
-sys.path.append(current_directory + "/" + "..")
+from unittest import TestCase, main
 
 import hive
 
 
-def build_h(i, ex, args):
-    # The following should raise AttributeErrors
-    ex.export = hive.attribute()
-    i.hive_object = hive.attribute()
+class TestWrappers(TestCase):
+    def test_exportable(self):
+        def build_h(i, ex, args):
+            i.attrib = hive.attribute()
+            ex.attrib = hive.attribute()
+
+        Hive = hive.hive("Hive", build_h)
+        with self.assertRaises(hive.HiveBuilderError) as ctx:
+            Hive()
+
+        cause = ctx.exception.__cause__
+        self.assertIsInstance(cause, AttributeError)
+        self.assertIn("Error setting attribute", str(cause))
+
+        cause = cause.__cause__
+        self.assertIsInstance(cause, ValueError)
+        self.assertEqual(str(cause), "Attribute must be Exportable")
+
+    def test_bee(self):
+        def build_h(i, ex, args):
+            i.attrib = 12
+
+        Hive = hive.hive("Hive", build_h)
+        with self.assertRaises(hive.HiveBuilderError) as ctx:
+            Hive()
+
+        cause = ctx.exception.__cause__
+        self.assertIsInstance(cause, AttributeError)
+        self.assertIn("Error setting attribute", str(cause))
+
+        cause = cause.__cause__
+        self.assertIsInstance(cause, ValueError)
+        self.assertIn("expected a BeeBase instance", str(cause))
+
+    def test_args(self):
+        def build_h(i, ex, args):
+            args.attrib = 12
+
+        Hive = hive.hive("Hive", build_h)
+        with self.assertRaises(hive.HiveBuilderError) as ctx:
+            Hive()
+
+        cause = ctx.exception.__cause__
+        self.assertIsInstance(cause, AttributeError)
+        self.assertIn("Error setting attribute", str(cause))
+
+        cause = cause.__cause__
+        self.assertIsInstance(cause, ValueError)
+        self.assertIn("expected a Parameter instance", str(cause))
 
 
-Hive = hive.hive("Hive", build_h)
-
-h = Hive()
+if __name__ == "__main__":
+    main()

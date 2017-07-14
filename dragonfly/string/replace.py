@@ -19,10 +19,10 @@ def build_replace(i, ex, args):
     ex.result = i.result.pull_out
 
     i.do_replace = hive.modifier(do_replace)
-    i.result.pull_out.pre_triggered.connect(i.string.pull_in.trigger,
-                                               i.substring.pull_in.trigger,
-                                               i.replacement.pull_in.trigger,
-                                               i.do_replace.trigger)
+    i.result.pull_out.pre_pushed.connect(i.string.pull_in.trigger,
+                                         i.substring.pull_in.trigger,
+                                         i.replacement.pull_in.trigger,
+                                         i.do_replace.trigger)
 
 
 Replace = hive.hive("Replace", build_replace)
