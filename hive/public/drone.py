@@ -6,13 +6,13 @@ from ..interfaces import BeeBase
 from ..manager import HiveModeFactory, memoize
 from ..private import PropertyBuilder, MethodBuilder, NO_START_VALUE
 
-def is_internal_descriptor(value):
+def is_internal_descriptor(value) -> bool:
     from struct import Struct
     getset_descriptor = type(Struct.size)
     return isinstance(value, getset_descriptor)
 
 
-def is_property(value):
+def is_property(value) -> bool:
     return isinstance(value, property)
 
 
@@ -42,16 +42,16 @@ class DroneBuilder(BeeBase):
         return value
 
     @memoize
-    def bind(self, run_hive):
+    def bind(self, run_hive: 'RuntimeHive'):
         return self._class(*self._args, **self._kwargs)
 
-    def property(self, name: str, data_type: str = '', start_value: Any = NO_START_VALUE):
+    def property(self, name: str, data_type: str = '', start_value: Any = NO_START_VALUE) -> PropertyBuilder:
         return PropertyBuilder(self, name, data_type, start_value)
 
-    def method(self, name: str):
+    def method(self, name: str) -> MethodBuilder:
         return MethodBuilder(self, name)
 
-    def _build_property(self, name: str):
+    def _build_property(self, name: str) -> PropertyBuilder:
         prop = getattr(self._class, name)
         data_type = get_return_type(prop.fget)
 
