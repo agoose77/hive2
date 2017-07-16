@@ -1,5 +1,5 @@
-from .function import FunctionBound, FunctionBuilder
-from ..manager import HiveModeFactory, memoize
+from hive.manager import memoize
+from hive.public.function import FunctionBound, FunctionBuilder
 
 
 class MethodBuilder(FunctionBuilder):
@@ -14,6 +14,3 @@ class MethodBuilder(FunctionBuilder):
         instance = run_hive._drone_class_to_instance[self._drone_cls]
         method = getattr(instance, self._name)
         return FunctionBound(self, run_hive, method)
-
-
-method = HiveModeFactory("hive.method", BUILD=MethodBuilder)

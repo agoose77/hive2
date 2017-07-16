@@ -1,5 +1,7 @@
 from .connect import connect, ConnectCandidate
 from .plugin import HivePluginBuilder, HivePluginRuntime
+from .property import PropertyBuilder
+from .method import MethodBuilder
 from .pull_in import PullInBuilder, PullInImmediate
 from .pull_out import PullOutBuilder, PullOutImmediate
 from .push_in import PushInBuilder, PushInImmediate

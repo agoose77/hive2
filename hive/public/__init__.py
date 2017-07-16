@@ -1,4 +1,3 @@
 from .attribute import attribute
-from .method import method
+from .drone import DroneBuilder
 from .modifier import modifier
-from .property import property

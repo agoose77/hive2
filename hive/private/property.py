@@ -1,10 +1,10 @@
 from functools import partial
 
-from ..interfaces import Stateful, BeeBase
-from ..manager import HiveModeFactory, memoize, memo_property
-from ..parameter import Parameter
-from ..private import (PushInBuilder, PullInBuilder, PushOutBuilder, PullOutBuilder, StatefulDescriptorBuilder,
-                       READ_WRITE, TriggerFuncBuilder)
+from hive.interfaces import Stateful, BeeBase
+from hive.manager import memoize, memo_property
+from hive.parameter import Parameter
+from hive.private import (PushInBuilder, PullInBuilder, PushOutBuilder, PullOutBuilder, StatefulDescriptorBuilder,
+                          READ_WRITE, TriggerFuncBuilder)
 
 builtin_property = property
 
@@ -111,6 +111,3 @@ class PropertyBuilder(BeeBase):
             start_value = run_hive._hive_object._hive_args_frozen.resolve_parameter(start_value)
 
         return PropertyBound(self, run_hive, self._drone_cls, self._name, self._data_type, start_value)
-
-
-property = HiveModeFactory("hive.property", BUILD=PropertyBuilder)
