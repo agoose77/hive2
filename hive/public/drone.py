@@ -3,8 +3,8 @@ from typing import Any, Type
 
 from ..annotations import get_argument_options, get_return_type
 from ..interfaces import BeeBase
-from ..manager import HiveModeFactory
-from ..private import PropertyBuilder, MethodBuilder
+from ..manager import HiveModeFactory, memoize
+from ..private import PropertyBuilder, MethodBuilder, NO_START_VALUE
 
 def is_internal_descriptor(value):
     from struct import Struct
@@ -41,11 +41,15 @@ class DroneBuilder(BeeBase):
 
         return value
 
-    def property(self, name: str, data_type: str = '', start_value: Any = None):
-        raise PropertyBuilder(self._class, name, )
+    @memoize
+    def bind(self, run_hive):
+        return self._class(*self._args, **self._kwargs)
+
+    def property(self, name: str, data_type: str = '', start_value: Any = NO_START_VALUE):
+        return PropertyBuilder(self, name, data_type, start_value)
 
     def method(self, name: str):
-        raise NotImplementedError
+        return MethodBuilder(self, name)
 
     def _build_property(self, name: str):
         prop = getattr(self._class, name)

@@ -3,14 +3,14 @@ from hive.private.function import FunctionBound, FunctionBuilder
 
 
 class MethodBuilder(FunctionBuilder):
-    def __init__(self, cls_proxy, name):
-        self._drone_cls = getattr(cls_proxy, '_hive_wrapped_drone_class')
+    def __init__(self, drone, name):
+        self._drone = drone
         self._name = name
 
         super().__init__()
 
     @memoize
     def bind(self, run_hive):
-        instance = run_hive._drone_class_to_instance[self._drone_cls]
+        instance = self._drone.bind(run_hive)
         method = getattr(instance, self._name)
         return FunctionBound(self, run_hive, method)

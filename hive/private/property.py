@@ -11,16 +11,16 @@ from ..manager import memoize, memo_property
 from ..parameter import Parameter
 
 builtin_property = property
+NO_START_VALUE = object()
 
 
 class PropertyBound(BeeBase, Stateful):
-    def __init__(self, build_bee, run_hive, drone_class, name, data_type='', start_value=None):
-        self._drone_class = drone_class
+    def __init__(self, build_bee, run_hive, drone, name, data_type='', start_value=NO_START_VALUE):
         self._name = name
-        self._instance = run_hive._drone_class_to_instance[drone_class]
+        self._drone = drone
 
-        self._getter = partial(getattr, self._instance, name)
-        self._setter = partial(setattr, self._instance, name)
+        self._getter = partial(getattr, self._drone, name)
+        self._setter = partial(setattr, self._drone, name)
 
         self._data_type = data_type
         self._start_value = start_value
@@ -28,13 +28,14 @@ class PropertyBound(BeeBase, Stateful):
         self._build_bee = build_bee
         self._run_hive = run_hive
 
-        self._setter(start_value)
+        if start_value is not NO_START_VALUE:
+            self._setter(start_value)
 
         super().__init__()
 
     def __repr__(self):
-        return "PropertyBound({!r}, {!r}, {!r}, {!r})".format(self._build_bee, self._run_hive, self._data_type,
-                                                              self._start_value)
+        return "PropertyBound({!r}, {!r}, {!r}, {!r})".format(self._build_bee, self._run_hive, self._drone, self._name,
+                                                              self._data_type, self._start_value)
 
     def _hive_stateful_getter(self):
         return self._getter()
@@ -72,8 +73,8 @@ class PropertyBound(BeeBase, Stateful):
 
 
 class PropertyBuilder(BeeBase):
-    def __init__(self, cls, name: str, data_type: str = '', start_value=None):
-        self._drone_cls = getattr(cls, '_hive_wrapped_drone_class')
+    def __init__(self, drone, name: str, data_type: str = '', start_value=None):
+        self._drone = drone
         self._name = name
         self._data_type = data_type
         self._start_value = start_value
@@ -114,4 +115,5 @@ class PropertyBuilder(BeeBase):
         if isinstance(start_value, Parameter):
             start_value = run_hive._hive_object._hive_args_frozen.resolve_parameter(start_value)
 
-        return PropertyBound(self, run_hive, self._drone_cls, self._name, self._data_type, start_value)
+        drone = self._drone.bind(run_hive)
+        return PropertyBound(self, run_hive, drone, self._name, self._data_type, start_value)

@@ -190,7 +190,6 @@ class HiveObject(BeeBase, ConnectSourceDerived, ConnectTargetDerived, TriggerSou
 
     @memoize
     def bind(self, run_hive: RuntimeHive) -> RuntimeHive:
-        print("BIND {} for {}".format(self, run_hive))
         return self.instantiate()
 
     @classmethod

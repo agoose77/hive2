@@ -3,6 +3,7 @@ import hive
 
 
 class DroneClass:
+    _x = 1
 
     @property
     def x(self):
@@ -11,15 +12,26 @@ class DroneClass:
     def push_x(self, x):
         self._x = x
 
-
-def build(cls, i, ex, args):
-    i.x = cls.x
-    ex.x = i.x.property()
-
-    i.push_x = cls.push_x
-    ex.push_x = i.push_x.push_in
+    def debug(self):
+        print("DBG")
 
 
+def mod(i, ex):
+    print(i.drone)
 
-H = hive.hive("build", build, drone_class=DroneClass)
+
+def build(i, ex, args):
+    i.mod = hive.modifier(mod)
+    i.drone = hive.drone(DroneClass)
+
+    ex.x = i.drone.x.property()
+    ex.t = i.mod.trigger
+    ex.dbg = i.drone.debug.trigger
+
+
+H = hive.hive("build", build)
 h = H()
+
+print(h.x)
+h.t()
+h.dbg()
