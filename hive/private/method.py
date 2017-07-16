@@ -1,5 +1,5 @@
 from hive.manager import memoize
-from hive.public.function import FunctionBound, FunctionBuilder
+from hive.private.function import FunctionBound, FunctionBuilder
 
 
 class MethodBuilder(FunctionBuilder):

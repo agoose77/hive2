@@ -1,6 +1,6 @@
 from functools import partial
 
-from .function import FunctionBuilder, FunctionBound
+from ..private import FunctionBuilder, FunctionBound
 from ..manager import HiveModeFactory, memoize
 
 

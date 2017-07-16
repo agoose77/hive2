@@ -5,7 +5,7 @@ from logging import getLogger
 logger = getLogger(__name__)
 
 
-class HiveModeFactory(object):
+class HiveModeFactory:
     """Return appropriate class instance depending upon execution mode"""
 
     def __init__(self, name, **kwargs):

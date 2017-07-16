@@ -33,8 +33,8 @@ from .identifier import is_valid_identifier
 from .contexts import (get_building_hive, get_mode, get_run_hive, get_matchmaker_validation_enabled,
                        set_matchmaker_validation_enabled, matchmaker_validation_enabled_as, HiveMode)
 from .manager import memo_property, memoize, MemoProperty, HiveModeFactory
-from hive.private import method
 from .private import READ_WRITE, READ, WRITE, connect, trigger, plugin, socket
+from .public import drone, modifier, attribute
 from .policies import SingleOptional, SingleRequired, MultipleOptional, MultipleRequired
 from .parameter import parameter
 from .super import external, internal, register_drone

@@ -4,7 +4,7 @@ from typing import Any, Type
 from ..annotations import get_argument_options, get_return_type
 from ..interfaces import BeeBase
 from ..manager import HiveModeFactory
-
+from ..private import PropertyBuilder, MethodBuilder
 
 def is_internal_descriptor(value):
     from struct import Struct
@@ -41,11 +41,8 @@ class DroneBuilder(BeeBase):
 
         return value
 
-    def __setattr__(self, key, value):
-        pass
-
     def property(self, name: str, data_type: str = '', start_value: Any = None):
-        raise NotImplementedError
+        raise PropertyBuilder(self._class, name, )
 
     def method(self, name: str):
         raise NotImplementedError

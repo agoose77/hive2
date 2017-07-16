@@ -25,7 +25,7 @@ class Bee(ABC):
 
     @property
     @abstractmethod
-    def _hive_parent_hive_object_class(self) -> Type:
+    def _hive_parent_hive_object_class(self) -> Type['HiveObject']:
         pass
 
     def implements(self, cls: Type) -> bool:

@@ -1,12 +1,10 @@
 from abc import ABC, abstractproperty
-from collections import OrderedDict
-from inspect import currentframe, getmodule, isclass
+from inspect import currentframe, getmodule
 from itertools import count, chain
 from typing import List, Generator, NamedTuple, Callable, Type, Dict, Union, Tuple, Any, Optional
 
-from .classes import (AttributeMapping, InternalValidator, ExternalValidator, ArgWrapper, validate_args,
-                      DroneClassProxy, HiveDescriptor)
-from .compatability import next, validate_signature
+from .classes import (AttributeMapping, InternalValidator, ExternalValidator, ArgWrapper, validate_args, HiveDescriptor)
+from .compatability import next
 from .contexts import (bee_register_context, get_mode, hive_mode_as, building_hive_as, run_hive_as,
                        get_building_hive, get_matchmaker_validation_enabled, HiveMode)
 from .exception import MatchmakingPolicyError, HiveBuilderError
@@ -15,11 +13,9 @@ from .interfaces import (BeeBase, ConnectTargetDerived, ConnectSourceDerived, Tr
 from .manager import memoize
 from .policies import MatchmakingPolicy
 from .private import ResolveBee, ConnectCandidate, connect
-from .super import register_drone
 from .typing import MatchFlags, data_types_match
 
-BuilderType = Callable[[Optional[DroneClassProxy], AttributeMapping, AttributeMapping, AttributeMapping,
-                        Optional[AttributeMapping]], None]
+BuilderType = Callable[[AttributeMapping, AttributeMapping, AttributeMapping, Optional[AttributeMapping]], None]
 ConfigurerType = Callable[[AttributeMapping], None]
 BasesType = Tuple[Type['HiveBuilder'], ...]
 
@@ -33,11 +29,6 @@ class MatchmakerConnectivityState(NamedTuple):
     active_policies: List[TrackedPolicy]
     plugins: Dict[Plugin, List[TrackedPolicy]]
     sockets: Dict[Socket, List[TrackedPolicy]]
-
-
-class HiveBuildPair(NamedTuple):
-    function: BuilderType
-    drone_class: Type
 
 
 def get_previous_module_name() -> str:
@@ -95,32 +86,14 @@ class RuntimeHive(BeeBase, ConnectSourceDerived, ConnectTargetDerived, TriggerSo
     """
     _hive_i_class = None
 
-    def __init__(self, hive_object: 'HiveObject', builders: Tuple[HiveBuildPair]):
+    def __init__(self, hive_object: 'HiveObject'):
         super().__init__()
 
         self._hive_object = hive_object
-        self._drone_class_to_instance = {}
         self._name_to_runtime_bee = {}
         self._hive_i = hive_i = self._hive_i_class(self)
 
         with run_hive_as(self):
-            args = hive_object._hive_drone_args
-            kwargs = hive_object._hive_drone_kwargs
-
-            for builder, drone_cls in builders:
-                if drone_cls is None:
-                    continue
-
-                # Do not initialise instance yet
-                assert drone_cls not in self._drone_class_to_instance, drone_cls
-                self._drone_class_to_instance[drone_cls] = drone = drone_cls.__new__(drone_cls)
-
-                # Register drone with global lookup
-                register_drone(drone, self)
-
-                # Now call init method to run initialisation routines
-                drone.__init__(*args, **kwargs)
-
             with building_hive_as(hive_object.__class__), hive_mode_as(HiveMode.BUILD):
                 # Add external public to runtime hive
                 for bee_name, bee in hive_object._hive_ex:
@@ -200,15 +173,6 @@ class HiveObject(BeeBase, ConnectSourceDerived, ConnectTargetDerived, TriggerSou
         self._hive_drone_args = remaining_args
         self._hive_drone_kwargs = remaining_kwargs
 
-        # Check build functions are valid
-        for builder, drone_cls in self._hive_parent_class._builders:
-            if drone_cls is not None:
-                try:
-                    validate_signature(drone_cls, *self._hive_drone_args, **self._hive_drone_kwargs)
-
-                except TypeError as err:
-                    raise TypeError("{}.{}".format(drone_cls.__name__, err.args[0]))
-
         # Create ResolveBee wrappers for external interface
         # We do NOT use 'with building_hive_as(...):' here, because these attributes are intended for use by the
         # the parent hive. They will not enter the hive namespace unless the parent accesses them with
@@ -222,7 +186,7 @@ class HiveObject(BeeBase, ConnectSourceDerived, ConnectTargetDerived, TriggerSou
 
     def instantiate(self, run_hive=None) -> RuntimeHive:
         """Return an instance of the runtime Hive for this Hive object."""
-        return self._hive_runtime_class(self, self._hive_parent_class._builders)
+        return self._hive_runtime_class(self)
 
     @memoize
     def bind(self, run_hive: RuntimeHive) -> RuntimeHive:
@@ -411,13 +375,12 @@ class HiveBuilder:
         return hive_object
 
     @classmethod
-    def extend(cls, name, builder: BuilderType = None, drone_class: Type = None, configurer: ConfigurerType = None,
+    def extend(cls, name, builder: BuilderType = None, configurer: ConfigurerType = None,
                is_dyna_hive: bool = None, bases: BasesType = (), module_name: str = None) -> Type['HiveBuilder']:
         """Extend HiveBuilder with an additional builder (and builder class)
 
         :param name: name of new hive class
         :param builder: optional function used to build hive
-        :param drone_class: optional Python class to bind to hive
         :param configurer: optional configurer to establish meta-parameters
         :param is_dyna_hive: optional flag to use dyna-hive instantiation path. If omitted (None), inherit
         :param bases: optional tuple of base classes to use
@@ -438,17 +401,12 @@ class HiveBuilder:
         base_builders = tuple(builder for hive_cls in bases for builder in hive_cls._builders)
         base_is_dyna_hive = any(hive_cls._is_dyna_hive for hive_cls in bases)
 
-        if drone_class is not None and not isclass(drone_class):
-            raise TypeError("drone_class must be a Python class, e.g. class SomeHive(object): ...")
-
         # Validate builders
         if builder is None:
             builders = base_builders
-            if drone_class is not None:
-                raise ValueError("Hive cannot be given a drone class without defining a builder function")
         else:
             # Add builder
-            builders = base_builders + (HiveBuildPair(builder, drone_class),)
+            builders = base_builders + (builder,)
 
         # Add configurer
         configurers = base_configurers
@@ -456,7 +414,7 @@ class HiveBuilder:
             configurers += (configurer,)
 
         # Build docstring
-        docstring = "\n".join([builder.__doc__ for builder, build_cls in builders if builder.__doc__ is not None])
+        docstring = "\n".join([builder.__doc__ for builder in builders if builder.__doc__ is not None])
 
         # If not provided, inherit from base classes
         if is_dyna_hive is None:
@@ -473,10 +431,11 @@ class HiveBuilder:
             "_is_dyna_hive": is_dyna_hive,
             "__module__": module_name
         }
-        return type(name, bases, class_dict)
+        builder_class: Type[HiveBuilder] = type(name, bases, class_dict)
+        return builder_class
 
     @classmethod
-    def _create_meta_primitive(cls, *args, **kwargs) -> MetaHivePrimitive:
+    def _create_meta_primitive(cls, *args, **kwargs) -> Type[MetaHivePrimitive]:
         """Return the MetaHivePrimitive subclass associated with the HiveObject class produced for these meta args"""
         args, kwargs, hive_object_class = cls._hive_object_class_from_args(args, kwargs)
         assert not args or kwargs, "Meta primitive cannot be passed any runtime-arguments"
@@ -494,8 +453,11 @@ class HiveBuilder:
     @memoize
     def _get_meta_primitive_class(cls, hive_object_class: Type[HiveObject]) -> Type[MetaHivePrimitive]:
         """Return the MetaHivePrimitive subclass associated with this HiveObject class """
-        return type("MetaHivePrimitive::{}".format(cls.__name__), (MetaHivePrimitive,),
-                    {'_hive_object_class': hive_object_class})
+        meta_primitive_class: Type[MetaHivePrimitive] = type("MetaHivePrimitive::{}".format(cls.__name__),
+                                                             (MetaHivePrimitive,),
+                                                             {'_hive_object_class': hive_object_class})
+
+        return meta_primitive_class
 
     @classmethod
     @memoize
@@ -507,7 +469,7 @@ class HiveBuilder:
         hive_name = cls.__name__
         hive_object_class_name = "{}(HiveObject)".format(hive_name)
         hive_object_dict = {'__doc__': cls.__doc__, "_hive_parent_class": cls, "__module__": cls.__module__}
-        hive_object_class = type(hive_object_class_name, (HiveObject,), hive_object_dict)
+        hive_object_class: Type[HiveObject] = type(hive_object_class_name, (HiveObject,), hive_object_dict)
 
         validate_internal = InternalValidator(hive_object_class)
         validate_external = ExternalValidator(hive_object_class)
@@ -525,14 +487,9 @@ class HiveBuilder:
         with hive_mode_as(HiveMode.BUILD), building_hive_as(hive_object_class), \
              bee_register_context() as registered_bees:
             # Invoke builder functions to build wrappers
-            for builder, drone_cls in cls._builders:
+            for builder in cls._builders:
                 # Call builder with appropriate arguments depending upon Hive type
-                if drone_cls is not None:
-                    wrapper = DroneClassProxy(drone_cls)
-                    builder_args = wrapper, internals, externals, args
-
-                else:
-                    builder_args = internals, externals, args
+                builder_args = internals, externals, args
 
                 if is_meta_hive:
                     builder_args = builder_args + (meta_args_frozen,)
@@ -755,18 +712,16 @@ class HiveBuilder:
                         "An error occurred during matchmaking {}, {}".format(bee_name, identifier)) from err
 
 
-def hive(name, builder: BuilderType = None, drone_class: Type = None, bases: BasesType = ()) -> Type[HiveBuilder]:
-    return HiveBuilder.extend(name, builder, drone_class, bases=bases)
+def hive(name, builder: BuilderType = None, bases: BasesType = ()) -> Type[HiveBuilder]:
+    return HiveBuilder.extend(name, builder, bases=bases)
 
 
-def dyna_hive(name, builder: BuilderType, configurer: ConfigurerType, drone_class: Type = None,
-              bases: BasesType = ()) -> Type[HiveBuilder]:
-    return HiveBuilder.extend(name, builder, drone_class, configurer=configurer, is_dyna_hive=True, bases=bases)
+def dyna_hive(name, builder: BuilderType, configurer: ConfigurerType, bases: BasesType = ()) -> Type[HiveBuilder]:
+    return HiveBuilder.extend(name, builder, configurer=configurer, is_dyna_hive=True, bases=bases)
 
 
-def meta_hive(name, builder: BuilderType, configurer: ConfigurerType, drone_class: Type = None,
-              bases: BasesType = ()) -> Type[HiveBuilder]:
-    return HiveBuilder.extend(name, builder, drone_class, configurer=configurer, is_dyna_hive=False, bases=bases)
+def meta_hive(name, builder: BuilderType, configurer: ConfigurerType, bases: BasesType = ()) -> Type[HiveBuilder]:
+    return HiveBuilder.extend(name, builder, configurer=configurer, is_dyna_hive=False, bases=bases)
 
 # ==========Hive construction path=========
 # 1. Take args and kwargs for construction call.
