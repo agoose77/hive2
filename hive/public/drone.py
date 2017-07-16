@@ -3,6 +3,7 @@ from typing import Any, Type
 
 from ..annotations import get_argument_options, get_return_type
 from ..interfaces import BeeBase
+from ..parameter import Parameter
 from ..manager import HiveModeFactory, memoize
 from ..private import PropertyBuilder, MethodBuilder, NO_START_VALUE
 
@@ -14,6 +15,12 @@ def is_internal_descriptor(value) -> bool:
 
 def is_property(value) -> bool:
     return isinstance(value, property)
+
+
+def resolve_arg(arg, run_hive: 'RuntimeHive'):
+    if isinstance(arg, Parameter):
+        return run_hive._hive_args_frozen.resolve_parameter(arg)
+    return arg
 
 
 class DroneBuilder(BeeBase):
@@ -43,7 +50,9 @@ class DroneBuilder(BeeBase):
 
     @memoize
     def bind(self, run_hive: 'RuntimeHive'):
-        return self._class(*self._args, **self._kwargs)
+        args = [resolve_arg(a, run_hive) for a in self._args]
+        kwargs = {k: resolve_arg(v, run_hive) for k, v in self._kwargs.items()}
+        return self._class(*args, **kwargs)
 
     def property(self, name: str, data_type: str = '', start_value: Any = NO_START_VALUE) -> PropertyBuilder:
         return PropertyBuilder(self, name, data_type, start_value)
