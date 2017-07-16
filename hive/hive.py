@@ -543,8 +543,7 @@ class HiveBuilder:
                                for name, bee in internals
                                if bee.implements(Descriptor)}
 
-        hive_i_class = type("{}._hive_i".format(run_hive_cls_name),
-                            (HiveInternalRuntimeWrapper,), internal_proxy_dict)
+        hive_i_class = type("{}._hive_i".format(run_hive_cls_name), (HiveInternalRuntimeWrapper,), internal_proxy_dict)
         run_hive_class_dict = {"__doc__": cls.__doc__, "__module__": cls.__module__, '_hive_i_class': hive_i_class}
 
         # For external public

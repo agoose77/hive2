@@ -1,11 +1,17 @@
 from inspect import isfunction
+from itertools import chain
+from logging import getLogger
+
 from typing import Any, Type
 
 from ..annotations import get_argument_options, get_return_type
 from ..interfaces import BeeBase
-from ..parameter import Parameter
 from ..manager import HiveModeFactory, memoize
+from ..parameter import Parameter
 from ..private import PropertyBuilder, MethodBuilder, NO_START_VALUE
+
+logger = getLogger(__name__)
+
 
 def is_internal_descriptor(value) -> bool:
     from struct import Struct
@@ -28,6 +34,14 @@ class DroneBuilder(BeeBase):
         self._class = cls
         self._args = args
         self._kwargs = kwargs
+
+        # Check no shadowed attributes
+        for name in chain.from_iterable((dir(c) for c in cls.__mro__[:-1])):
+            if hasattr(self.__class__, name) and not hasattr(object, name):
+                logger.warning(
+                    "Drone class {!r} has attribute that is shadowed in hive.drone bee, and cannot be accessed"
+                        .format(cls)
+                )
 
         super().__init__()
 
