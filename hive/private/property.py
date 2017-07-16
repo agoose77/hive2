@@ -105,7 +105,7 @@ class PropertyBuilder(BeeBase):
 
         return super().implements(cls)
 
-    def property(self, flags=READ_WRITE):
+    def proxy(self, flags=READ_WRITE):
         return StatefulDescriptorBuilder(self, flags=flags)
 
     @memoize

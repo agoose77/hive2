@@ -119,7 +119,7 @@ class AttributeBuilder(BeeBase):
     def implements(self, cls):
         return issubclass(AttributeBound, cls) or super().implements(cls)
 
-    def property(self, flags=READ_WRITE):
+    def proxy(self, flags=READ_WRITE):
         return StatefulDescriptorBuilder(self, flags=flags)
 
 

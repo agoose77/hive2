@@ -4,12 +4,12 @@ from unittest import TestCase, main
 
 def build_a(i, ex, args):
     i.b = hive.attribute('int', 1)
-    ex.a = i.b.property()
+    ex.a = i.b.proxy()
 
 
 def build_b(i, ex, args):
     i.b = hive.attribute('int', 2)
-    ex.b = i.b.property()
+    ex.b = i.b.proxy()
 
 
 A = hive.hive("A", build_a)

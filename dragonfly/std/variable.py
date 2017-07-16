@@ -11,7 +11,7 @@ def build_variable(i, ex, args, meta_args):
     args.start_value = hive.parameter(meta_args.data_type)
     i.value = hive.attribute(meta_args.data_type, args.start_value)
 
-    ex.value = i.value.property()
+    ex.value = i.value.proxy()
     ex.value_out = i.value.pull_out
     ex.value_in = i.value.push_in
 
