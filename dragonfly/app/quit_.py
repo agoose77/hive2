@@ -1,7 +1,7 @@
 import hive
 
 
-class _Quit:
+class QuitClass:
 
     def __init__(self):
         self._quit = None
@@ -15,8 +15,9 @@ class _Quit:
 
 def build_quit(cls, i, ex, args):
     """Quit the top-level Hive"""
-    ex.get_quit = cls.set_quit.socket(identifier="quit")
-    ex.do_quit = cls.quit.trigger
+    i.quit_drone = hive.drone(QuitClass)
+    ex.get_quit = i.drone.set_quit.socket(identifier="quit")
+    ex.do_quit = i.drone.quit.trigger
 
 
-Quit = hive.hive("Quit", build_quit, drone_class=_Quit)
+Quit = hive.hive("Quit", build_quit)

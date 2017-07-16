@@ -11,11 +11,11 @@ from ..manager import memoize, memo_property
 from ..parameter import Parameter
 
 builtin_property = property
-NO_START_VALUE = object()
+PROP_NO_START_VALUE = object()
 
 
 class PropertyBound(BeeBase, Stateful):
-    def __init__(self, build_bee, run_hive, drone, name, data_type='', start_value=NO_START_VALUE):
+    def __init__(self, build_bee, run_hive, drone, name, data_type='', start_value=PROP_NO_START_VALUE):
         self._name = name
         self._drone = drone
 
@@ -28,7 +28,7 @@ class PropertyBound(BeeBase, Stateful):
         self._build_bee = build_bee
         self._run_hive = run_hive
 
-        if start_value is not NO_START_VALUE:
+        if start_value is not PROP_NO_START_VALUE:
             self._setter(start_value)
 
         super().__init__()

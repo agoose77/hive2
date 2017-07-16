@@ -1,6 +1,7 @@
 from abc import ABC, abstractproperty
 from inspect import currentframe, getmodule
 from itertools import count, chain
+
 from typing import List, Generator, NamedTuple, Callable, Type, Dict, Union, Tuple, Any, Optional
 
 from .classes import (AttributeMapping, InternalValidator, ExternalValidator, ArgWrapper, validate_args, HiveDescriptor)
@@ -199,7 +200,6 @@ class HiveObject(BeeBase, ConnectSourceDerived, ConnectTargetDerived, TriggerSou
 
     @memoize
     def bind(self, run_hive: RuntimeHive) -> RuntimeHive:
-        from .parameter import Parameter
         arg_values = resolve_arguments(run_hive, self._hive_arg_values)
         return self._hive_runtime_class(self, self._hive_args.freeze(arg_values))
 
@@ -386,7 +386,8 @@ class HiveBuilder:
 
     @classmethod
     def extend(cls, name, builder: BuilderType = None, configurer: ConfigurerType = None,
-               is_dyna_hive: bool = None, bases: BasesType = (), module_name: str = None) -> Type['HiveBuilder']:
+               is_dyna_hive: bool = None, bases: Tuple[BasesType, ...] = (), module_name: str = None) -> Type[
+        'HiveBuilder']:
         """Extend HiveBuilder with an additional builder (and builder class)
 
         :param name: name of new hive class
@@ -721,15 +722,17 @@ class HiveBuilder:
                         "An error occurred during matchmaking {}, {}".format(bee_name, identifier)) from err
 
 
-def hive(name, builder: BuilderType = None, bases: BasesType = ()) -> Type[HiveBuilder]:
+def hive(name, builder: BuilderType = None, bases: Tuple[BasesType, ...] = ()) -> Type[HiveBuilder]:
     return HiveBuilder.extend(name, builder, bases=bases)
 
 
-def dyna_hive(name, builder: BuilderType, configurer: ConfigurerType, bases: BasesType = ()) -> Type[HiveBuilder]:
+def dyna_hive(name, builder: BuilderType, configurer: ConfigurerType, bases: Tuple[BasesType, ...] = ()) -> Type[
+    HiveBuilder]:
     return HiveBuilder.extend(name, builder, configurer=configurer, is_dyna_hive=True, bases=bases)
 
 
-def meta_hive(name, builder: BuilderType, configurer: ConfigurerType, bases: BasesType = ()) -> Type[HiveBuilder]:
+def meta_hive(name, builder: BuilderType, configurer: ConfigurerType, bases: Tuple[BasesType, ...] = ()) -> Type[
+    HiveBuilder]:
     return HiveBuilder.extend(name, builder, configurer=configurer, is_dyna_hive=False, bases=bases)
 
 # ==========Hive construction path=========

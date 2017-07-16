@@ -5,12 +5,16 @@ from ..private import (PushInBuilder, PushInImmediate, PullInBuilder, PullInImme
                        PullOutImmediate, PushOutImmediate, StatefulDescriptorBuilder, READ_WRITE, TriggerFuncBuilder,
                        TriggerFuncRuntime)
 
+ATTR_NO_START_VALUE = object()
+
+
 class AttributeBase(BeeBase, Stateful):
     pre_updated = None
     updated = None
 
-    def __init__(self, data_type='', start_value=None):
-        self._value = start_value
+    def __init__(self, data_type='', start_value=ATTR_NO_START_VALUE):
+        if start_value is not ATTR_NO_START_VALUE:
+            self._value = start_value
         self._data_type = data_type
         self._start_value = start_value
 
@@ -28,7 +32,7 @@ class AttributeBase(BeeBase, Stateful):
 
 
 class AttributeImmediate(AttributeBase):
-    def __init__(self, data_type='', start_value=None):
+    def __init__(self, data_type='', start_value=ATTR_NO_START_VALUE):
         super().__init__(data_type, start_value)
 
         self.pull_in = PullInImmediate(self)
@@ -43,7 +47,7 @@ class AttributeImmediate(AttributeBase):
 
 
 class AttributeBound(AttributeBase):
-    def __init__(self, build_bee, run_hive, data_type='', start_value=None):
+    def __init__(self, build_bee, run_hive, data_type='', start_value=ATTR_NO_START_VALUE):
         self._build_bee = build_bee
         self._run_hive = run_hive
 
@@ -82,7 +86,7 @@ builtin_property = property
 
 
 class AttributeBuilder(BeeBase):
-    def __init__(self, data_type='', start_value=None):
+    def __init__(self, data_type='', start_value=ATTR_NO_START_VALUE):
         self._data_type = data_type
         self._start_value = start_value
 

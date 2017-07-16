@@ -38,9 +38,10 @@ class EventBindClass(factory.create_external_class()):
         self._processes[process_id].resume_events()
 
     def get_config(self):
-        if hasattr(self._hive, "event_leader"):
+        internals = hive.internal(self)
+        if hasattr(internals, "event_leader"):
             # Pull leader
-            self._hive.event_leader()
+            internals.event_leader()
             dict(leader=self.leader)
 
         return {}
@@ -48,24 +49,25 @@ class EventBindClass(factory.create_external_class()):
 
 @factory.builds_external
 def build_bind(cls, i, ex, args, meta_args):
+    i.drone = hive.drone(EventBindClass)
+
     if meta_args.forward_events == "none":
         return
 
     if meta_args.forward_events == "by_leader":
-        i.event_leader = hive.property(cls, "leader", "tuple")
-        i.pull_event_leader = hive.pull_in(i.event_leader)
-        ex.event_leader = hive.antenna(i.pull_event_leader)
+        i.event_leader = i.drone.property("leader", "tuple")
+        ex.event_leader = i.event_leader.pull_in
 
-    i.push_pause_in = hive.push_in(cls.pause)
+    i.push_pause_in = hive.push_in(cls.pause) # TODO
     ex.pause_events = hive.antenna(i.push_pause_in)
 
     i.push_resume_in = hive.push_in(cls.resume)
     ex.resume_events = hive.antenna(i.push_resume_in)
 
-    ex.on_created = hive.plugin(cls.on_created, "bind.on_created")
+    ex.on_created = i.drone.on_created.plugin("bind.on_created")
 
 
-_BindEvent = hive.dyna_hive("BindEvent", build_bind, configurer=factory.external_configurer, drone_class=EventBindClass)
+_BindEvent = hive.dyna_hive("BindEvent", build_bind, configurer=factory.external_configurer)
 
 
 class EventEnvironmentClass(factory.create_environment_class()):
@@ -74,7 +76,6 @@ class EventEnvironmentClass(factory.create_environment_class()):
         super().__init__(context)
 
         self._dispatcher = EventDispatcher()
-        self._hive = hive.get_run_hive()
 
         self._main_add_handler = context.plugins['event.add_handler']
         self._main_remove_handler = context.plugins['event.remove_handler']
@@ -125,7 +126,6 @@ class EventEnvironmentClass(factory.create_environment_class()):
     def on_closed(self):
         """Disconnect from external event stream"""
         self._dispatcher.clear_handlers()
-
         self._update_listener_state()
 
 
@@ -139,21 +139,17 @@ def build_event_environment(cls, i, ex, args, meta_args):
 
     Provides appropriate sockets and plugins for event interface
     """
-    ex.add_handler = hive.plugin(cls.add_handler, identifier="event.add_handler")
-    ex.remove_handler = hive.plugin(cls.remove_handler, identifier="event.remove_handler")
-    ex.read_event = hive.plugin(cls.handle_event, identifier="event.process")
+    i.drone = hive.drone(EventEnvironmentClass)
+    ex.add_handler = i.drone.add_handler.plugin(identifier="event.add_handler")
+    ex.remove_handler = i.drone.remove_handler.plugin(identifier="event.remove_handler")
+    ex.read_event = i.drone.handle_event.plugin(identifier="event.process")
+    ex.event_on_stopped = i.drone.on_closed.plugin(identifier="on_stopped", policy=hive.SingleOptional)
 
-    ex.event_on_stopped = hive.plugin(cls.on_closed, identifier="on_stopped", policy=hive.SingleOptional)
-
-    i.pause_events = hive.triggerable(cls.pause)
-    ex.pause_events = hive.entry(i.pause_events)
-
-    i.resume_events = hive.triggerable(cls.resume)
-    ex.resume_events = hive.entry(i.resume_events)
+    ex.pause_events = i.drone.pause.trigger
+    ex.resume_events = i.drone.resume.trigger
 
 
-_EventEnvironment = hive.meta_hive("EventEnvironment", build_event_environment, configure_event_environment,
-                                  drone_class=EventEnvironmentClass)
+_EventEnvironment = hive.meta_hive("EventEnvironment", build_event_environment, configure_event_environment)
 
 
 def get_environment(meta_args):

@@ -13,7 +13,7 @@ ALL_KEYCODES.extend(string.punctuation)
 ALL_KEYCODES.extend(_SPECIAL_KEYCODES)
 
 
-class Keyboard_:
+class KeyboardClass:
 
     def __init__(self):
         self._hive = hive.get_run_hive()
@@ -71,38 +71,36 @@ def configure_keyboard(meta_args):
 
 def build_keyboard(cls, i, ex, args, meta_args):
     """Listen for keyboard event"""
+    i.keyboard_drone = hive.drone(KeyboardClass)
+
     if meta_args.mode == 'single key':
-        ex.on_event = hive.socket(cls.add_single_listener, identifier="event.add_handler")
+        ex.on_event = i.keyboard_drone.add_single_listener.socket(identifier="event.add_handler")
 
         args.key = hive.parameter("str.keycode", "w")
-        i.key = hive.property(cls, "key", "str.keycode", args.key)
+        i.key = i.keyboard_drone.property("key", "str.keycode", args.key)
 
-        i.push_key = hive.push_in(i.key)
-        ex.key = hive.antenna(i.push_key)
+        ex.key = i.key.push_in
 
-        i.on_key_changed = hive.triggerable(cls.change_listener_keys)
-        hive.trigger(i.push_key, i.on_key_changed)
+        i.on_key_changed = i.keyboard_drone.change_listener_keys
+        i.key.push_in.after.connect(i.on_key_changed.trigger)
 
-        i.on_pressed = hive.triggerfunc()
-        ex.on_pressed = hive.hook(i.on_pressed)
+        i.on_pressed = hive.modifier()
+        ex.on_pressed = i.on_pressed.triggered
 
-        i.on_released = hive.triggerfunc()
-        ex.on_released = hive.hook(i.on_released)
+        i.on_released = hive.modifier()
+        ex.on_released = i.on_released.triggered
 
-        i.is_pressed = hive.property(cls, "is_pressed", "bool")
-        i.pull_is_pressed = hive.pull_out(i.is_pressed)
-        ex.is_pressed = hive.output(i.pull_is_pressed)
+        i.is_pressed = i.keyboard_drone.property("is_pressed", "bool")
+        ex.is_pressed = i.is_pressed.pull_out
 
     else:
-        ex.on_event = hive.socket(cls.add_any_listener, identifier="event.add_handler")
+        ex.on_event = i.keyboard_drone.add_any_listener.socket(identifier="event.add_handler")
 
-        i.key_pressed = hive.property(cls, 'key_pressed', data_type='str.keycode')
-        i.pull_key_pressed = hive.push_out(i.key_pressed)
-        ex.key_pressed = hive.output(i.pull_key_pressed)
+        i.key_pressed = i.keyboard_drone.property('key_pressed', data_type='str.keycode')
+        ex.key_pressed = i.key_pressed.push_out
 
-        i.key_released = hive.property(cls, 'key_released', data_type='str.keycode')
-        i.pull_key_released = hive.push_out(i.key_released)
-        ex.key_released = hive.output(i.pull_key_released)
+        i.key_released = i.keyboard_drone.property('key_released', data_type='str.keycode')
+        ex.key_released = i.key_released.push_out
 
 
-Keyboard = hive.dyna_hive("Keyboard", build_keyboard, configurer=configure_keyboard, drone_class=Keyboard_)
+Keyboard = hive.dyna_hive("Keyboard", build_keyboard, configurer=configure_keyboard)

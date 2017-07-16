@@ -3,12 +3,12 @@ from .typing import is_valid_data_type
 
 from collections.abc import Collection
 
+PARAM_NO_VALUE = object()
+
 
 class Parameter:
 
-    no_value = object()
-
-    def __init__(self, data_type='', start_value=no_value, options=None):
+    def __init__(self, data_type='', start_value=PARAM_NO_VALUE, options=None):
         if not is_valid_data_type(data_type):
             raise ValueError(data_type)
 
@@ -18,7 +18,7 @@ class Parameter:
                 raise ValueError("Expected None or a collection for options")
             options = frozenset(options)
 
-            if start_value is not Parameter.no_value and start_value not in options:
+            if start_value is not PARAM_NO_VALUE and start_value not in options:
                 raise ValueError("Invalid start value: {!r} not in {!r}".format(start_value, options))
 
         self._data_type = data_type
@@ -26,7 +26,7 @@ class Parameter:
         self._options = options
 
         # Validate start value
-        if start_value is not Parameter.no_value and options is not None:
+        if start_value is not PARAM_NO_VALUE and options is not None:
             assert start_value in options
 
     @property

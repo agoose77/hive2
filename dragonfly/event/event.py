@@ -72,9 +72,9 @@ class EventDispatcher:
 class EventHiveClass(EventDispatcher):
 
     def __init__(self):
-        super(EventHiveClass, self).__init__()
-
         self.pushed_event = None
+
+        super().__init__()
 
     def on_started(self):
         self.handle_event(("start",))
@@ -86,24 +86,24 @@ class EventHiveClass(EventDispatcher):
         self.handle_event(self.pushed_event)
 
 
-def event_builder(cls, i, ex, args):
-    ex.add_handler = hive.plugin(cls.add_handler, identifier="event.add_handler", export_to_parent=True)
-    ex.remove_handler = hive.plugin(cls.remove_handler, identifier="event.remove_handler", export_to_parent=True)
-    ex.read_event = hive.plugin(cls.handle_event, identifier="event.process", export_to_parent=True)
+def event_builder(i, ex, args):
+    i.event_drone = hive.drone(EventHiveClass)
+
+    ex.add_handler = i.event_drone.add_handler.plugin(identifier="event.add_handler", export_to_parent=True)
+    ex.remove_handler = i.event_drone.remove_handler.plugin(identifier="event.remove_handler", export_to_parent=True)
+    ex.read_event = i.event_drone.handle_event.plugin(identifier="event.process", export_to_parent=True)
 
     # Send startup and stop events
-    ex.on_stopped = hive.plugin(cls.on_stopped, identifier="on_stopped")
-    ex.on_started = hive.plugin(cls.on_started, identifier="on_started")
+    ex.on_stopped = i.event_drone.on_stopped.plugin(identifier="on_stopped")
+    ex.on_started = i.event_drone.on_started.plugin(identifier="on_started")
 
     # Allow events to be pushed in
-    i.event_in = hive.property(cls, 'pushed_event', 'tuple')
-    i.push_event = hive.push_in(i.event_in)
-    ex.event_in = hive.antenna(i.push_event)
+    i.event = i.event_drone.property('pushed_event', 'tuple')
+    ex.event_in = i.event.push_in
 
-    i.on_event_in = hive.triggerable(cls.on_event_in)
-    hive.trigger(i.push_event, i.on_event_in)
+    i.event.push_in.after.connect(i.event_drone.on_event_in.trigger)
 
 
-EventManager = hive.hive("EventManager", event_builder, EventHiveClass)
+EventManager = hive.hive("EventManager", event_builder)
 
 

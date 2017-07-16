@@ -1,6 +1,6 @@
 from .connect import connect, ConnectCandidate
 from .plugin import HivePluginBuilder, HivePluginRuntime
-from .property import PropertyBuilder, NO_START_VALUE
+from .property import PropertyBuilder, PROP_NO_START_VALUE
 from .method import MethodBuilder
 from .function import FunctionBuilder, FunctionBound, FunctionImmediate
 from .pull_in import PullInBuilder, PullInImmediate

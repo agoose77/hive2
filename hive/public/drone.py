@@ -1,6 +1,8 @@
+"""Provide clean API to access RuntimeHive instance from Drone instance"""
 from inspect import isfunction
 from itertools import chain
 from logging import getLogger
+from weakref import WeakValueDictionary
 
 from typing import Any, Type
 
@@ -8,9 +10,45 @@ from ..annotations import get_argument_options, get_return_type
 from ..interfaces import BeeBase
 from ..manager import HiveModeFactory, memoize
 from ..parameter import Parameter
-from ..private import PropertyBuilder, MethodBuilder, NO_START_VALUE
+from ..private import PropertyBuilder, MethodBuilder, PROP_NO_START_VALUE
 
 logger = getLogger(__name__)
+
+_drone_instance_to_run_hive = WeakValueDictionary()
+def register_drone(drone, run_hive):
+    _drone_instance_to_run_hive[drone] = run_hive
+
+
+def args(drone_instance):
+    """Convenience method to get current run hive args from drone instance
+
+    :param drone_instance: drone class instance
+    """
+    return _drone_instance_to_run_hive[drone_instance]._hive_args_frozen
+
+
+def meta_args(drone_instance):
+    """Convenience method to get current run hive meta-args from drone instance
+
+    :param drone_instance: drone class instance
+    """
+    return _drone_instance_to_run_hive[drone_instance]._hive_object._hive_meta_args_frozen
+
+
+def external(drone_instance):
+    """Convenience method to get current run hive from drone instance
+
+    :param drone_instance: drone class instance
+    """
+    return _drone_instance_to_run_hive[drone_instance]
+
+
+def internal(drone_instance):
+    """Convenience method to get current run hive private wrapper from drone instance
+
+    :param drone_instance: drone class instance
+    """
+    return _drone_instance_to_run_hive[drone_instance]._hive_i
 
 
 def is_internal_descriptor(value) -> bool:
@@ -66,9 +104,12 @@ class DroneBuilder(BeeBase):
     def bind(self, run_hive: 'RuntimeHive'):
         args = [resolve_arg(a, run_hive) for a in self._args]
         kwargs = {k: resolve_arg(v, run_hive) for k, v in self._kwargs.items()}
-        return self._class(*args, **kwargs)
 
-    def property(self, name: str, data_type: str = '', start_value: Any = NO_START_VALUE) -> PropertyBuilder:
+        drone = self._class(*args, **kwargs)
+        register_drone(drone, run_hive)
+        return drone
+
+    def property(self, name: str, data_type: str = '', start_value: Any = PROP_NO_START_VALUE) -> PropertyBuilder:
         return PropertyBuilder(self, name, data_type, start_value)
 
     def method(self, name: str) -> MethodBuilder:

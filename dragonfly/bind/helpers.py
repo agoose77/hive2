@@ -7,12 +7,12 @@ from string import punctuation
 import hive
 from hive.parameter import Parameter
 
-
 punctuation_no_underscore = punctuation.replace("_", "")
 
 ForwardedIO = namedtuple("ForwardedIO", "identifier plugin_policy socket_policy")
 BindParameterPair = namedtuple("BindParameterPair", "condition parameter")
-PluginEntry = namedtuple("PluginEntry", "identifier plugin_policy socket_policy configure_for_environment condition_stack")
+PluginEntry = namedtuple("PluginEntry",
+                         "identifier plugin_policy socket_policy configure_for_environment condition_stack")
 
 
 class BindClassDefinition:
@@ -29,7 +29,7 @@ class BindClassDefinition:
         plugin_entry = PluginEntry(identifier, plugin_policy, socket_policy, configure_for_environment, condition_stack)
         self._plugin_entries.append(plugin_entry)
 
-    def parameter(self, name, data_type=None, start_value=Parameter.no_value, options=None):
+    def parameter(self, name, data_type=None, start_value=hive.PARAM_NO_VALUE, options=None):
         self._parameters[name] = Parameter(data_type, start_value, options)
         return Variable(name)
 
@@ -44,7 +44,6 @@ class BindClassDefinition:
 
 
 def build_operator(operator_):
-
     def wrapper(self, right):
         if not isinstance(right, Operand):
             right = Value(right)
@@ -95,7 +94,6 @@ class Variable(Operand):
 
 
 class Operation(Operand):
-
     def __init__(self, operator_, left, right):
         super().__init__()
 
@@ -127,7 +125,6 @@ class BindClassFactory:
     def name(self):
         return self._name
 
-
     @staticmethod
     def sanitise_identifier(identifier):
         """Convert string identifier to underscore delimited string"""
@@ -138,7 +135,6 @@ class BindClassFactory:
         class_name = "ExternalBindClass"
 
         class BinderClassBase:
-
             def __init__(self_binder):
                 self_binder._plugins = {}
 
@@ -165,7 +161,6 @@ class BindClassFactory:
         class_name = "EnvironmentBindClass"
 
         class BinderClassBase:
-
             def __init__(self_binder, context):
                 self_binder._plugins = context.plugins
                 self_binder._config = context.config
@@ -186,14 +181,12 @@ class BindClassFactory:
         return type(class_name, (BinderClassBase,), cls_dict)
 
     def build_external_hive(self):
-        external_class = self.create_external_class()
         return hive.dyna_hive("{}External".format(self._name), self.external_builder,
-                              configurer=self.external_configurer, drone_class=external_class)
+                              configurer=self.external_configurer)
 
     def build_environment_hive(self):
-        environment_class = self.create_environment_class()
         return hive.meta_hive("{}Environment".format(self._name), self.environment_builder,
-                              configurer=self.environment_configurer, drone_class=environment_class)
+                              configurer=self.environment_configurer)
 
     def external_configurer(self, meta_args):
         """Adds bind parameters to meta args wrapper"""
@@ -202,6 +195,7 @@ class BindClassFactory:
 
     def external_builder(self, cls, i, ex, args, meta_args):
         """Adds bind-plugin sockets to ex wrapper if conditions allow."""
+        i.drone = hive.drone(self.create_external_class())
         meta_args_dict = meta_args.to_ordered_dict()
 
         for attr_name, plugin_entry in self._plugins.items():
@@ -214,8 +208,8 @@ class BindClassFactory:
                 socket = method.socket(plugin_entry.identifier, policy=plugin_entry.socket_policy)
                 setattr(ex, attr_name, socket)
 
-        get_plugins_plugin = hive.plugin(cls.get_plugins, identifier="bind.get_plugins")
-        get_config_plugin = hive.plugin(cls.get_config, identifier="bind.get_config")
+        get_plugins_plugin = i.drone.get_plugins.plugin(identifier="bind.get_plugins")
+        get_config_plugin = i.drone.get_config.plugin(identifier="bind.get_config")
 
         setattr(ex, '{}_get_plugins'.format(self._name), get_plugins_plugin)
         setattr(ex, '{}_get_config'.format(self._name), get_config_plugin)
@@ -223,8 +217,9 @@ class BindClassFactory:
     def environment_configurer(self, meta_args):
         """Inactive function to provide consistent API"""
 
-    def environment_builder(self, cls, i, ex, args, meta_args):
+    def environment_builder(self, i, ex, args, meta_args):
         """Adds bind-plugin plugins to ex wrapper if conditions allow."""
+        i.drone = hive.drone(self.create_environment_class())
         meta_args_dict = meta_args.bind_meta_args.to_ordered_dict()
 
         for attr_name, plugin_entry in self._plugins.items():
@@ -236,7 +231,7 @@ class BindClassFactory:
                     break
 
             else:
-                method = getattr(cls, attr_name)
+                method = getattr(i.drone, attr_name)
                 plugin = method.plugin(plugin_entry.identifier, plugin_entry.plugin_policy)
                 setattr(ex, attr_name, plugin)
 
@@ -247,6 +242,7 @@ class BindClassFactory:
 
         :param func: subsequent builder
         """
+
         @wraps(func)
         def builder(cls, i, ex, args, meta_args):
             self.external_builder(cls, i, ex, args, meta_args)
@@ -261,6 +257,7 @@ class BindClassFactory:
 
         :param func: subsequent builder
         """
+
         @wraps(func)
         def builder(cls, i, ex, args, meta_args):
             self.environment_builder(cls, i, ex, args, meta_args)

@@ -56,18 +56,18 @@ class DelayCls:
 
 def build_delay(i, ex, args):
     """Delay input trigger by X ticks, where X is the value of delay_in (greater than zero)"""
-    i.delay_cls = hive.drone(DelayCls)
+    i.delay_drone = hive.drone(DelayCls)
     i.on_elapsed = hive.modifier()
     ex.on_elapsed = i.on_elapsed.pushed
 
-    ex.trig_in = i.delay_cls.on_triggered.trigger
+    ex.trig_in = i.delay_drone.on_triggered.trigger
 
-    i.delay = i.delay_cls.property("delay", "float")
+    i.delay = i.delay_drone.property("delay", "float")
     ex.delay_in = i.delay.push_in
 
-    ex.get_add_handler = i.delay_cls.set_add_handler.socket("event.add_handler")
-    ex.get_remove_handler = i.delay_cls.set_remove_handler.socket("event.remove_handler")
-    ex.get_get_tick_rate = i.delay_cls.set_get_tick_rate.socket("app.get_tick_rate")
+    ex.get_add_handler = i.delay_drone.set_add_handler.socket("event.add_handler")
+    ex.get_remove_handler = i.delay_drone.set_remove_handler.socket("event.remove_handler")
+    ex.get_get_tick_rate = i.delay_drone.set_get_tick_rate.socket("app.get_tick_rate")
 
 
 Delay = hive.hive("Delay", build_delay)

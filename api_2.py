@@ -14,6 +14,7 @@ class DroneClass:
         self._x = x
 
     def debug(self):
+        print(hive.args(self))
         print("DBG")
 
 
@@ -31,7 +32,8 @@ def build(i, ex, args):
     ex.dbg = i.drone.debug.trigger
 
 
-H = hive.hive("build", build)
+H = hive.hive("MyHive", build)
 h = H("bill")
 
 print(h.x)
+h.dbg()
