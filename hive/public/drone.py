@@ -19,12 +19,19 @@ def register_drone(drone, run_hive):
     _drone_instance_to_run_hive[drone] = run_hive
 
 
+def get_run_hive_owning(drone):
+    try:
+        return _drone_instance_to_run_hive[drone]
+    except KeyError:
+        raise RuntimeError("Drone {} does not have a corresponding run hive".format(drone))
+
+
 def args(drone_instance):
     """Convenience method to get current run hive args from drone instance
 
     :param drone_instance: drone class instance
     """
-    return _drone_instance_to_run_hive[drone_instance]._hive_args_frozen
+    return get_run_hive_owning(drone_instance)._hive_args_frozen
 
 
 def meta_args(drone_instance):
@@ -32,7 +39,7 @@ def meta_args(drone_instance):
 
     :param drone_instance: drone class instance
     """
-    return _drone_instance_to_run_hive[drone_instance]._hive_object._hive_meta_args_frozen
+    return get_run_hive_owning(drone_instance)._hive_object._hive_meta_args_frozen
 
 
 def external(drone_instance):
@@ -40,7 +47,7 @@ def external(drone_instance):
 
     :param drone_instance: drone class instance
     """
-    return _drone_instance_to_run_hive[drone_instance]
+    return get_run_hive_owning(drone_instance)
 
 
 def internal(drone_instance):
@@ -48,7 +55,7 @@ def internal(drone_instance):
 
     :param drone_instance: drone class instance
     """
-    return _drone_instance_to_run_hive[drone_instance]._hive_i
+    return get_run_hive_owning(drone_instance)._hive_i
 
 
 def is_internal_descriptor(value) -> bool:
@@ -67,6 +74,15 @@ def resolve_arg(arg, run_hive: 'RuntimeHive'):
     return arg
 
 
+def check_attributes_not_shadowed(wrapped, wrapper):
+    for name in chain.from_iterable((dir(c) for c in wrapped.__mro__[:-1])):
+        if hasattr(wrapper, name) and not hasattr(object, name):
+            logger.warning(
+                "object {!r} has attribute that is shadowed by {}, and cannot be accessed"
+                    .format(wrapped, wrapper)
+            )
+
+
 class DroneBuilder(BeeBase):
     def __init__(self, cls: Type, *args, **kwargs):
         self._class = cls
@@ -74,12 +90,7 @@ class DroneBuilder(BeeBase):
         self._kwargs = kwargs
 
         # Check no shadowed attributes
-        for name in chain.from_iterable((dir(c) for c in cls.__mro__[:-1])):
-            if hasattr(self.__class__, name) and not hasattr(object, name):
-                logger.warning(
-                    "Drone class {!r} has attribute that is shadowed in hive.drone bee, and cannot be accessed"
-                        .format(cls)
-                )
+        check_attributes_not_shadowed(cls, self.__class__)
 
         super().__init__()
 
