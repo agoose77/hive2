@@ -23,7 +23,7 @@ class ProcessClass:
             callback()
 
 
-def build_process(cls, i, ex, args):
+def build_process(i, ex, args):
     # Startup / End callback
     i.process_drone = hive.drone(ProcessClass)
     ex.get_on_started = i.process_drone.add_on_started.socket(identifier="on_started", policy=hive.MultipleOptional)

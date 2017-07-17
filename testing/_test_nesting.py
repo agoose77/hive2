@@ -34,7 +34,7 @@ class House(object):
         print("Mail arrives")
 
 
-def build_dog(cls, i, ex, args):
+def build_dog(i, ex, args):
     i.call = hive.triggerfunc(cls.call)
     i.woof = hive.triggerable(cls.woof)
     hive.trigger(i.call, i.woof)
@@ -53,7 +53,7 @@ def build_dog(cls, i, ex, args):
     ex.call = hive.hook(i.call)
 
 
-def build_house(cls, i, ex, args):
+def build_house(i, ex, args):
     i.brutus_ = DogHive("Brutus")
     i.fifi = DogHive("Fifi")
 

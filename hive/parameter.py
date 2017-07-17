@@ -1,7 +1,7 @@
 from .manager import HiveModeFactory
 from .typing import is_valid_data_type
 
-from collections.abc import Collection
+from collections.abc import Iterable
 
 PARAM_NO_VALUE = object()
 
@@ -14,20 +14,19 @@ class Parameter:
 
         # Ensure options aren't easily mutated by accident
         if options is not None:
-            if not isinstance(options, Collection):
-                raise ValueError("Expected None or a collection for options")
+            if not isinstance(options, Iterable):
+                raise ValueError("Expected None or an iterable for options arg")
             options = frozenset(options)
 
+            if not options:
+                raise ValueError("If options is given, cannot be empty")
+
             if start_value is not PARAM_NO_VALUE and start_value not in options:
-                raise ValueError("Invalid start value: {!r} not in {!r}".format(start_value, options))
+                raise ValueError("Start value {!r} not in valid options {!r}".format(start_value, options))
 
         self._data_type = data_type
         self._start_value = start_value
         self._options = options
-
-        # Validate start value
-        if start_value is not PARAM_NO_VALUE and options is not None:
-            assert start_value in options
 
     @property
     def data_type(self) -> str:

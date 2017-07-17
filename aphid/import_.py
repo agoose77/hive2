@@ -38,19 +38,19 @@ class ImportClass:
         self.module = import_module(self.import_path, package=package)
 
 
-def build_import(cls, i, ex, args):
+def build_import(i, ex, args):
     """Interface to python import mechanism, with respect to editor project path"""
-    i.import_path = hive.property(cls, "import_path", 'str')
+    i.importer = hive.drone(ImportClass)
+    i.import_path = i.importer.property("import_path", 'str')
     ex.import_path = i.import_path.pull_in
 
-    i.do_import = cls.do_import_from_path
 
-    i.module = hive.property(cls, "module", "module")
+    i.module = i.importer.property("module", "module")
     ex.module = i.module.pull_out
 
     i.module.pull_in.pre_pushed.connect(i.import_path.pull_in.trigger)
-    i.module.pull_in.pre_pushed.connect(i.do_import.trigger)
+    i.module.pull_in.pre_pushed.connect(i.importer.do_import_from_path.trigger)
 
 
-Import = hive.hive("Import", build_import, drone_class=ImportClass)
+Import = hive.hive("Import", build_import)
 

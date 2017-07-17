@@ -52,7 +52,7 @@ def configure_build_environment(meta_args):
     meta_args.hive_class = hive.parameter("class")
 
 
-def build_bind_environment(cls, i, ex, args, meta_args):
+def build_bind_environment(i, ex, args, meta_args):
     """Provides plugins to new embedded hive instance"""
     i.drone = hive.drone(BindEnvironmentClass)
     ex.hive = meta_args.hive_class()
@@ -162,7 +162,7 @@ def configure_instantiator(meta_args):
     meta_args.bind_process = hive.parameter("str", 'child', {'child', 'independent'})
 
 
-def build_instantiator(cls, i, ex, args, meta_args):
+def build_instantiator(i, ex, args, meta_args):
     """Instantiates a Hive class at runtime"""
     i.drone = hive.drone(InstantiatorClass)
     # If this is built now, then it won't perform matchmaking, so use meta hive

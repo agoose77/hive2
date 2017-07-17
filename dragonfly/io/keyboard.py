@@ -69,7 +69,7 @@ def configure_keyboard(meta_args):
     meta_args.mode = hive.parameter("str", 'single key', options={'single key', 'any key'})
 
 
-def build_keyboard(cls, i, ex, args, meta_args):
+def build_keyboard(i, ex, args, meta_args):
     """Listen for keyboard event"""
     i.keyboard_drone = hive.drone(KeyboardClass)
 

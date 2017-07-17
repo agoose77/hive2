@@ -58,7 +58,7 @@ class MouseClass:
         self._released_listener.pattern = self.get_pattern("released")
 
 
-def build_mouse(cls, i, ex, args):
+def build_mouse(i, ex, args):
     i.mouse_drone = hive.drone(MouseClass)
     ex.on_event = i.mouse_drone.set_add_handler.socket(identifier="event.add_handler")
     i.on_tick = hive.modifier()

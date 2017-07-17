@@ -462,7 +462,7 @@ class chesskeeper(drone):
 import hive as h
 
 
-def build_chesskeeper(cls, i, ex, args):
+def build_chesskeeper(i, ex, args):
     ex.finished = h.property(cls, "finished", "bool")
     ex.make_move = cls.make_move
     ex.format_move = cls.make_move

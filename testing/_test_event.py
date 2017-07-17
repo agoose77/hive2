@@ -67,7 +67,7 @@ class MyHiveCls:
 import hive
 
 
-def my_hive_builder(cls, i, ex, args):
+def my_hive_builder(i, ex, args):
     ex.some_socket = hive.socket(cls.get_handler)
     hive.connect(ex.add_handler, ex.some_socket)
 

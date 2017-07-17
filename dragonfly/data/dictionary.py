@@ -21,7 +21,7 @@ def configure_dictionary(meta_args):
     meta_args.data_type = hive.parameter("str", "int")
 
 
-def build_dictionary(cls, i, ex, args, meta_args):
+def build_dictionary(i, ex, args, meta_args):
     """Interface to dictionary object"""
     ex.dict = hive.property(cls, "dict", "dict")
 

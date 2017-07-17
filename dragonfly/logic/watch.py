@@ -31,7 +31,7 @@ def configure_watch(meta_args):
     meta_args.mode = hive.parameter("str", "pull", {"push", "pull"})
 
 
-def build_watch(cls, i, ex, args, meta_args):
+def build_watch(i, ex, args, meta_args):
     """Watch value and indicate when it is changed.
 
     Uses a tick callback.

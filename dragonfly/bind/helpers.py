@@ -244,7 +244,7 @@ class BindClassFactory:
         """
 
         @wraps(func)
-        def builder(cls, i, ex, args, meta_args):
+        def builder(i, ex, args, meta_args):
             self.external_builder(cls, i, ex, args, meta_args)
             func(cls, i, ex, args, meta_args)
 
@@ -259,7 +259,7 @@ class BindClassFactory:
         """
 
         @wraps(func)
-        def builder(cls, i, ex, args, meta_args):
+        def builder(i, ex, args, meta_args):
             self.environment_builder(cls, i, ex, args, meta_args)
             func(cls, i, ex, args, meta_args)
 
@@ -332,7 +332,7 @@ def configure_bind_hive(meta_args):
     meta_args.bind_some_other_plugin = hive.parameter("str", options={"yes", "no"})
 
     
-def build_bind_hive(cls, i, ex, args, meta_args):
+def build_bind_hive(i, ex, args, meta_args):
     if meta_args.bind_some_plugin == "yes":
         ex.some_plugin = ...
 

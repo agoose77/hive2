@@ -3,7 +3,7 @@ from collections import OrderedDict
 from typing import MutableMapping, KT, VT, Any, Callable, Dict, Type, NamedTuple
 
 from ..interfaces import Bee, Exportable
-from ..parameter import Parameter
+from ..parameter import Parameter, PARAM_NO_VALUE
 
 
 class OrderedDictType(OrderedDict, MutableMapping[KT, VT]):
@@ -110,11 +110,9 @@ class BeeValidatorBase(ValidatorBase):
         if value._hive_parent_hive_object_class is None:
             raise ValueError("Bees must be defined inside the builder function")
 
-        # TODO should permit ResolveBees here
         if value._hive_parent_hive_object_class is not self._hive_object_class:
-            raise ValueError(
-                "Bees cannot be built by a different hive {} // {}".format(value._hive_parent_hive_object_class,
-                                                                           self._hive_object_class))
+            raise ValueError("Bees cannot be built by a different hive {} // {}"
+                             .format(value._hive_parent_hive_object_class, self._hive_object_class))
 
 
 class InternalValidator(BeeValidatorBase):
@@ -204,7 +202,7 @@ class ArgWrapper(AttributeMapping):
                 value = found_param_values[name]
             except KeyError:
                 # Check if we can omit the value
-                if parameter.start_value is Parameter.NO_VALUE:
+                if parameter.start_value is PARAM_NO_VALUE  :
                     raise ValueError("No value for parameter '{}' can be resolved".format(name))
                 else:
                     value = parameter.start_value

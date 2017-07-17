@@ -27,7 +27,7 @@ class C:
         o()
 
 
-def build_h(cls, i, ex, args, meta_args):
+def build_h(i, ex, args, meta_args):
     print("Build hive", meta_args.i)
 
     is_root = meta_args.root

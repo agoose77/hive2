@@ -13,7 +13,7 @@ class QuitClass:
         self._quit()
 
 
-def build_quit(cls, i, ex, args):
+def build_quit(i, ex, args):
     """Quit the top-level Hive"""
     i.quit_drone = hive.drone(QuitClass)
     ex.get_quit = i.drone.set_quit.socket(identifier="quit")

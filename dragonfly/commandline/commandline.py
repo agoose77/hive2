@@ -57,7 +57,7 @@ class commandlineclass(object):
         self._commands = []
 
 
-def build_commandline(cls, i, ex, args):
+def build_commandline(i, ex, args):
     i.start = cls.start
     i.stop = cls.stop
     i.flush = cls.flush

@@ -344,7 +344,7 @@ class MetaHivePrimitive(ABC):
 
     _hive_object_class: Type[HiveObject] = abstractproperty()
 
-    def __new__(cls, *args, **kwargs) -> Union[HiveObject, RuntimeHive]:
+    def __new__(*args, **kwargs) -> Union[HiveObject, RuntimeHive]:
         hive_object = cls._hive_object_class(*args, **kwargs)
 
         if get_mode() == HiveMode.IMMEDIATE:
@@ -411,6 +411,7 @@ class HiveBuilder:
         base_configurers = tuple(configurer for hive_cls in bases for configurer in hive_cls._configurers)
         base_builders = tuple(builder for hive_cls in bases for builder in hive_cls._builders)
         base_is_dyna_hive = any(hive_cls._is_dyna_hive for hive_cls in bases)
+        hive_meta_args = cls._hive_build_meta_args_wrapper()
 
         # Validate builders
         if builder is None:
@@ -438,7 +439,7 @@ class HiveBuilder:
             "__doc__": docstring,
             "_builders": builders,
             "_configurers": configurers,
-            "_hive_meta_args": None,
+            "_hive_meta_args": hive_meta_args,
             "_is_dyna_hive": is_dyna_hive,
             "__module__": module_name
         }
@@ -660,9 +661,6 @@ class HiveBuilder:
     
         Extract meta args from arguments and return remainder
         """
-        if cls._hive_meta_args is None:
-            cls._hive_meta_args = cls._hive_build_meta_args_wrapper()
-
         # Map keyword arguments to parameters, return remaining argumentss
         args, kwargs, meta_args = cls._hive_meta_args.extract_from_arguments(args, kwargs)
         return args, kwargs, cls._build(tuple(meta_args.items()))

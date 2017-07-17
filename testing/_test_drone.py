@@ -25,7 +25,7 @@ class Dog(object):
         self._hive.woofed()
 
 
-def build_dog(cls, i, ex, args):
+def build_dog(i, ex, args):
     i.call = hive.triggerfunc(cls.call)
     i.woof = hive.triggerable(cls.woof)
     hive.connect(i.call, i.woof)

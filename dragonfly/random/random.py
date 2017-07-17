@@ -35,7 +35,7 @@ class RandomClass:
         return self.rng.uniform(self.uniform_min, self.uniform_max)
 
 
-def build_random(cls, i, ex, args):
+def build_random(i, ex, args):
     """HIVE interface to Python random module"""
     # i.push_seed = hive.push_in(cls.set_seed)
     # ex.seed = hive.antenna(i.push_seed)

@@ -48,7 +48,7 @@ class EventBindClass(factory.create_external_class()):
 
 
 @factory.builds_external
-def build_bind(cls, i, ex, args, meta_args):
+def build_bind(i, ex, args, meta_args):
     i.drone = hive.drone(EventBindClass)
 
     if meta_args.forward_events == "none":
@@ -134,7 +134,7 @@ def configure_event_environment(meta_args):
 
 
 @factory.builds_environment
-def build_event_environment(cls, i, ex, args, meta_args):
+def build_event_environment(i, ex, args, meta_args):
     """Runtime event environment for instantiated hive.
 
     Provides appropriate sockets and plugins for event interface
