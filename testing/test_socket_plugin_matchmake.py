@@ -54,7 +54,7 @@ class TestDroneNesting(TestCase):
     def test_nested(self):
         h = ContainerHive("bob")
 
-        name_result = hive.attribute("str")
+        name_result = hive.attribute("str", None)
         name_source = hive.attribute("str", "fred")
 
         name_source.pull_out.connect(h.name_in)

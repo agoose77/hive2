@@ -1,5 +1,6 @@
 from abc import ABC, abstractproperty
 from inspect import currentframe, getmodule
+from collections import OrderedDict
 from itertools import count, chain
 
 from typing import List, Generator, NamedTuple, Callable, Type, Dict, Union, Tuple, Any, Optional
@@ -80,11 +81,6 @@ def validate_internal_name(attr_name: str):
         raise AttributeError('Cannot overwrite special attribute RuntimeHive.{}'.format(attr_name))
 
 
-def resolve_arguments(run_hive, arg_values):
-    resolve_parameter = run_hive._hive_object._hive_args_frozen.resolve_parameter
-    return (resolve_parameter(a) if isinstance(a, Parameter) else a for a in arg_values)
-
-
 class RuntimeHive(BeeBase, ConnectSourceDerived, ConnectTargetDerived, TriggerSource, TriggerTarget, Nameable):
     """Unique Hive instance that is created at runtime for a Hive object.
 
@@ -92,7 +88,7 @@ class RuntimeHive(BeeBase, ConnectSourceDerived, ConnectTargetDerived, TriggerSo
     """
     _hive_i_class = None
 
-    def __init__(self, hive_object: 'HiveObject', hive_args_resolved: tuple):
+    def __init__(self, hive_object: 'HiveObject', hive_args_resolved: ArgWrapper):
         super().__init__()
 
         self._hive_object = hive_object
@@ -149,6 +145,11 @@ class RuntimeHive(BeeBase, ConnectSourceDerived, ConnectTargetDerived, TriggerSo
         return getattr(self, target_name)
 
 
+def resolve_arguments(run_hive: RuntimeHive, parameters: Dict[str, Any]):
+    resolve_parameter = run_hive._hive_args_frozen.resolve_parameter
+    return OrderedDict(((k, resolve_parameter(a) if isinstance(a, Parameter) else a) for k, a in parameters.items()))
+
+
 class HiveObject(BeeBase, ConnectSourceDerived, ConnectTargetDerived, TriggerSource, TriggerTarget):
     """Built Hive base-class responsible for creating new Hive instances.
 
@@ -180,7 +181,7 @@ class HiveObject(BeeBase, ConnectSourceDerived, ConnectTargetDerived, TriggerSou
         assert not remaining_kwargs
 
         # Store extracted hive args, but don't build wrapper yet (as need to resolve Parameters from parent)
-        self._hive_arg_values = arg_wrapper_values
+        self._hive_args_dict = arg_wrapper_values
 
         # Create ResolveBee wrappers for external interface
         # We do NOT use 'with building_hive_as(...):' here, because these attributes are intended for use by the
@@ -195,11 +196,11 @@ class HiveObject(BeeBase, ConnectSourceDerived, ConnectTargetDerived, TriggerSou
 
     def instantiate(self) -> RuntimeHive:
         """Return an instance of the runtime Hive for this Hive object."""
-        return self._hive_runtime_class(self, self._hive_args.freeze(self._hive_arg_values))
+        return self._hive_runtime_class(self, self._hive_args.freeze(self._hive_args_dict))
 
     @memoize
     def bind(self, run_hive: RuntimeHive) -> RuntimeHive:
-        arg_values = resolve_arguments(run_hive, self._hive_arg_values)
+        arg_values = resolve_arguments(run_hive, self._hive_args_dict)
         return self._hive_runtime_class(self, self._hive_args.freeze(arg_values))
 
     @classmethod

@@ -113,7 +113,7 @@ class PropertyBuilder(BeeBase):
         start_value = self._start_value
 
         if isinstance(start_value, Parameter):
-            start_value = run_hive._hive_object._hive_args_frozen.resolve_parameter(start_value)
+            start_value = run_hive._hive_args_frozen.resolve_parameter(start_value)
 
         drone = self._drone.bind(run_hive)
         return PropertyBound(self, run_hive, drone, self._name, self._data_type, start_value)

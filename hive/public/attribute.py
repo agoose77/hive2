@@ -115,8 +115,7 @@ class AttributeBuilder(BeeBase):
         start_value = self._start_value
 
         if isinstance(start_value, Parameter):
-            hive_args_resolved = run_hive._hive_object._hive_args_frozen
-            start_value = hive_args_resolved.resolve_parameter(start_value)
+            start_value = run_hive._hive_args_frozen.resolve_parameter(start_value)
 
         return AttributeBound(self, run_hive, self._data_type, start_value)
 
