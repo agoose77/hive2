@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from collections import OrderedDict
 from typing import MutableMapping, KT, VT, Any, Callable, Dict, Type, NamedTuple
 
-from ..compatability import next
 from ..interfaces import Bee, Exportable
 from ..parameter import Parameter
 

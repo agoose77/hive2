@@ -5,7 +5,6 @@ from itertools import count, chain
 from typing import List, Generator, NamedTuple, Callable, Type, Dict, Union, Tuple, Any, Optional
 
 from .classes import (AttributeMapping, InternalValidator, ExternalValidator, ArgWrapper, validate_args, HiveDescriptor)
-from .compatability import next
 from .contexts import (bee_register_context, get_mode, hive_mode_as, building_hive_as, run_hive_as,
                        get_building_hive, get_matchmaker_validation_enabled, HiveMode)
 from .exception import MatchmakingPolicyError, HiveBuilderError
