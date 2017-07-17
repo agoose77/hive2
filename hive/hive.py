@@ -386,7 +386,7 @@ class HiveBuilder:
 
     @classmethod
     def extend(cls, name, builder: BuilderType = None, configurer: ConfigurerType = None,
-               is_dyna_hive: bool = None, bases: Tuple[BasesType, ...] = (), module_name: str = None) -> Type[
+               is_dyna_hive: bool = None, bases: BasesType = (), module_name: str = None) -> Type[
         'HiveBuilder']:
         """Extend HiveBuilder with an additional builder (and builder class)
 
@@ -722,16 +722,16 @@ class HiveBuilder:
                         "An error occurred during matchmaking {}, {}".format(bee_name, identifier)) from err
 
 
-def hive(name, builder: BuilderType = None, bases: Tuple[BasesType, ...] = ()) -> Type[HiveBuilder]:
+def hive(name, builder: BuilderType = None, bases: BasesType = ()) -> Type[HiveBuilder]:
     return HiveBuilder.extend(name, builder, bases=bases)
 
 
-def dyna_hive(name, builder: BuilderType, configurer: ConfigurerType, bases: Tuple[BasesType, ...] = ()) -> Type[
+def dyna_hive(name, builder: BuilderType, configurer: ConfigurerType, bases: BasesType = ()) -> Type[
     HiveBuilder]:
     return HiveBuilder.extend(name, builder, configurer=configurer, is_dyna_hive=True, bases=bases)
 
 
-def meta_hive(name, builder: BuilderType, configurer: ConfigurerType, bases: Tuple[BasesType, ...] = ()) -> Type[
+def meta_hive(name, builder: BuilderType, configurer: ConfigurerType, bases: BasesType = ()) -> Type[
     HiveBuilder]:
     return HiveBuilder.extend(name, builder, configurer=configurer, is_dyna_hive=False, bases=bases)
 
