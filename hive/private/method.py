@@ -10,7 +10,7 @@ class MethodBuilder(FunctionBuilder):
         super().__init__()
 
     @memoize
-    def bind(self, run_hive):
+    def bind(self, run_hive) -> FunctionBound:
         instance = self._drone.bind(run_hive)
         method = getattr(instance, self._name)
         return FunctionBound(self, run_hive, method)

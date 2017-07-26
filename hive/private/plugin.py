@@ -1,10 +1,10 @@
+from .mixins import ConnectableMixin
 from ..exception import HiveConnectionError
 from ..identifier import is_valid_identifier
 from ..interfaces import ConnectSource, Exportable, BeeBase, Bee, Plugin, Socket
-from ..manager import memoize, HiveModeFactory
+from ..manager import memoize
 from ..policies import MultipleOptional
 from ..typing import is_valid_data_type
-from .mixins import ConnectableMixin
 
 
 class HivePluginRuntime(Plugin, ConnectSource):

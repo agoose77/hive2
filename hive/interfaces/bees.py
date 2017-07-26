@@ -29,7 +29,7 @@ class Bee(ABC):
         pass
 
     def implements(self, cls: Type) -> bool:
-        """Return True if the BeeBase returned by getinstance will implement a given class.
+        """Return True if the BeeBase returned by bind(...) implements a given class.
         
         Required to support inspection of runtime-public
         
@@ -46,6 +46,7 @@ class BeeBase(Bee):
 
     def __init__(self):
         self._hive_parent_hive_object_class = get_building_hive()
+
         if get_building_hive() is None:
             logger.warning("Building hive is none for {}, is this the root hive?".format(self))
 
