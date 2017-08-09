@@ -19,4 +19,4 @@ def build_quit(cls, i, ex, args):
     ex.do_quit = cls.quit.trigger
 
 
-Quit = hive.hive("Quit", build_quit, drone_class=_Quit)
+Quit = hive.hive("Quit", build_quit) #TODO

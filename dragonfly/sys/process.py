@@ -23,13 +23,15 @@ class ProcessClass:
             callback()
 
 
-def build_process(cls, i, ex, args):
+def build_process(i, ex, args):
     # Startup / End callback
-    ex.get_on_started = cls.add_on_started.socket(identifier="on_started", policy=hive.MultipleOptional)
-    ex.get_on_stopped = cls.add_on_stopped.socket(identifier="on_stopped", policy=hive.MultipleOptional)
+    i.drone = hive.drone(ProcessClass)
+    
+    ex.get_on_started = i.drone.add_on_started.socket(identifier="on_started", policy=hive.MultipleOptional)
+    ex.get_on_stopped = i.drone.add_on_stopped.socket(identifier="on_stopped", policy=hive.MultipleOptional)
 
-    ex.on_started = cls.start.trigger
-    ex.on_stopped = cls.stop.trigger
+    ex.on_started = i.drone.start.trigger
+    ex.on_stopped = i.drone.stop.trigger
 
 
-Process = hive.hive("Process", build_process, drone_class=ProcessClass)
+Process = hive.hive("Process", build_process)

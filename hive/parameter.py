@@ -10,7 +10,7 @@ class Parameter:
 
     def __init__(self, data_type='', start_value=no_value, options=None):
         if not is_valid_data_type(data_type):
-            raise ValueError(data_type)
+            raise ValueError(f"Invalid data type {data_type!r}")
 
         # Ensure options aren't easily mutated by accident
         if options is not None:

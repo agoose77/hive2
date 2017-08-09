@@ -1,5 +1,5 @@
 import hive
-from dragonfly.event import EventHandler
+# from dragonfly.event import EventHandler
 
 
 class TimeClass:
@@ -30,15 +30,17 @@ class TimeClass:
         self._get_tick_rate = get_tick_rate
 
 
-def time_builder(cls, i, ex, args):
+def time_builder(i, ex, args):
     """Access to Python time module"""
-    i.elapsed = hive.property(cls, 'elapsed', 'float')
+    i.drone = hive.drone(TimeClass)
+
+    i.elapsed = i.drone.property('elapsed', 'float')
     ex.elapsed_out = i.elapsed.pull_out
     ex.elapsed = i.elapsed.property(hive.READ)
 
-    ex.get_add_handler = cls.set_add_handler.socket("event.add_handler")
-    ex.on_started = cls.on_started.plugin("on_started", policy=hive.SingleRequired)
-    ex.get_get_tick_rate = cls.set_get_tick_rate.socket("app.get_tick_rate")
+    ex.get_add_handler = i.drone.set_add_handler.socket("event.add_handler")
+    ex.on_started = i.drone.on_started.plugin("on_started", policy=hive.SingleRequired)
+    ex.get_get_tick_rate = i.drone.set_get_tick_rate.socket("app.get_tick_rate")
 
 
-Time = hive.hive("Time", builder=time_builder, drone_class=TimeClass)
+Time = hive.hive("Time", builder=time_builder)

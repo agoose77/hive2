@@ -1,9 +1,11 @@
-from derp.grammar import Grammar
-from derp.parsers import lit, parse
-from derp.utilities import unpack_n
-from grammars.ebnf.tokenizer import tokenize_text as _tokenize_text
+from derp import Grammar, lit, parse, unpack as unpack_n
+from grammars.ebnf import EBNFTokenizer
 
 from .ast import AnyType, MappingType, SequenceType, TypeName
+
+
+tokenizer = EBNFTokenizer()
+_tokenize_text = tokenizer.tokenize_text
 
 
 def tokenize_text(string):
@@ -36,7 +38,7 @@ def parse_type_string(type_string):
     if len(tree) != 1:
         raise ValueError("Unable to parse type string: {}".format(type_string))
 
-    return tree.pop()
+    return next(iter(tree))
 
 
 def emit_sequence(args):
@@ -82,7 +84,7 @@ t.single_specialism = (lit('[') & t.definition & lit(']')) >> emit_single_specia
 t.sequence = (lit('ID') & t.single_specialism) >> emit_sequence
 t.mapping = (lit('ID') & lit('[') & t.definition & lit('-') & lit('>') & t.definition & lit(']')) >> emit_mapping
 t.collections = t.sequence | t.mapping
-t.simple_type_name = (lit('ID') & +(lit('.') & lit('ID'))) >> emit_simple_type_name
+t.simple_type_name = (lit('ID') & (lit('.') & lit('ID'))[...]) >> emit_simple_type_name
 t.any_type = lit('?') >> emit_any_type
 t.definition = t.collections | t.simple_type_name | t.any_type
 t.ensure_parsers_defined()
@@ -90,4 +92,4 @@ t.ensure_parsers_defined()
 
 def build_ast(string):
     tokens = tuple(tokenize_text(string))
-    return parse(t.definition, tokens).pop()
+    return next(iter(parse(t.definition, tokens)))

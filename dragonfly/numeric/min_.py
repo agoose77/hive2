@@ -21,7 +21,7 @@ def build_min(i, ex, args, meta_args):
 
     i.do_min = hive.modifier(do_min)
 
-    i.value.pull_out.pre_pushed.connect(i.a.pull_in.trigger,
+    i.value.pull_out.before.connect(i.a.pull_in.trigger,
                                         i.b.pull_in.trigger,
                                         i.do_min.trigger)
 

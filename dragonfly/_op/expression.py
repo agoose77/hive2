@@ -55,11 +55,11 @@ def build_expression(i, ex, args, meta_args):
         setattr(i, name, attribute)
         setattr(ex, name, attribute.pull_in)
 
-        i.result.pull_out.pre_pushed.connect(attribute.pull_in.trigger)
+        i.result.pull_out.before.connect(attribute.pull_in.trigger)
 
     func = create_func(meta_args.expression, variable_names)
     i.modifier = hive.modifier(func)
-    i.result.pull_out.pre_pushed.connect(i.modifier.trigger)
+    i.result.pull_out.before.connect(i.modifier.trigger)
 
 
 Expression = hive.dyna_hive("Expression", build_expression, configurer=configure_expression)

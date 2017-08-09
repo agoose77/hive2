@@ -21,7 +21,7 @@ def build_max(i, ex, args, meta_args):
 
     i.do_max = hive.modifier(do_max)
 
-    i.value.pull_out.pre_pushed.connect(i.a.pull_in.trigger,
+    i.value.pull_out.before.connect(i.a.pull_in.trigger,
                                         i.b.pull_in.trigger,
                                         i.do_max.trigger)
 

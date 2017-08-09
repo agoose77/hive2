@@ -17,7 +17,7 @@ def build_compose(i, ex, args):
 
     i.build_value = hive.modifier(build_value)
 
-    i.value.pull_out.pre_pushed.connect(i.real.pull_in.trigger,
+    i.value.pull_out.before.connect(i.real.pull_in.trigger,
                                         i.imag.pull_in.trigger,
                                         i.build_value.trigger)
 

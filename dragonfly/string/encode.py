@@ -17,8 +17,8 @@ def build_encode(i, ex, args):
     ex.bytes = i.bytes.pull_out
 
     i.encode = hive.modifier(encode)
-    i.bytes.pull_out.pre_pushed.connect(i.string.pull_in.trigger)
-    i.string.pull_in.pushed.connect(i.encode.trigger)
+    i.bytes.pull_out.before.connect(i.string.pull_in.trigger)
+    i.string.pull_in.after.connect(i.encode.trigger)
 
 
 Encode = hive.hive("Encode", build_encode)

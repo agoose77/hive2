@@ -21,9 +21,9 @@ def build_endswith(i, ex, args):
     ex.endswith = i.endswith.pull_out
 
     i.do_find_substr = hive.modifier(do_endswith)
-    i.endswith.pull_out.pre_pushed.connect(i.string.pull_in.trigger,
-                                           i.substring.pull_in.trigger,
-                                           i.do_find_substr.trigger)
+    i.endswith.pull_out.before.connect(i.string.pull_in.trigger,
+                                       i.substring.pull_in.trigger,
+                                       i.do_find_substr.trigger)
 
 
 EndsWith = hive.hive("EndsWith", build_endswith)

@@ -21,7 +21,7 @@ def build_sorted(i, ex, args, meta_args):
     ex.value = i.value.pull_in
 
     i.sort = hive.modifier(sort)
-    i.result.pull_out.pre_pushed.connects(i.value.pull_in.trigger,
+    i.result.pull_out.before.connects(i.value.pull_in.trigger,
                                           i.sort.trigger)
 
 
