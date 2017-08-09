@@ -15,13 +15,17 @@ class AttributeBase(BeeBase, Stateful):
     def __init__(self, data_type='', start_value=ATTR_NO_START_VALUE):
         if start_value is not ATTR_NO_START_VALUE:
             self._value = start_value
+
         self._data_type = data_type
         self._start_value = start_value
 
         super().__init__()
 
     def _hive_stateful_getter(self):
-        return self._value
+        try:
+            return self._value
+        except AttributeError:
+            raise AttributeError("No value has yet been assigned")
 
     def _hive_stateful_setter(self, value):
         self.pre_updated()
