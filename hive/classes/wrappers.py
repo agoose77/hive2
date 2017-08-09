@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from collections import OrderedDict
 from typing import MutableMapping, KT, VT, Any, Callable, Dict, Type, NamedTuple
 
-from ..compatability import next
 from ..interfaces import Bee, Exportable
 from ..parameter import Parameter
 
@@ -48,7 +47,7 @@ class ImmutableAttributeMapping:
 
     def __str__(self):
         if self._ordered_mapping:
-            attributes_string = ', '.join("\n  .{} = {!r}".format(k, v) for k, v in self._ordered_mapping.items())
+            attributes_string = ', '.join("\n  {} = {!r}".format(k, v) for k, v in self._ordered_mapping.items())
             return "{}{}".format(self._name, attributes_string)
         else:
             return self._name
@@ -205,7 +204,7 @@ class ArgWrapper(AttributeMapping):
                 value = found_param_values[name]
             except KeyError:
                 # Check if we can omit the value
-                if parameter.start_value is Parameter.no_value:
+                if parameter.start_value is Parameter.NO_VALUE:
                     raise ValueError("No value for parameter '{}' can be resolved".format(name))
                 else:
                     value = parameter.start_value

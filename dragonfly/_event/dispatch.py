@@ -7,25 +7,22 @@ class DispatchClass:
         self._read_event = None
 
         self.event = None
-        self._hive = hive.get_run_hive()
 
     def set_read_event(self, read_event):
         self._read_event = read_event
 
     def dispatch(self):
-        self._hive.event()
+        hive.internal(self).event.pull_in()
         self._read_event(self.event)
 
 
-def build_dispatch(cls, i, ex, args):
-    i.event = hive.property(cls, "event", "tuple.event")
-    i.pull_event = hive.pull_in(i.event)
-    ex.event = hive.antenna(i.pull_event)
+def build_dispatch(i, ex, args):
+    i.dispatch_drone = hive.drone(DispatchClass)
+    i.event = i.dispatch_drone.property("event", "tuple.event")
+    ex.event = i.event.pull_in
 
-    ex.get_read_event = hive.socket(cls.set_read_event, identifier="event.process")
-
-    i.dispatch = hive.triggerable(cls.dispatch)
-    ex.trig = hive.entry(i.dispatch)
+    ex.get_read_event = i.dispatch_drone.set_read_event.socket(identifier="event.process")
+    ex.trig = i.dispatch_drone.dispatch.trigger
 
 
-Dispatch = hive.hive("Dispatch", build_dispatch, drone_class=DispatchClass)
+Dispatch = hive.hive("Dispatch", build_dispatch)

@@ -3,12 +3,10 @@ import hive
 from .event import EventHandler
 
 
-class _TickCls:
+class TickClass:
 
     @hive.types(activate_on_start='bool')
     def __init__(self, activate_on_start=True):
-        self._hive = hive.get_run_hive()
-
         self._add_handler = None
         self._remove_handler = None
 
@@ -18,7 +16,7 @@ class _TickCls:
     def set_add_handler(self, add_handler):
         self._add_handler = add_handler
 
-        self._handler = EventHandler(self._hive._on_tick, ("tick",), mode="match")
+        self._handler = EventHandler(hive.internal(self).on_tick, ("tick",), mode="match")
 
         if self._activate_on_started:
             self.enable()
@@ -37,19 +35,17 @@ class _TickCls:
             self._active = False
 
 
-def build_tick(cls, i, ex, args):
+def build_tick(i, ex, args):
     """Tick event sensor, trigger on_tick every tick"""
-    i.on_tick = hive.triggerfunc()
-    ex.on_tick = hive.hook(i.on_tick)
+    i.tick_drone = hive.drone(TickClass)
+    i.on_tick = hive.modifier()
+    ex.on_tick = i.on_tick.triggered
 
-    ex.get_add_handler = hive.socket(cls.set_add_handler, "event.add_handler", policy=hive.SingleRequired)
-    ex.get_remove_handler = hive.socket(cls.set_remove_handler, "event.remove_handler", policy=hive.SingleRequired)
+    ex.get_add_handler = i.tick_drone.set_add_handler.socket("event.add_handler", policy=hive.SingleRequired)
+    ex.get_remove_handler = i.tick_drone.set_remove_handler.socket("event.remove_handler", policy=hive.SingleRequired)
 
-    i.enable = hive.triggerable(cls.enable)
-    ex.enable = hive.entry(i.enable)
-
-    i.disable = hive.triggerable(cls.disable)
-    ex.disable = hive.entry(i.disable)
+    ex.enable = i.tick_drone.enable.trigger
+    ex.disable = i.tick_drone.disable.trigger
 
 
-OnTick = hive.hive("OnTick", build_tick, drone_class=_TickCls)
+OnTick = hive.hive("OnTick", build_tick)

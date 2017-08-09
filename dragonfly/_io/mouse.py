@@ -3,7 +3,7 @@ import hive
 from ..event import EventHandler
 
 
-class Mouse_:
+class MouseClass:
 
     def __init__(self):
         self.button = None
@@ -59,37 +59,38 @@ class Mouse_:
 
 
 def build_mouse(cls, i, ex, args):
-    ex.on_event = cls.set_add_handler.socket(identifier="event.add_handler")
+    i.mouse_drone = hive.drone(MouseClass)
+    ex.on_event = i.mouse_drone.set_add_handler.socket(identifier="event.add_handler")
     i.on_tick = hive.modifier()
 
     args.button = hive.parameter("str", "left", options={"left", "middle", "right"})
 
-    i.button = hive.property(cls, "button", "str", args.button)
+    i.button = i.mouse_drone.property("button", "str", args.button)
     ex.button = i.button.push_in
 
-    i.on_button_changed = cls.change_listener_buttons
+    i.on_button_changed = i.mouse_drone.change_listener_buttons
     i.push_button.pushed.connect(i.on_button_changed.trigger)
 
     i.on_pressed = hive.modifier()
-    ex.on_pressed = i.on_pressed.trigger
+    ex.on_pressed = i.on_pressed.triggered
 
     i.on_moved = hive.modifier()
-    ex.on_moved = i.on_moved.trigger
+    ex.on_moved = i.on_moved.triggered
 
-    i.pos_x = hive.property(cls, "pos_x", "float")
+    i.pos_x = i.mouse_drone.property("pos_x", "float")
     ex.x = i.pos_x.pull_out
 
-    i.pos_y = hive.property(cls, "pos_y", "float")
+    i.pos_y = i.mouse_drone.property("pos_y", "float")
     ex.y = i.pos_y.pull_out
 
-    i.dx = hive.property(cls, "dx", "float")
+    i.dx = i.mouse_drone.property("dx", "float")
     ex.dx = i.dx.pull_out
 
-    i.dy = hive.property(cls, "dy", "float")
+    i.dy = i.mouse_drone.property("dy", "float")
     ex.dy = i.dy.pull_out
 
-    i.is_pressed = hive.property(cls, "is_pressed", "bool")
+    i.is_pressed = i.mouse_drone.property("is_pressed", "bool")
     ex.is_pressed = i.is_pressed.pull_out
 
 
-Mouse = hive.hive("Mouse", build_mouse, drone_class=Mouse_)
+Mouse = hive.hive("Mouse", build_mouse)

@@ -4,9 +4,11 @@ from dragonfly.event import EventHandler
 
 
 class WatchClass:
+    NO_VALUE = object()
+
     def __init__(self):
-        self.current_value = None
-        self._last_value = None
+        self.current_value = self.NO_VALUE
+        self._last_value = self.NO_VALUE
 
     def _on_tick(self):
         hive.internal(self).value()
@@ -34,12 +36,12 @@ def build_watch(cls, i, ex, args, meta_args):
 
     Uses a tick callback.
     """
-    args.start_value = hive.parameter(meta_args.data_type, None)
-    i.value = hive.property(cls, "current_value", meta_args.data_type, args.start_value)
+    i.watch_drone = hive.drone(WatchClass)
+    args.start_value = hive.parameter(meta_args.data_type)
+    i.value = i.watch_drone.property("current_value", meta_args.data_type, args.start_value)
 
     if meta_args.mode == 'pull':
         i.value_in = i.value.pull_in
-
     else:
         i.value_in = i.value.push_in
 
@@ -49,10 +51,10 @@ def build_watch(cls, i, ex, args, meta_args):
     ex.on_changed = i.on_changed.trigger
 
     if meta_args.mode == 'pull':
-        ex.get_add_handler = cls.set_add_handler.socket(identifier="event.add_handler")
+        ex.get_add_handler = i.watch_drone.set_add_handler.socket(identifier="event.add_handler")
 
     else:
-        i.value_in.pushed.connect(cls.compare_values.trigger)
+        i.value_in.pushed.connect(i.watch_drone.compare_values.trigger)
 
 
-Watch = hive.dyna_hive("Watch", build_watch, configure_watch, drone_class=WatchClass)
+Watch = hive.dyna_hive("Watch", build_watch, configure_watch)

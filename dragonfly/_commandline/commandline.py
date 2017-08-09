@@ -63,7 +63,7 @@ def build_commandline(cls, i, ex, args):
     i.flush = cls.flush
     prop_command = h.property(cls, "command", "str")
 
-    ex.prop_command = prop_command.property(h.READ)
+    ex.prop_command = prop_command.proxy(h.READ)
     ex.command = prop_command.command.push_out
     ex.send_command = cls.send_command.trigger
     ex.start = i.start.trigger

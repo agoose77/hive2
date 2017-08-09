@@ -21,7 +21,7 @@ def build_myhive(i, ex, args):
     i.a.push_in.after.connect(i.calc_sum.trigger)
     i.b.push_in.after.connect(i.calc_sum.trigger)
 
-    ex.c = i.c.property(hive.READ)
+    ex.c = i.c.proxy(hive.READ)
     ex.result = i.c.push_out
     i.calc_sum.triggered.connect(ex.result.trigger)
 

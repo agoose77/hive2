@@ -9,7 +9,7 @@ def build_decode(i, ex, args):
     """Decode bytes into a string"""
     args.encoding = hive.parameter('str', 'utf-8')
     i.encoding = hive.attribute('str', args.encoding)
-    ex.encoding = i.encoding.property()
+    ex.encoding = i.encoding.proxy()
 
     i.string = hive.attribute("str")
     ex.string = i.string.pull_out

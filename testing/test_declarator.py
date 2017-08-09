@@ -29,7 +29,7 @@ def configure_dog(meta_args):
 def build_dog(i, ex, args, meta_args):
     args.name = hive.parameter("str")
     i.name = hive.attribute("str", args.name)
-    ex.name = i.name.property(hive.READ)
+    ex.name = i.name.proxy(hive.READ)
 
     for n in range(meta_args.puppies):
         def bark(i, ex, n=n):

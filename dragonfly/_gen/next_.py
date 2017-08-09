@@ -1,7 +1,5 @@
 import hive
 
-from hive.compatability import next
-
 
 def next_modifier(self):
     iterator = self._iterator

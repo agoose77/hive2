@@ -25,15 +25,16 @@ class SocketHiveClass:
         self.plugin()
 
 
-def build_inner(cls, i, ex, args):
+def build_inner(i, ex, args):
     def get_plugin(i, ex, plugin):
         print(plugin)
 
-    ex.sock = cls.set_plugin.socket(identifier="push_name")
-    ex.do_push = cls.call_plugin.trigger
+    i.drone_class = hive.drone(SocketHiveClass)
+    ex.sock = i.drone_class.set_plugin.socket(identifier="push_name")
+    ex.do_push = i.drone_class.call_plugin.trigger
 
 
-SocketHive = hive.hive("SocketHive", build_inner, drone_class=SocketHiveClass)
+SocketHive = hive.hive("SocketHive", build_inner)
 
 
 def build_container(i, ex, args):

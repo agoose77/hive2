@@ -16,7 +16,7 @@ class BindEnvironmentClass:
     Exposes relevant plugins
     """
 
-    def __init__(self, context):
+    def __init__(self):
         self._on_stopped = []
         self._on_started = []
 
@@ -54,21 +54,18 @@ def configure_build_environment(meta_args):
 
 def build_bind_environment(cls, i, ex, args, meta_args):
     """Provides plugins to new embedded hive instance"""
+    i.drone = hive.drone(BindEnvironmentClass)
     ex.hive = meta_args.hive_class()
 
     # Startup / End callback
-    ex.get_on_started = hive.socket(cls.add_on_started, identifier="on_started", policy=hive.MultipleOptional)
-    ex.get_on_stopped = hive.socket(cls.add_on_stopped, identifier="on_stopped", policy=hive.MultipleOptional)
+    ex.get_on_started = i.drone.add_on_started.socket(identifier="on_started", policy=hive.MultipleOptional)
+    ex.get_on_stopped = i.drone.add_on_stopped.socket(identifier="on_stopped", policy=hive.MultipleOptional)
 
-    i.on_started = hive.triggerable(cls.start)
-    i.on_stopped = hive.triggerable(cls.stop)
+    ex.on_started = i.drone.start.trigger
+    ex.on_stopped = i.dron.stop.trigger
 
-    ex.on_started = hive.entry(i.on_started)
-    ex.on_stopped = hive.entry(i.on_stopped)
-
-    i.state = hive.property(cls, 'state', 'str')
-    i.pull_state = hive.pull_out(i.state)
-    ex.state = hive.output(i.pull_state)
+    i.state = i.drone.property('state', 'str')
+    ex.state = i.state.pull_out
 
 
 class InstantiatorClass:
@@ -167,38 +164,38 @@ def configure_instantiator(meta_args):
 
 def build_instantiator(cls, i, ex, args, meta_args):
     """Instantiates a Hive class at runtime"""
+    i.drone = hive.drone(InstantiatorClass)
     # If this is built now, then it won't perform matchmaking, so use meta hive
-    bind_meta_class = hive.meta_hive("BindEnvironment", build_bind_environment, configure_build_environment,
-                                     drone_class=BindEnvironmentClass)
+    bind_meta_class = hive.meta_hive("BindEnvironment", build_bind_environment, configure_build_environment)
     #assert bind_meta_class._hive_object_class
-    i.bind_meta_class = hive.property(cls, "bind_meta_class", "class", bind_meta_class)
+    i.bind_meta_class = i.drone.property("bind_meta_class", "class", bind_meta_class)
 
 
-    i.hive_class = hive.property(cls, "hive_class", "class")
+    i.hive_class = i.drone.property("hive_class", "class")
     ex.hive_class = i.hive_class.pull_in
 
-    ex.create = cls.instantiate.trigger
-    hive.trigger(i.trig_instantiate, i.pull_hive_class, pretrigger=True)
+    ex.create = i.drone.instantiate.trigger
+    i.drone.instantiate.pre_triggered.connect(i.hive_class.pull_in.trigger)
 
-    i.last_created_process_id = hive.property(cls, "last_created_process_id", "int.process_id")
+    i.last_created_process_id = i.drone.property("last_created_process_id", "int.process_id")
     ex.last_process_id = i.last_created_process_id.pull_out
 
-    i.stop_process_id = hive.property(cls, "stop_process_id", "int.process_id")
-    i.stop_process_id.push_in.pushed.connect(cls.stop_hive.trigger)
+    i.stop_process_id = i.drone.property("stop_process_id", "int.process_id")
+    i.stop_process_id.push_in.pushed.connect(i.drone.stop_hive.trigger)
     ex.stop_process = i.stop_process_id.push_in
 
     # Bind class plugin
-    ex.bind_on_created = hive.socket(cls.add_on_created, identifier="bind.on_created", policy=hive.MultipleOptional)
-    ex.add_get_plugins = hive.socket(cls.add_get_plugins, identifier="bind.get_plugins", policy=hive.MultipleOptional)
-    ex.add_get_config = hive.socket(cls.add_get_config, identifier="bind.get_config", policy=hive.MultipleOptional)
+    ex.bind_on_created = i.drone.add_on_created.socket(identifier="bind.on_created", policy=hive.MultipleOptional)
+    ex.add_get_plugins = i.drone.add_get_plugins.socket(identifier="bind.get_plugins", policy=hive.MultipleOptional)
+    ex.add_get_config = i.drone.add_get_config.socket(identifier="bind.get_config", policy=hive.MultipleOptional)
 
     # Bind instantiator
     if meta_args.bind_process == 'child':
         # Add startup and stop callbacks
-        ex.on_stopped = hive.plugin(cls.stop_all_processes, identifier="on_stopped")
+        ex.on_stopped = i.drone.stop_all_processes.plugin(identifier="on_stopped")
 
 
-Instantiator = hive.dyna_hive("Instantiator", build_instantiator, configure_instantiator, drone_class=InstantiatorClass)
+Instantiator = hive.dyna_hive("Instantiator", build_instantiator, configure_instantiator)
 
 
 def create_instantiator(*bind_infos, docstring=""):

@@ -1,16 +1,17 @@
 from abc import ABC, abstractproperty
 from inspect import currentframe, getmodule
 from itertools import count, chain
+
 from typing import List, Generator, NamedTuple, Callable, Type, Dict, Union, Tuple, Any, Optional
 
 from .classes import (AttributeMapping, InternalValidator, ExternalValidator, ArgWrapper, validate_args, HiveDescriptor)
-from .compatability import next
 from .contexts import (bee_register_context, get_mode, hive_mode_as, building_hive_as, run_hive_as,
                        get_building_hive, get_matchmaker_validation_enabled, HiveMode)
 from .exception import MatchmakingPolicyError, HiveBuilderError
 from .interfaces import (BeeBase, ConnectTargetDerived, ConnectSourceDerived, TriggerSource, TriggerTarget, Nameable,
                          ConnectSource, ConnectTarget, Descriptor, Plugin, Socket)
 from .manager import memoize
+from .parameter import Parameter
 from .policies import MatchmakingPolicy
 from .private import ResolveBee, ConnectCandidate, connect
 from .typing import MatchFlags, data_types_match
@@ -79,6 +80,11 @@ def validate_internal_name(attr_name: str):
         raise AttributeError('Cannot overwrite special attribute RuntimeHive.{}'.format(attr_name))
 
 
+def resolve_arguments(run_hive, arg_values):
+    resolve_parameter = run_hive._hive_object._hive_args_frozen.resolve_parameter
+    return (resolve_parameter(a) if isinstance(a, Parameter) else a for a in arg_values)
+
+
 class RuntimeHive(BeeBase, ConnectSourceDerived, ConnectTargetDerived, TriggerSource, TriggerTarget, Nameable):
     """Unique Hive instance that is created at runtime for a Hive object.
 
@@ -86,12 +92,13 @@ class RuntimeHive(BeeBase, ConnectSourceDerived, ConnectTargetDerived, TriggerSo
     """
     _hive_i_class = None
 
-    def __init__(self, hive_object: 'HiveObject'):
+    def __init__(self, hive_object: 'HiveObject', hive_args_resolved: tuple):
         super().__init__()
 
         self._hive_object = hive_object
         self._name_to_runtime_bee = {}
         self._hive_i = hive_i = self._hive_i_class(self)
+        self._hive_args_frozen = hive_args_resolved
 
         with run_hive_as(self):
             with building_hive_as(hive_object.__class__), hive_mode_as(HiveMode.BUILD):
@@ -151,6 +158,7 @@ class HiveObject(BeeBase, ConnectSourceDerived, ConnectTargetDerived, TriggerSou
     _hive_parent_class = None
     _hive_runtime_class = None
 
+    # Wrappers
     _hive_i = None
     _hive_ex = None
     _hive_args = None
@@ -167,11 +175,12 @@ class HiveObject(BeeBase, ConnectSourceDerived, ConnectTargetDerived, TriggerSou
 
         # Take out args required by _hive_args wrapper
         remaining_args, remaining_kwargs, arg_wrapper_values = self._hive_args.extract_from_arguments(args, kwargs)
-        self._hive_args_frozen = self._hive_args.freeze(arg_wrapper_values)
 
-        # Args to instantiate builder-class instances
-        self._hive_drone_args = remaining_args
-        self._hive_drone_kwargs = remaining_kwargs
+        assert not remaining_args
+        assert not remaining_kwargs
+
+        # Store extracted hive args, but don't build wrapper yet (as need to resolve Parameters from parent)
+        self._hive_arg_values = arg_wrapper_values
 
         # Create ResolveBee wrappers for external interface
         # We do NOT use 'with building_hive_as(...):' here, because these attributes are intended for use by the
@@ -184,14 +193,14 @@ class HiveObject(BeeBase, ConnectSourceDerived, ConnectTargetDerived, TriggerSou
                 resolve_bee = ResolveBee(bee, self)
                 setattr(self, bee_name, resolve_bee)
 
-    def instantiate(self, run_hive=None) -> RuntimeHive:
+    def instantiate(self) -> RuntimeHive:
         """Return an instance of the runtime Hive for this Hive object."""
-        return self._hive_runtime_class(self)
+        return self._hive_runtime_class(self, self._hive_args.freeze(self._hive_arg_values))
 
     @memoize
     def bind(self, run_hive: RuntimeHive) -> RuntimeHive:
-        print("BIND {} for {}".format(self, run_hive))
-        return self.instantiate()
+        arg_values = resolve_arguments(run_hive, self._hive_arg_values)
+        return self._hive_runtime_class(self, self._hive_args.freeze(arg_values))
 
     @classmethod
     def _hive_find_trigger_target(cls) -> str:
@@ -361,7 +370,7 @@ class HiveBuilder:
     _is_dyna_hive: bool = False
     _hive_meta_args: ArgWrapper = None
 
-    def __new__(cls, *new_args, **new_kwargs) -> Union[MetaHivePrimitive, HiveObject, RuntimeHive]:
+    def __new__(cls, *new_args, **new_kwargs) -> Union[Type[MetaHivePrimitive], HiveObject, RuntimeHive]:
         # Meta hives receive their meta args, and normal args in two separate calls (so don't try and parse args yet)
         if cls._configurers and not cls._is_dyna_hive:
             return cls._create_meta_primitive(*new_args, **new_kwargs)
@@ -376,7 +385,8 @@ class HiveBuilder:
 
     @classmethod
     def extend(cls, name, builder: BuilderType = None, configurer: ConfigurerType = None,
-               is_dyna_hive: bool = None, bases: BasesType = (), module_name: str = None) -> Type['HiveBuilder']:
+               is_dyna_hive: bool = None, bases: Tuple[BasesType, ...] = (), module_name: str = None) -> Type[
+        'HiveBuilder']:
         """Extend HiveBuilder with an additional builder (and builder class)
 
         :param name: name of new hive class
@@ -533,8 +543,7 @@ class HiveBuilder:
                                for name, bee in internals
                                if bee.implements(Descriptor)}
 
-        hive_i_class = type("{}._hive_i".format(run_hive_cls_name),
-                            (HiveInternalRuntimeWrapper,), internal_proxy_dict)
+        hive_i_class = type("{}._hive_i".format(run_hive_cls_name), (HiveInternalRuntimeWrapper,), internal_proxy_dict)
         run_hive_class_dict = {"__doc__": cls.__doc__, "__module__": cls.__module__, '_hive_i_class': hive_i_class}
 
         # For external public
@@ -712,15 +721,17 @@ class HiveBuilder:
                         "An error occurred during matchmaking {}, {}".format(bee_name, identifier)) from err
 
 
-def hive(name, builder: BuilderType = None, bases: BasesType = ()) -> Type[HiveBuilder]:
+def hive(name, builder: BuilderType = None, bases: Tuple[BasesType, ...] = ()) -> Type[HiveBuilder]:
     return HiveBuilder.extend(name, builder, bases=bases)
 
 
-def dyna_hive(name, builder: BuilderType, configurer: ConfigurerType, bases: BasesType = ()) -> Type[HiveBuilder]:
+def dyna_hive(name, builder: BuilderType, configurer: ConfigurerType, bases: Tuple[BasesType, ...] = ()) -> Type[
+    HiveBuilder]:
     return HiveBuilder.extend(name, builder, configurer=configurer, is_dyna_hive=True, bases=bases)
 
 
-def meta_hive(name, builder: BuilderType, configurer: ConfigurerType, bases: BasesType = ()) -> Type[HiveBuilder]:
+def meta_hive(name, builder: BuilderType, configurer: ConfigurerType, bases: Tuple[BasesType, ...] = ()) -> Type[
+    HiveBuilder]:
     return HiveBuilder.extend(name, builder, configurer=configurer, is_dyna_hive=False, bases=bases)
 
 # ==========Hive construction path=========

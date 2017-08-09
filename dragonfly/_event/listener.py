@@ -3,28 +3,25 @@ import hive
 from .event import EventHandler
 
 
-class _ListenerCls:
+class ListenerClass:
 
-    @hive.types(event="tuple.event", mode="str")
-    def __init__(self, event=()):
+    def __init__(self, event, mode):
         self.add_handler = None
         self.event = event
-
-        self._hive = hive.get_run_hive()
-        self._mode = self._hive._hive_object._hive_meta_args_frozen.mode
+        self.mode = mode
 
         self.following_leader = None
 
     def on_event_leader(self, tail):
         self.following_leader = tail
 
-        self._hive._on_event()
+        hive.internal(self).on_event()
 
     def on_event(self):
-        self._hive._on_event()
+        hive.internal(self).on_event()
 
     def set_add_handler(self, add_handler):
-        mode = self._mode
+        mode = self.mode
 
         if mode == "leader":
             callback = self.on_event_leader
@@ -40,17 +37,19 @@ def configure_listener(meta_args):
     meta_args.mode = hive.parameter("str", 'leader', options={'leader', 'match', 'trigger'})
 
 
-def build_listener(cls, i, ex, args, meta_args):
+def build_listener(i, ex, args, meta_args):
     """Tick event sensor, trigger on_tick every tick"""
-    i.on_event = hive.triggerfunc()
-    ex.on_event = hive.hook(i.on_event)
+    args.event = hive.parameter("str.event")
+    i.listener_drone = hive.drone(ListenerClass, event=args.event, mode=meta_args.mode)
 
-    ex.get_add_handler = hive.socket(cls.set_add_handler, "event.add_handler")
+    i.on_event = hive.modifier()
+    ex.on_event = i.on_event.triggered
+
+    ex.get_add_handler = i.listener_drone.set_add_handler.socket("event.add_handler")
 
     if meta_args.mode == 'leader':
-        i.after_leader = hive.property(cls, 'after_leader', 'tuple')
-        i.pull_after_leader = hive.pull_out(i.after_leader)
-        ex.after_leader = hive.output(i.pull_after_leader)
+        i.after_leader = i.listener_drone.property('after_leader', 'tuple')
+        ex.after_leader = i.after_leader.pull_out
 
 
-Listener = hive.dyna_hive("Listener", build_listener, drone_class=_ListenerCls, configurer=configure_listener)
+Listener = hive.dyna_hive("Listener", build_listener, configurer=configure_listener)
